@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, StyleSheet, Alert, SafeAreaView, Text } from 'react-native';
+import {
+    View,
+    ScrollView,
+    StyleSheet,
+    Alert,
+    SafeAreaView,
+    Text,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Project, Task, Account } from '../utils/types';
 import { User } from '../utils/auth';
@@ -7,8 +14,15 @@ import TaskView from './TaskView';
 import Timeline from './Timeline';
 import AccountView from './AccountView';
 import BottomNav from './BottomNav';
-import { saveProjects, loadProjects, saveAccounts, loadAccounts, getCurrentAccount, setCurrentAccount } from '../utils/storage';
-import SettingsView from "../../app/components/SettingsView";
+import {
+    saveProjects,
+    loadProjects,
+    saveAccounts,
+    loadAccounts,
+    getCurrentAccount,
+    setCurrentAccount,
+} from '../utils/storage';
+import SettingsView from '../../app/components/SettingsView';
 
 type ViewType = 'tasks' | 'timeline' | 'account' | 'settings';
 
@@ -23,73 +37,98 @@ export default function Planner({ user, onLogout }: PlannerProps) {
     const [projects, setProjects] = useState<Project[]>([]);
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
     const [currentView, setCurrentView] = useState<ViewType>('tasks');
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
-    // accounts laden
+    // 1) accounts + current account laden
     useEffect(() => {
-        const loadedAccounts = loadAccounts();
-        setAccounts(loadedAccounts);
-        const savedAccountId = getCurrentAccount();
-        if (savedAccountId && loadedAccounts.find((a) => a.id === savedAccountId)) {
-            setCurrentAccountId(savedAccountId);
-        } else if (loadedAccounts.length > 0) {
-            setCurrentAccountId(loadedAccounts[0].id);
-            setCurrentAccount(loadedAccounts[0].id);
-        }
+        const init = async () => {
+            const loadedAccounts = await loadAccounts();
+            setAccounts(loadedAccounts);
+
+            const savedAccountId = await getCurrentAccount();
+
+            if (savedAccountId && loadedAccounts.find(a => a.id === savedAccountId)) {
+                setCurrentAccountId(savedAccountId);
+            } else if (loadedAccounts.length > 0) {
+                const firstId = loadedAccounts[0].id;
+                setCurrentAccountId(firstId);
+                await setCurrentAccount(firstId);
+            } else {
+                setCurrentAccountId(null);
+            }
+
+            setIsLoading(false);
+        };
+
+        init();
     }, []);
 
+    // 2) projecten laden zodra account bekend is
     useEffect(() => {
-        const load = async () => {
-            if (currentAccountId) {
-                const loadedProjects = loadProjects(currentAccountId);
+        const loadForAccount = async () => {
+            if (!currentAccountId) {
+                setProjects([]);
+                setSelectedProjectId(null);
+                return;
+            }
 
-                const hasInbox = loadedProjects.some((p) => p.id === 'inbox');
-                let finalProjects = loadedProjects;
-                if (!hasInbox) {
-                    const inbox: Project = {
-                        id: 'inbox',
-                        name: 'Inbox',
-                        tasks: [],
-                        color: '#6366F1',
-                    };
-                    finalProjects = [inbox, ...loadedProjects];
-                }
+            const loadedProjects = await loadProjects(currentAccountId);
 
-                setProjects(finalProjects);
+            // inbox afdwingen
+            const hasInbox = loadedProjects.some(p => p.id === 'inbox');
+            let finalProjects = loadedProjects;
+            if (!hasInbox) {
+                const inbox: Project = {
+                    id: 'inbox',
+                    name: 'Inbox',
+                    tasks: [],
+                    color: '#6366F1',
+                };
+                finalProjects = [inbox, ...loadedProjects];
+            }
 
+            setProjects(finalProjects);
+
+            // laatst geopende project herstellen
+            try {
                 const last = await AsyncStorage.getItem('lastProjectId');
-                if (last && finalProjects.find((p) => p.id === last)) {
+                if (last && finalProjects.find(p => p.id === last)) {
                     setSelectedProjectId(last);
                 } else if (finalProjects.length > 0) {
-                    const inbox = finalProjects.find((p) => p.id === 'inbox');
+                    const inbox = finalProjects.find(p => p.id === 'inbox');
                     setSelectedProjectId(inbox ? inbox.id : finalProjects[0].id);
                 } else {
                     setSelectedProjectId(null);
                 }
-            } else {
-                setProjects([]);
-                setSelectedProjectId(null);
+            } catch {
+                if (finalProjects.length > 0) {
+                    const inbox = finalProjects.find(p => p.id === 'inbox');
+                    setSelectedProjectId(inbox ? inbox.id : finalProjects[0].id);
+                }
             }
         };
 
-        load();
+        loadForAccount();
     }, [currentAccountId]);
 
+    // 3) projecten bewaren bij wijziging
     useEffect(() => {
-        if (currentAccountId) {
-            saveProjects(projects, currentAccountId);
-        }
+        const persist = async () => {
+            if (currentAccountId) {
+                await saveProjects(projects, currentAccountId);
+            }
+        };
+        persist();
     }, [projects, currentAccountId]);
 
+    // 4) laatst gekozen project bewaren
     useEffect(() => {
-        if (selectedProjectId) {
-            AsyncStorage.setItem('lastProjectId', selectedProjectId).catch(() => {});
-        }
+        if (!selectedProjectId) return;
+        AsyncStorage.setItem('lastProjectId', selectedProjectId).catch(() => {});
     }, [selectedProjectId]);
 
     const selectedProject =
-        selectedProjectId
-            ? projects.find((p) => p.id === selectedProjectId) ?? null
-            : null;
+        selectedProjectId ? projects.find(p => p.id === selectedProjectId) ?? null : null;
 
     // ==== Project handlers =====
     const handleAddProject = (name: string, color: string) => {
@@ -99,13 +138,13 @@ export default function Planner({ user, onLogout }: PlannerProps) {
             tasks: [],
             color,
         };
-        setProjects((prev) => [...prev, newProject]);
+        setProjects(prev => [...prev, newProject]);
         setSelectedProjectId(newProject.id);
     };
 
     const handleUpdateProject = (projectId: string, updates: Partial<Project>) => {
-        setProjects((prev) =>
-            prev.map((p) => (p.id === projectId ? { ...p, ...updates } : p))
+        setProjects(prev =>
+            prev.map(p => (p.id === projectId ? { ...p, ...updates } : p)),
         );
     };
 
@@ -115,12 +154,12 @@ export default function Planner({ user, onLogout }: PlannerProps) {
             return;
         }
 
-        setProjects((prev) => {
-            const next = prev.filter((p) => p.id !== projectId);
+        setProjects(prev => {
+            const next = prev.filter(p => p.id !== projectId);
 
             if (projectId === selectedProjectId) {
                 if (next.length > 0) {
-                    const inbox = next.find((p) => p.id === 'inbox');
+                    const inbox = next.find(p => p.id === 'inbox');
                     setSelectedProjectId(inbox ? inbox.id : next[0].id);
                 } else {
                     setSelectedProjectId(null);
@@ -133,42 +172,46 @@ export default function Planner({ user, onLogout }: PlannerProps) {
 
     // ==== Task handlers =====
     const handleAddTask = (projectId: string, task: Task) => {
-        setProjects((prev) =>
-            prev.map((p) =>
-                p.id === projectId ? { ...p, tasks: [...p.tasks, task] } : p
-            )
+        setProjects(prev =>
+            prev.map(p =>
+                p.id === projectId ? { ...p, tasks: [...p.tasks, task] } : p,
+            ),
         );
     };
 
-    const handleUpdateTask = (projectId: string, taskId: string, updates: Partial<Task>) => {
-        setProjects((prev) =>
-            prev.map((p) =>
+    const handleUpdateTask = (
+        projectId: string,
+        taskId: string,
+        updates: Partial<Task>,
+    ) => {
+        setProjects(prev =>
+            prev.map(p =>
                 p.id === projectId
                     ? {
                         ...p,
-                        tasks: p.tasks.map((t) =>
-                            t.id === taskId ? { ...t, ...updates } : t
+                        tasks: p.tasks.map(t =>
+                            t.id === taskId ? { ...t, ...updates } : t,
                         ),
                     }
-                    : p
-            )
+                    : p,
+            ),
         );
     };
 
     const handleDeleteTask = (projectId: string, taskId: string) => {
-        setProjects((prev) =>
-            prev.map((p) =>
+        setProjects(prev =>
+            prev.map(p =>
                 p.id === projectId
-                    ? { ...p, tasks: p.tasks.filter((t) => t.id !== taskId) }
-                    : p
-            )
+                    ? { ...p, tasks: p.tasks.filter(t => t.id !== taskId) }
+                    : p,
+            ),
         );
     };
 
     // inbox-add direct
     const handleAddToInbox = (task: Task) => {
-        setProjects((prev) => {
-            const inbox = prev.find((p) => p.id === 'inbox');
+        setProjects(prev => {
+            const inbox = prev.find(p => p.id === 'inbox');
             if (!inbox) {
                 const newInbox: Project = {
                     id: 'inbox',
@@ -179,12 +222,11 @@ export default function Planner({ user, onLogout }: PlannerProps) {
                 return [newInbox, ...prev];
             }
 
-            return prev.map((p) =>
-                p.id === 'inbox' ? { ...p, tasks: [...p.tasks, task] } : p
+            return prev.map(p =>
+                p.id === 'inbox' ? { ...p, tasks: [...p.tasks, task] } : p,
             );
         });
 
-        // zodat je 'm ziet:
         setSelectedProjectId('inbox');
     };
 
@@ -197,12 +239,12 @@ export default function Planner({ user, onLogout }: PlannerProps) {
         };
         const updatedAccounts = [...accounts, newAccount];
         setAccounts(updatedAccounts);
-        saveAccounts(updatedAccounts);
+        saveAccounts(updatedAccounts); // async maar fire-and-forget is ok hier
     };
 
     const handleUpdateAccount = (accountId: string, name: string) => {
-        const updatedAccounts = accounts.map((a) =>
-            a.id === accountId ? { ...a, name } : a
+        const updatedAccounts = accounts.map(a =>
+            a.id === accountId ? { ...a, name } : a,
         );
         setAccounts(updatedAccounts);
         saveAccounts(updatedAccounts);
@@ -213,7 +255,7 @@ export default function Planner({ user, onLogout }: PlannerProps) {
             Alert.alert('Not allowed', 'You must have at least one account');
             return;
         }
-        const updatedAccounts = accounts.filter((a) => a.id !== accountId);
+        const updatedAccounts = accounts.filter(a => a.id !== accountId);
         setAccounts(updatedAccounts);
         saveAccounts(updatedAccounts);
 
@@ -229,21 +271,33 @@ export default function Planner({ user, onLogout }: PlannerProps) {
         setCurrentAccount(accountId);
     };
 
+    if (isLoading) {
+        return (
+            <SafeAreaView style={styles.safeArea}>
+                <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                    <Text style={{ color: '#6B7280' }}>Loading…</Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
-                {currentView === 'tasks' && (
-                    selectedProject ? (
+                {currentView === 'tasks' &&
+                    (selectedProject ? (
                         <TaskView
                             project={selectedProject}
                             allProjects={projects}
                             onSelectProject={setSelectedProjectId}
                             onAddProject={handleAddProject}
-                            onAddTask={(task) => handleAddTask(selectedProject.id, task)}
+                            onAddTask={task => handleAddTask(selectedProject.id, task)}
                             onUpdateTask={(taskId, updates) =>
                                 handleUpdateTask(selectedProject.id, taskId, updates)
                             }
-                            onDeleteTask={(taskId) => handleDeleteTask(selectedProject.id, taskId)}
+                            onDeleteTask={taskId =>
+                                handleDeleteTask(selectedProject.id, taskId)
+                            }
                             onAddToInbox={handleAddToInbox}
                         />
                     ) : (
@@ -253,15 +307,14 @@ export default function Planner({ user, onLogout }: PlannerProps) {
                                 Maak er eentje aan en we gaan je helpen focussen ✨
                             </Text>
                         </View>
-                    )
-                )}
+                    ))}
 
                 {currentView === 'timeline' && (
                     <ScrollView
                         style={styles.timelineContainer}
                         contentContainerStyle={{ paddingBottom: 90 }}
                     >
-                        {projects.map((project) => (
+                        {projects.map(project => (
                             <View key={project.id} style={styles.timelineBlock}>
                                 <View style={styles.timelineHeader}>
                                     <View
@@ -271,7 +324,7 @@ export default function Planner({ user, onLogout }: PlannerProps) {
                                 </View>
                                 <Timeline
                                     project={project}
-                                    onAddTask={(task) => handleAddTask(project.id, task)}
+                                    onAddTask={task => handleAddTask(project.id, task)}
                                     onUpdateTask={(taskId, updates) =>
                                         handleUpdateTask(project.id, taskId, updates)
                                     }
@@ -304,10 +357,7 @@ export default function Planner({ user, onLogout }: PlannerProps) {
                 )}
 
                 {currentView === 'settings' && (
-                    <SettingsView
-                        user={user}
-                        onLogout={onLogout}
-                    />
+                    <SettingsView user={user} onLogout={onLogout} />
                 )}
 
                 <BottomNav currentView={currentView} onViewChange={setCurrentView} />
