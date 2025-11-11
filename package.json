@@ -1,34 +1,56 @@
 {
-  "name": "magic-patterns-vite-template",
-  "version": "0.0.1",
+  "name": "neuroflow",
+  "version": "0.1.0",
+  "main": "expo-router/entry",
+  "expo-router": {
+    "root": "./src/app"
+  },
   "private": true,
-  "type": "module",
   "scripts": {
-    "dev": "npx vite",
-    "build": "npx vite build",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "preview": "npx vite preview"
+    "start": "expo start",
+    "web": "expo start --web",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "build": "expo export --platform web --output-dir dist"
+  },
+  "engines": {
+    "node": ">=20.19.4"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.2",
-    "lucide-react": "0.522.0"
+    "@expo/metro-runtime": "~5.0.4",
+    "@react-native-async-storage/async-storage": "2.1.2",
+    "@react-native-community/datetimepicker": "8.4.1",
+    "@react-native-community/slider": "4.5.6",
+    "@react-native-picker/picker": "2.11.1",
+    "@supabase/supabase-js": "^2.55.0",
+    "date-fns": "^4.1.0",
+    "expo": "53.0.23",
+    "expo-constants": "~17.1.7",
+    "expo-dev-client": "^5.2.4",
+    "expo-linear-gradient": "~14.1.5",
+    "expo-linking": "7.1.7",
+    "expo-router": "^5.1.4",
+    "lucide-react-native": "^0.553.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-native": "0.79.6",
+    "react-native-gesture-handler": "~2.24.0",
+    "react-native-gifted-charts": "^1.4.64",
+    "react-native-reanimated": "~3.17.4",
+    "react-native-safe-area-context": "5.4.0",
+    "react-native-screens": "4.11.1",
+    "react-native-svg": "15.11.2",
+    "react-native-web": "^0.20.0"
   },
   "devDependencies": {
-    "@types/node": "^20.11.18",
-    "@types/react": "^18.3.1",
-    "@types/react-dom": "^18.3.1",
-    "@typescript-eslint/eslint-plugin": "^5.54.0",
-    "@typescript-eslint/parser": "^5.54.0",
-    "@vitejs/plugin-react": "^4.2.1",
-    "eslint": "^8.50.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.1",
-    "typescript": "^5.5.4",
-    "vite": "^5.2.0",
-    "tailwindcss": "3.4.17",
-    "autoprefixer": "latest",
-    "postcss": "latest"
+    "@types/nodemailer": "^6.4.17",
+    "@types/react": "~19.0.10",
+    "autoprefixer": "^10.4.21",
+    "babel-plugin-module-resolver": "^5.0.2",
+    "babel-plugin-transform-import-meta": "^2.3.3",
+    "postcss": "^8.5.6",
+    "react-refresh": "^0.18.0",
+    "tailwindcss": "^3.4.17",
+    "typescript": "5.8.3"
   }
 }

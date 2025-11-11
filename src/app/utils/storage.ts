@@ -1,4 +1,5 @@
-import { Project, Account } from './types';
+import { Project, Account } from '../../app/utils/types';
+
 const PROJECTS_KEY_PREFIX = 'adhd-planner-projects-';
 const ACCOUNTS_KEY = 'adhd-planner-accounts';
 const CURRENT_ACCOUNT_KEY = 'adhd-planner-current-account';

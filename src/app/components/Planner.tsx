@@ -1,0 +1,367 @@
+import React, { useEffect, useState } from 'react';
+import { View, ScrollView, StyleSheet, Alert, SafeAreaView, Text } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Project, Task, Account } from '../utils/types';
+import { User } from '../utils/auth';
+import TaskView from './TaskView';
+import Timeline from './Timeline';
+import AccountView from './AccountView';
+import BottomNav from './BottomNav';
+import { saveProjects, loadProjects, saveAccounts, loadAccounts, getCurrentAccount, setCurrentAccount } from '../utils/storage';
+import SettingsView from "../../app/components/SettingsView";
+
+type ViewType = 'tasks' | 'timeline' | 'account' | 'settings';
+
+interface PlannerProps {
+    user: User;
+    onLogout: () => void;
+}
+
+export default function Planner({ user, onLogout }: PlannerProps) {
+    const [accounts, setAccounts] = useState<Account[]>([]);
+    const [currentAccountId, setCurrentAccountId] = useState<string | null>(null);
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+    const [currentView, setCurrentView] = useState<ViewType>('tasks');
+
+    // accounts laden
+    useEffect(() => {
+        const loadedAccounts = loadAccounts();
+        setAccounts(loadedAccounts);
+        const savedAccountId = getCurrentAccount();
+        if (savedAccountId && loadedAccounts.find((a) => a.id === savedAccountId)) {
+            setCurrentAccountId(savedAccountId);
+        } else if (loadedAccounts.length > 0) {
+            setCurrentAccountId(loadedAccounts[0].id);
+            setCurrentAccount(loadedAccounts[0].id);
+        }
+    }, []);
+
+    useEffect(() => {
+        const load = async () => {
+            if (currentAccountId) {
+                const loadedProjects = loadProjects(currentAccountId);
+
+                const hasInbox = loadedProjects.some((p) => p.id === 'inbox');
+                let finalProjects = loadedProjects;
+                if (!hasInbox) {
+                    const inbox: Project = {
+                        id: 'inbox',
+                        name: 'Inbox',
+                        tasks: [],
+                        color: '#6366F1',
+                    };
+                    finalProjects = [inbox, ...loadedProjects];
+                }
+
+                setProjects(finalProjects);
+
+                const last = await AsyncStorage.getItem('lastProjectId');
+                if (last && finalProjects.find((p) => p.id === last)) {
+                    setSelectedProjectId(last);
+                } else if (finalProjects.length > 0) {
+                    const inbox = finalProjects.find((p) => p.id === 'inbox');
+                    setSelectedProjectId(inbox ? inbox.id : finalProjects[0].id);
+                } else {
+                    setSelectedProjectId(null);
+                }
+            } else {
+                setProjects([]);
+                setSelectedProjectId(null);
+            }
+        };
+
+        load();
+    }, [currentAccountId]);
+
+    useEffect(() => {
+        if (currentAccountId) {
+            saveProjects(projects, currentAccountId);
+        }
+    }, [projects, currentAccountId]);
+
+    useEffect(() => {
+        if (selectedProjectId) {
+            AsyncStorage.setItem('lastProjectId', selectedProjectId).catch(() => {});
+        }
+    }, [selectedProjectId]);
+
+    const selectedProject =
+        selectedProjectId
+            ? projects.find((p) => p.id === selectedProjectId) ?? null
+            : null;
+
+    // ==== Project handlers =====
+    const handleAddProject = (name: string, color: string) => {
+        const newProject: Project = {
+            id: Date.now().toString(),
+            name,
+            tasks: [],
+            color,
+        };
+        setProjects((prev) => [...prev, newProject]);
+        setSelectedProjectId(newProject.id);
+    };
+
+    const handleUpdateProject = (projectId: string, updates: Partial<Project>) => {
+        setProjects((prev) =>
+            prev.map((p) => (p.id === projectId ? { ...p, ...updates } : p))
+        );
+    };
+
+    const handleDeleteProject = (projectId: string) => {
+        if (projectId === 'inbox') {
+            Alert.alert('Not allowed', 'Inbox cannot be deleted');
+            return;
+        }
+
+        setProjects((prev) => {
+            const next = prev.filter((p) => p.id !== projectId);
+
+            if (projectId === selectedProjectId) {
+                if (next.length > 0) {
+                    const inbox = next.find((p) => p.id === 'inbox');
+                    setSelectedProjectId(inbox ? inbox.id : next[0].id);
+                } else {
+                    setSelectedProjectId(null);
+                }
+            }
+
+            return next;
+        });
+    };
+
+    // ==== Task handlers =====
+    const handleAddTask = (projectId: string, task: Task) => {
+        setProjects((prev) =>
+            prev.map((p) =>
+                p.id === projectId ? { ...p, tasks: [...p.tasks, task] } : p
+            )
+        );
+    };
+
+    const handleUpdateTask = (projectId: string, taskId: string, updates: Partial<Task>) => {
+        setProjects((prev) =>
+            prev.map((p) =>
+                p.id === projectId
+                    ? {
+                        ...p,
+                        tasks: p.tasks.map((t) =>
+                            t.id === taskId ? { ...t, ...updates } : t
+                        ),
+                    }
+                    : p
+            )
+        );
+    };
+
+    const handleDeleteTask = (projectId: string, taskId: string) => {
+        setProjects((prev) =>
+            prev.map((p) =>
+                p.id === projectId
+                    ? { ...p, tasks: p.tasks.filter((t) => t.id !== taskId) }
+                    : p
+            )
+        );
+    };
+
+    // inbox-add direct
+    const handleAddToInbox = (task: Task) => {
+        setProjects((prev) => {
+            const inbox = prev.find((p) => p.id === 'inbox');
+            if (!inbox) {
+                const newInbox: Project = {
+                    id: 'inbox',
+                    name: 'Inbox',
+                    tasks: [task],
+                    color: '#6366F1',
+                };
+                return [newInbox, ...prev];
+            }
+
+            return prev.map((p) =>
+                p.id === 'inbox' ? { ...p, tasks: [...p.tasks, task] } : p
+            );
+        });
+
+        // zodat je 'm ziet:
+        setSelectedProjectId('inbox');
+    };
+
+    // ==== Account handlers =====
+    const handleAddAccount = (name: string) => {
+        const newAccount: Account = {
+            id: Date.now().toString(),
+            name,
+            createdAt: new Date().toISOString(),
+        };
+        const updatedAccounts = [...accounts, newAccount];
+        setAccounts(updatedAccounts);
+        saveAccounts(updatedAccounts);
+    };
+
+    const handleUpdateAccount = (accountId: string, name: string) => {
+        const updatedAccounts = accounts.map((a) =>
+            a.id === accountId ? { ...a, name } : a
+        );
+        setAccounts(updatedAccounts);
+        saveAccounts(updatedAccounts);
+    };
+
+    const handleDeleteAccount = (accountId: string) => {
+        if (accounts.length === 1) {
+            Alert.alert('Not allowed', 'You must have at least one account');
+            return;
+        }
+        const updatedAccounts = accounts.filter((a) => a.id !== accountId);
+        setAccounts(updatedAccounts);
+        saveAccounts(updatedAccounts);
+
+        if (currentAccountId === accountId) {
+            const newAccountId = updatedAccounts[0].id;
+            setCurrentAccountId(newAccountId);
+            setCurrentAccount(newAccountId);
+        }
+    };
+
+    const handleSwitchAccount = (accountId: string) => {
+        setCurrentAccountId(accountId);
+        setCurrentAccount(accountId);
+    };
+
+    return (
+        <SafeAreaView style={styles.safeArea}>
+            <View style={styles.container}>
+                {currentView === 'tasks' && (
+                    selectedProject ? (
+                        <TaskView
+                            project={selectedProject}
+                            allProjects={projects}
+                            onSelectProject={setSelectedProjectId}
+                            onAddProject={handleAddProject}
+                            onAddTask={(task) => handleAddTask(selectedProject.id, task)}
+                            onUpdateTask={(taskId, updates) =>
+                                handleUpdateTask(selectedProject.id, taskId, updates)
+                            }
+                            onDeleteTask={(taskId) => handleDeleteTask(selectedProject.id, taskId)}
+                            onAddToInbox={handleAddToInbox}
+                        />
+                    ) : (
+                        <View style={styles.emptyTimeline}>
+                            <Text style={styles.emptyTitle}>Nog geen projecten</Text>
+                            <Text style={styles.emptySubtitle}>
+                                Maak er eentje aan en we gaan je helpen focussen ✨
+                            </Text>
+                        </View>
+                    )
+                )}
+
+                {currentView === 'timeline' && (
+                    <ScrollView
+                        style={styles.timelineContainer}
+                        contentContainerStyle={{ paddingBottom: 90 }}
+                    >
+                        {projects.map((project) => (
+                            <View key={project.id} style={styles.timelineBlock}>
+                                <View style={styles.timelineHeader}>
+                                    <View
+                                        style={[styles.colorDot, { backgroundColor: project.color }]}
+                                    />
+                                    <Text style={styles.timelineTitle}>{project.name}</Text>
+                                </View>
+                                <Timeline
+                                    project={project}
+                                    onAddTask={(task) => handleAddTask(project.id, task)}
+                                    onUpdateTask={(taskId, updates) =>
+                                        handleUpdateTask(project.id, taskId, updates)
+                                    }
+                                />
+                            </View>
+                        ))}
+
+                        {projects.length === 0 && (
+                            <View style={styles.emptyTimeline}>
+                                <Text style={styles.emptyTitle}>No projects yet</Text>
+                                <Text style={styles.emptySubtitle}>
+                                    Go to Tasks view to create your first project
+                                </Text>
+                            </View>
+                        )}
+                    </ScrollView>
+                )}
+
+                {currentView === 'account' && (
+                    <AccountView
+                        accounts={accounts}
+                        currentAccountId={currentAccountId}
+                        onAddAccount={handleAddAccount}
+                        onUpdateAccount={handleUpdateAccount}
+                        onDeleteAccount={handleDeleteAccount}
+                        onSwitchAccount={handleSwitchAccount}
+                        user={user}
+                        onLogout={onLogout}
+                    />
+                )}
+
+                {currentView === 'settings' && (
+                    <SettingsView
+                        user={user}
+                        onLogout={onLogout}
+                    />
+                )}
+
+                <BottomNav currentView={currentView} onViewChange={setCurrentView} />
+            </View>
+        </SafeAreaView>
+    );
+}
+
+const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#F3F4F6',
+    },
+    container: {
+        flex: 1,
+        paddingBottom: 70,
+    },
+    timelineContainer: {
+        flex: 1,
+        paddingHorizontal: 16,
+        paddingTop: 16,
+    },
+    timelineBlock: {
+        marginBottom: 24,
+    },
+    timelineHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+        gap: 8,
+    },
+    colorDot: {
+        width: 12,
+        height: 12,
+        borderRadius: 9999,
+        marginRight: 6,
+    },
+    timelineTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#1F2937',
+    },
+    emptyTimeline: {
+        alignItems: 'center',
+        paddingVertical: 40,
+    },
+    emptyTitle: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: '#4B5563',
+        marginBottom: 4,
+    },
+    emptySubtitle: {
+        fontSize: 13,
+        color: '#9CA3AF',
+    },
+});
