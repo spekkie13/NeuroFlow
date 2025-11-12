@@ -6,6 +6,7 @@ import {
     Alert,
     SafeAreaView,
     Text,
+    Pressable,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Project, Task, Account } from '../utils/types';
@@ -63,7 +64,6 @@ export default function Planner({ user, onLogout }: PlannerProps) {
         init();
     }, []);
 
-    // 2) projecten laden zodra account bekend is
     useEffect(() => {
         const loadForAccount = async () => {
             if (!currentAccountId) {
@@ -74,7 +74,6 @@ export default function Planner({ user, onLogout }: PlannerProps) {
 
             const loadedProjects = await loadProjects(currentAccountId);
 
-            // inbox afdwingen
             const hasInbox = loadedProjects.some(p => p.id === 'inbox');
             let finalProjects = loadedProjects;
             if (!hasInbox) {
@@ -89,7 +88,6 @@ export default function Planner({ user, onLogout }: PlannerProps) {
 
             setProjects(finalProjects);
 
-            // laatst geopende project herstellen
             try {
                 const last = await AsyncStorage.getItem('lastProjectId');
                 if (last && finalProjects.find(p => p.id === last)) {
@@ -111,7 +109,6 @@ export default function Planner({ user, onLogout }: PlannerProps) {
         loadForAccount();
     }, [currentAccountId]);
 
-    // 3) projecten bewaren bij wijziging
     useEffect(() => {
         const persist = async () => {
             if (currentAccountId) {
@@ -121,7 +118,6 @@ export default function Planner({ user, onLogout }: PlannerProps) {
         persist();
     }, [projects, currentAccountId]);
 
-    // 4) laatst gekozen project bewaren
     useEffect(() => {
         if (!selectedProjectId) return;
         AsyncStorage.setItem('lastProjectId', selectedProjectId).catch(() => {});
@@ -239,7 +235,12 @@ export default function Planner({ user, onLogout }: PlannerProps) {
         };
         const updatedAccounts = [...accounts, newAccount];
         setAccounts(updatedAccounts);
-        saveAccounts(updatedAccounts); // async maar fire-and-forget is ok hier
+        saveAccounts(updatedAccounts);
+
+        if (!currentAccountId) {
+            setCurrentAccountId(newAccount.id);
+            setCurrentAccount(newAccount.id);
+        }
     };
 
     const handleUpdateAccount = (accountId: string, name: string) => {
@@ -281,83 +282,113 @@ export default function Planner({ user, onLogout }: PlannerProps) {
         );
     }
 
+    const noWorkspace = !currentAccountId || accounts.length === 0;
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
-                {currentView === 'tasks' &&
-                    (selectedProject ? (
-                        <TaskView
-                            project={selectedProject}
-                            allProjects={projects}
-                            onSelectProject={setSelectedProjectId}
-                            onAddProject={handleAddProject}
-                            onAddTask={task => handleAddTask(selectedProject.id, task)}
-                            onUpdateTask={(taskId, updates) =>
-                                handleUpdateTask(selectedProject.id, taskId, updates)
-                            }
-                            onDeleteTask={taskId =>
-                                handleDeleteTask(selectedProject.id, taskId)
-                            }
-                            onAddToInbox={handleAddToInbox}
-                        />
-                    ) : (
-                        <View style={styles.emptyTimeline}>
-                            <Text style={styles.emptyTitle}>Nog geen projecten</Text>
-                            <Text style={styles.emptySubtitle}>
-                                Maak er eentje aan en we gaan je helpen focussen ✨
+
+                {noWorkspace ? (
+                    <View style={styles.emptyWorkspace}>
+                        <Text style={styles.wsTitle}>No workspace yet 🧩</Text>
+                        <Text style={styles.wsSubtitle}>
+                            Create a workspace to start organizing your projects.
+                        </Text>
+
+                        <Pressable
+                            onPress={() => handleAddAccount('My First Workspace')}
+                            style={styles.createWorkspaceBtn}
+                        >
+                            <Text style={styles.createWorkspaceBtnText}>+ Create workspace</Text>
+                        </Pressable>
+
+                        <Pressable
+                            onPress={() => setCurrentView('account')}
+                            style={[styles.createWorkspaceBtn, { backgroundColor: '#111827', marginTop: 10 }]}
+                        >
+                            <Text style={[styles.createWorkspaceBtnText, { color: '#FFFFFF' }]}>
+                                Open Accounts
                             </Text>
-                        </View>
-                    ))}
-
-                {currentView === 'timeline' && (
-                    <ScrollView
-                        style={styles.timelineContainer}
-                        contentContainerStyle={{ paddingBottom: 90 }}
-                    >
-                        {projects.map(project => (
-                            <View key={project.id} style={styles.timelineBlock}>
-                                <View style={styles.timelineHeader}>
-                                    <View
-                                        style={[styles.colorDot, { backgroundColor: project.color }]}
-                                    />
-                                    <Text style={styles.timelineTitle}>{project.name}</Text>
-                                </View>
-                                <Timeline
-                                    project={project}
-                                    onAddTask={task => handleAddTask(project.id, task)}
+                        </Pressable>
+                    </View>
+                ) : (
+                    <>
+                        {currentView === 'tasks' &&
+                            (selectedProject ? (
+                                <TaskView
+                                    project={selectedProject}
+                                    allProjects={projects}
+                                    onSelectProject={setSelectedProjectId}
+                                    onAddProject={handleAddProject}
+                                    onAddTask={task => handleAddTask(selectedProject.id, task)}
                                     onUpdateTask={(taskId, updates) =>
-                                        handleUpdateTask(project.id, taskId, updates)
+                                        handleUpdateTask(selectedProject.id, taskId, updates)
                                     }
+                                    onDeleteTask={taskId =>
+                                        handleDeleteTask(selectedProject.id, taskId)
+                                    }
+                                    onAddToInbox={handleAddToInbox}
                                 />
-                            </View>
-                        ))}
+                            ) : (
+                                <View style={styles.emptyTimeline}>
+                                    <Text style={styles.emptyTitle}>Nog geen projecten</Text>
+                                    <Text style={styles.emptySubtitle}>
+                                        Maak er eentje aan en we gaan je helpen focussen ✨
+                                    </Text>
+                                </View>
+                            ))}
 
-                        {projects.length === 0 && (
-                            <View style={styles.emptyTimeline}>
-                                <Text style={styles.emptyTitle}>No projects yet</Text>
-                                <Text style={styles.emptySubtitle}>
-                                    Go to Tasks view to create your first project
-                                </Text>
-                            </View>
+                        {currentView === 'timeline' && (
+                            <ScrollView
+                                style={styles.timelineContainer}
+                                contentContainerStyle={{ paddingBottom: 90 }}
+                            >
+                                {projects.map(project => (
+                                    <View key={project.id} style={styles.timelineBlock}>
+                                        <View style={styles.timelineHeader}>
+                                            <View
+                                                style={[styles.colorDot, { backgroundColor: project.color }]}
+                                            />
+                                            <Text style={styles.timelineTitle}>{project.name}</Text>
+                                        </View>
+                                        <Timeline
+                                            project={project}
+                                            onAddTask={task => handleAddTask(project.id, task)}
+                                            onUpdateTask={(taskId, updates) =>
+                                                handleUpdateTask(project.id, taskId, updates)
+                                            }
+                                        />
+                                    </View>
+                                ))}
+
+                                {projects.length === 0 && (
+                                    <View style={styles.emptyTimeline}>
+                                        <Text style={styles.emptyTitle}>No projects yet</Text>
+                                        <Text style={styles.emptySubtitle}>
+                                            Go to Tasks view to create your first project
+                                        </Text>
+                                    </View>
+                                )}
+                            </ScrollView>
                         )}
-                    </ScrollView>
-                )}
 
-                {currentView === 'account' && (
-                    <AccountView
-                        accounts={accounts}
-                        currentAccountId={currentAccountId}
-                        onAddAccount={handleAddAccount}
-                        onUpdateAccount={handleUpdateAccount}
-                        onDeleteAccount={handleDeleteAccount}
-                        onSwitchAccount={handleSwitchAccount}
-                        user={user}
-                        onLogout={onLogout}
-                    />
-                )}
+                        {currentView === 'account' && (
+                            <AccountView
+                                accounts={accounts}
+                                currentAccountId={currentAccountId}
+                                onAddAccount={handleAddAccount}
+                                onUpdateAccount={handleUpdateAccount}
+                                onDeleteAccount={handleDeleteAccount}
+                                onSwitchAccount={handleSwitchAccount}
+                                user={user}
+                                onLogout={onLogout}
+                            />
+                        )}
 
-                {currentView === 'settings' && (
-                    <SettingsView user={user} onLogout={onLogout} />
+                        {currentView === 'settings' && (
+                            <SettingsView user={user} onLogout={onLogout} />
+                        )}
+                    </>
                 )}
 
                 <BottomNav currentView={currentView} onViewChange={setCurrentView} />
@@ -413,5 +444,34 @@ const styles = StyleSheet.create({
     emptySubtitle: {
         fontSize: 13,
         color: '#9CA3AF',
+    },
+
+    emptyWorkspace: {
+        flex: 1,
+        paddingHorizontal: 24,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    wsTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#111827',
+        marginBottom: 6,
+    },
+    wsSubtitle: {
+        fontSize: 14,
+        color: '#6B7280',
+        textAlign: 'center',
+        marginBottom: 16,
+    },
+    createWorkspaceBtn: {
+        backgroundColor: '#2563EB',
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 8,
+    },
+    createWorkspaceBtnText: {
+        color: '#FFFFFF',
+        fontWeight: '600',
     },
 });

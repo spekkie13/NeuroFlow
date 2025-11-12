@@ -9,10 +9,18 @@ export default function App() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Check if user is already logged in
-        const user = getCurrentUser();
-        setCurrentUser(user);
-        setIsLoading(false);
+        const loadUser = async () => {
+            try {
+                const user = await getCurrentUser(); // now awaited
+                setCurrentUser(user);
+            } catch (error) {
+                console.error('Failed to load current user:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadUser();
     }, []);
 
     const handleLogin = (user: User) => {
