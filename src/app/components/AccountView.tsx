@@ -1,39 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, Alert, FlatList } from 'react-native';
-import { User } from '../utils/auth';
+import { View, Text, TextInput, Pressable, Alert, FlatList } from 'react-native';
 import { Account } from '../utils/types';
-import {
-    User as UserIcon,
-    Trash2 as TrashIcon,
-    Edit as EditIcon,
-    LogOut as LogOutIcon,
-    Plus as PlusIcon,
-    Mail as MailIcon,
-    Check as CheckIcon,
-    X as XIcon,
-} from 'lucide-react-native';
-
-interface AccountViewProps {
-    accounts: Account[];
-    currentAccountId: string | null;
-    onAddAccount: (name: string) => void;
-    onUpdateAccount: (accountId: string, name: string) => void;
-    onDeleteAccount: (accountId: string) => void;
-    onSwitchAccount: (accountId: string) => void;
-    user: User;
-    onLogout: () => void;
-}
+import { User, Trash, Edit, LogOut, Plus, Mail, Check, X } from 'lucide-react-native';
+import {AccountViewProps} from "@/props/AccountViewProps";
+import {styles} from "@/styles/accountView";
 
 export default function AccountView({
-                                        accounts,
-                                        currentAccountId,
-                                        onAddAccount,
-                                        onUpdateAccount,
-                                        onDeleteAccount,
-                                        onSwitchAccount,
-                                        user,
-                                        onLogout,
-                                    }: AccountViewProps) {
+                                accounts,
+                                currentAccountId,
+                                onAddAccount,
+                                onUpdateAccount,
+                                onDeleteAccount,
+                                onSwitchAccount,
+                                user,
+                                onLogout,
+                            }: AccountViewProps) {
     const [isAdding, setIsAdding] = useState(false);
     const [newAccountName, setNewAccountName] = useState('');
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -74,7 +55,7 @@ export default function AccountView({
             'Verwijderen?',
             `Workspace "${account.name}" wordt verwijderd.`,
             [
-                { text: 'Annuleer', style: 'cancel' },
+                {text: 'Annuleer', style: 'cancel'},
                 {
                     text: 'Verwijder',
                     style: 'destructive',
@@ -94,10 +75,10 @@ export default function AccountView({
                             {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                         </Text>
                     </View>
-                    <View style={{ flex: 1 }}>
+                    <View style={{flex: 1}}>
                         <Text style={styles.userName}>{user.name}</Text>
                         <View style={styles.mailRow}>
-                            <MailIcon size={14} color="#9CA3AF" />
+                            <Mail size={14} color="#9CA3AF"/>
                             <Text style={styles.userMail}>{user.email}</Text>
                         </View>
                         <View style={styles.badge}>
@@ -107,7 +88,7 @@ export default function AccountView({
                         </View>
                     </View>
                     <Pressable onPress={onLogout} style={styles.logoutBtn}>
-                        <LogOutIcon size={18} color="#DC2626" />
+                        <LogOut size={18} color="#DC2626"/>
                         <Text style={styles.logoutText}>Log out</Text>
                     </Pressable>
                 </View>
@@ -146,7 +127,7 @@ export default function AccountView({
                     </View>
                 ) : (
                     <Pressable onPress={() => setIsAdding(true)} style={styles.addTrigger}>
-                        <PlusIcon size={18} color="#4B5563" />
+                        <Plus size={18} color="#4B5563"/>
                         <Text style={styles.addTriggerText}>Nieuwe workspace</Text>
                     </Pressable>
                 )}
@@ -156,28 +137,28 @@ export default function AccountView({
             <FlatList
                 data={accounts}
                 keyExtractor={(item) => item.id}
-                style={{ flex: 1 }}
-                contentContainerStyle={{ gap: 8 }}
-                renderItem={({ item }) => {
+                style={{flex: 1}}
+                contentContainerStyle={{gap: 8}}
+                renderItem={({item}) => {
                     const isActive = item.id === currentAccountId;
                     const isEditing = item.id === editingId;
                     return (
                         <View
                             style={[
                                 styles.accountRow,
-                                isActive && { borderColor: '#2563EB', backgroundColor: '#EFF6FF' },
+                                isActive && {borderColor: '#2563EB', backgroundColor: '#EFF6FF'},
                             ]}
                         >
                             <View style={styles.accountLeft}>
                                 <View
                                     style={[
                                         styles.accountIcon,
-                                        isActive && { backgroundColor: '#DBEAFE' },
+                                        isActive && {backgroundColor: '#DBEAFE'},
                                     ]}
                                 >
-                                    <UserIcon size={18} color={isActive ? '#1D4ED8' : '#6B7280'} />
+                                    <User size={18} color={isActive ? '#1D4ED8' : '#6B7280'}/>
                                 </View>
-                                <View style={{ flex: 1 }}>
+                                <View style={{flex: 1}}>
                                     {isEditing ? (
                                         <View style={styles.editRow}>
                                             <TextInput
@@ -191,18 +172,18 @@ export default function AccountView({
                                                 onPress={() => handleEditSave(item.id)}
                                                 style={styles.iconBtnSuccess}
                                             >
-                                                <CheckIcon size={16} color="#16A34A" />
+                                                <Check size={16} color="#16A34A"/>
                                             </Pressable>
                                             <Pressable
                                                 onPress={() => setEditingId(null)}
                                                 style={styles.iconBtn}
                                             >
-                                                <XIcon size={16} color="#6B7280" />
+                                                <X size={16} color="#6B7280"/>
                                             </Pressable>
                                         </View>
                                     ) : (
                                         <>
-                                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <View style={{flexDirection: 'row', alignItems: 'center'}}>
                                                 <Text style={styles.accountName}>{item.name}</Text>
                                                 {isActive && (
                                                     <Text style={styles.activePill}>Actief</Text>
@@ -231,13 +212,13 @@ export default function AccountView({
                                         onPress={() => startEdit(item)}
                                         style={styles.iconBtn}
                                     >
-                                        <EditIcon size={16} color="#6B7280" />
+                                        <Edit size={16} color="#6B7280"/>
                                     </Pressable>
                                     <Pressable
                                         onPress={() => confirmDelete(item)}
                                         style={styles.iconBtn}
                                     >
-                                        <TrashIcon size={16} color="#DC2626" />
+                                        <Trash size={16} color="#DC2626"/>
                                     </Pressable>
                                 </View>
                             )}
@@ -248,221 +229,3 @@ export default function AccountView({
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 16,
-        gap: 12,
-    },
-    userCard: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 16,
-        padding: 14,
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
-    },
-    userRow: {
-        flexDirection: 'row',
-        gap: 12,
-        alignItems: 'center',
-    },
-    avatar: {
-        width: 52,
-        height: 52,
-        borderRadius: 9999,
-        backgroundColor: '#2563EB',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    avatarText: {
-        color: '#FFFFFF',
-        fontWeight: '700',
-        fontSize: 18,
-    },
-    userName: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#111827',
-    },
-    mailRow: {
-        flexDirection: 'row',
-        gap: 4,
-        alignItems: 'center',
-        marginTop: 2,
-    },
-    userMail: {
-        fontSize: 13,
-        color: '#6B7280',
-    },
-    badge: {
-        marginTop: 4,
-        backgroundColor: '#DBEAFE',
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 9999,
-        alignSelf: 'flex-start',
-    },
-    badgeText: {
-        fontSize: 11,
-        color: '#1D4ED8',
-        fontWeight: '500',
-    },
-    logoutBtn: {
-        flexDirection: 'row',
-        gap: 4,
-        backgroundColor: '#FEE2E2',
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: 10,
-    },
-    logoutText: {
-        color: '#DC2626',
-        fontWeight: '500',
-    },
-    sectionHeader: {
-        marginTop: 8,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#111827',
-    },
-    sectionSub: {
-        fontSize: 13,
-        color: '#6B7280',
-    },
-    addCard: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 14,
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
-        padding: 12,
-    },
-    addTrigger: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
-    addTriggerText: {
-        color: '#4B5563',
-        fontSize: 13,
-        fontWeight: '500',
-    },
-    addRow: {
-        flexDirection: 'row',
-        gap: 6,
-    },
-    input: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: '#D1D5DB',
-        borderRadius: 10,
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        backgroundColor: '#FFFFFF',
-    },
-    primaryBtn: {
-        backgroundColor: '#2563EB',
-        borderRadius: 10,
-        paddingHorizontal: 12,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    primaryBtnText: {
-        color: '#FFFFFF',
-        fontWeight: '500',
-    },
-    secondaryBtn: {
-        backgroundColor: '#F3F4F6',
-        borderRadius: 10,
-        paddingHorizontal: 12,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    secondaryBtnText: {
-        color: '#374151',
-    },
-    accountRow: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 14,
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
-        padding: 12,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    accountLeft: {
-        flexDirection: 'row',
-        gap: 10,
-        flex: 1,
-        alignItems: 'center',
-    },
-    accountIcon: {
-        width: 36,
-        height: 36,
-        borderRadius: 9999,
-        backgroundColor: '#F3F4F6',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    accountName: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#111827',
-    },
-    accountMeta: {
-        fontSize: 12,
-        color: '#9CA3AF',
-    },
-    activePill: {
-        marginLeft: 6,
-        backgroundColor: '#DBEAFE',
-        color: '#1D4ED8',
-        paddingHorizontal: 6,
-        paddingVertical: 1,
-        borderRadius: 9999,
-        fontSize: 11,
-        overflow: 'hidden',
-    },
-    accountActions: {
-        flexDirection: 'row',
-        gap: 6,
-    },
-    switchBtn: {
-        backgroundColor: '#2563EB',
-        borderRadius: 9999,
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-    },
-    switchBtnText: {
-        color: '#FFFFFF',
-        fontSize: 12,
-        fontWeight: '500',
-    },
-    iconBtn: {
-        padding: 6,
-        borderRadius: 9999,
-        backgroundColor: '#F3F4F6',
-    },
-    iconBtnSuccess: {
-        padding: 6,
-        borderRadius: 9999,
-        backgroundColor: '#ECFDF3',
-    },
-    editRow: {
-        flexDirection: 'row',
-        gap: 4,
-        alignItems: 'center',
-    },
-    editInput: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: '#D1D5DB',
-        borderRadius: 8,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        backgroundColor: '#FFFFFF',
-    },
-});

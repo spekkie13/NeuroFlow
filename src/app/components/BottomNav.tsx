@@ -1,24 +1,17 @@
 import React from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
-import {
-    ListTodo as ListTodoIcon,
-    Calendar as CalendarIcon,
-    User as UserIcon, CogIcon,
-} from 'lucide-react-native';
+import { View, Text, Pressable } from 'react-native';
+import { ListTodo, Calendar, User, Cog } from 'lucide-react-native';
+import { styles } from "@/styles/bottomNav";
+import { ViewType } from "@/types/ViewType";
+import { BottomNavProps } from "@/props/BottomNavProps";
 
-type ViewType = 'tasks' | 'timeline' | 'account' | 'settings';
-
-interface BottomNavProps {
-    currentView: ViewType;
-    onViewChange: (view: ViewType) => void;
-}
 
 export default function BottomNav({ currentView, onViewChange }: BottomNavProps) {
     const navItems = [
-        { id: 'tasks' as ViewType, label: 'Tasks', icon: ListTodoIcon },
-        { id: 'timeline' as ViewType, label: 'Timeline', icon: CalendarIcon },
-        { id: 'account' as ViewType, label: 'Account', icon: UserIcon },
-        { id: 'settings' as ViewType, label: 'Settings', icon: CogIcon },
+        { id: 'tasks' as ViewType, label: 'Tasks', icon: ListTodo },
+        { id: 'timeline' as ViewType, label: 'Timeline', icon: Calendar },
+        { id: 'account' as ViewType, label: 'Account', icon: User },
+        { id: 'settings' as ViewType, label: 'Settings', icon: Cog },
     ];
 
     return (
@@ -57,43 +50,3 @@ export default function BottomNav({ currentView, onViewChange }: BottomNavProps)
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    navContainer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: '#FFFFFF',
-        borderTopWidth: 1,
-        borderTopColor: '#E5E7EB',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 5,
-        zIndex: 50,
-    },
-    navInner: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        height: 64,
-        paddingHorizontal: 16,
-    },
-    navItem: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    navLabel: {
-        fontSize: 11,
-        marginTop: 4,
-        color: '#6B7280',
-        fontWeight: '500',
-    },
-    navLabelActive: {
-        color: '#2563EB',
-        fontWeight: '600',
-    },
-});

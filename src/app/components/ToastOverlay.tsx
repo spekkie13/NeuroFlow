@@ -1,7 +1,9 @@
-import {Text, View, StyleSheet} from "react-native";
 import React from "react";
+import { Text, View } from "react-native";
+import { ToastOverlayProps } from "@/props/ToastOverlayProps";
+import { styles } from "@/styles/toastOverlay";
 
-export function ToastOverlay({ visible }: { visible: boolean }) {
+export function ToastOverlay({ visible }: ToastOverlayProps) {
     if (!visible) return null;
     return (
         <View style={styles.toast}>
@@ -9,20 +11,3 @@ export function ToastOverlay({ visible }: { visible: boolean }) {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    toast: {
-        position: 'absolute',
-        top: 16,
-        alignSelf: 'center',
-        backgroundColor: '#2563EB',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 9999,
-        zIndex: 2000,
-    },
-    toastText: {
-        color: '#FFFFFF',
-        fontWeight: '600',
-    },
-})

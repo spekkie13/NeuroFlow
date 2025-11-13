@@ -1,16 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import {
-    View,
-    ScrollView,
-    StyleSheet,
-    Alert,
-    SafeAreaView,
-    Text,
-    Pressable,
-} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, ScrollView, Alert, SafeAreaView, Text, Pressable } from 'react-native';
 import { Project, Task, Account } from '../utils/types';
-import { User } from '../utils/auth';
 import TaskView from './TaskView';
 import Timeline from './Timeline';
 import AccountView from './AccountView';
@@ -24,13 +15,10 @@ import {
     setCurrentAccount,
 } from '../utils/storage';
 import SettingsView from '../../app/components/SettingsView';
+import {PlannerProps} from "@/props/PlannerProps";
+import {styles} from "@/styles/planner";
 
 type ViewType = 'tasks' | 'timeline' | 'account' | 'settings';
-
-interface PlannerProps {
-    user: User;
-    onLogout: () => void;
-}
 
 export default function Planner({ user, onLogout }: PlannerProps) {
     const [accounts, setAccounts] = useState<Account[]>([]);
@@ -396,82 +384,3 @@ export default function Planner({ user, onLogout }: PlannerProps) {
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: '#F3F4F6',
-    },
-    container: {
-        flex: 1,
-        paddingBottom: 70,
-    },
-    timelineContainer: {
-        flex: 1,
-        paddingHorizontal: 16,
-        paddingTop: 16,
-    },
-    timelineBlock: {
-        marginBottom: 24,
-    },
-    timelineHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 12,
-        gap: 8,
-    },
-    colorDot: {
-        width: 12,
-        height: 12,
-        borderRadius: 9999,
-        marginRight: 6,
-    },
-    timelineTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#1F2937',
-    },
-    emptyTimeline: {
-        alignItems: 'center',
-        paddingVertical: 40,
-    },
-    emptyTitle: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: '#4B5563',
-        marginBottom: 4,
-    },
-    emptySubtitle: {
-        fontSize: 13,
-        color: '#9CA3AF',
-    },
-
-    emptyWorkspace: {
-        flex: 1,
-        paddingHorizontal: 24,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    wsTitle: {
-        fontSize: 20,
-        fontWeight: '700',
-        color: '#111827',
-        marginBottom: 6,
-    },
-    wsSubtitle: {
-        fontSize: 14,
-        color: '#6B7280',
-        textAlign: 'center',
-        marginBottom: 16,
-    },
-    createWorkspaceBtn: {
-        backgroundColor: '#2563EB',
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        borderRadius: 8,
-    },
-    createWorkspaceBtnText: {
-        color: '#FFFFFF',
-        fontWeight: '600',
-    },
-});

@@ -1,22 +1,19 @@
-import {Priority, Task} from "../../../app/utils/types";
-import {Pressable, StyleSheet, Text, TextInput, View} from "react-native";
-import {
-    ArrowDown as ArrowDownIcon,
-    ArrowRight as ArrowRightIcon,
-    ArrowUp as ArrowUpIcon, CheckCircleIcon, CheckIcon, CircleIcon, ClockIcon, EditIcon,
-    TrashIcon, XIcon
-} from "lucide-react-native";
 import React from "react";
-import {PriorityMenu} from "../../../app/components/Task/PriorityMenu";
+import { Priority } from "../../../app/utils/types";
+import { Pressable, Text, TextInput, View} from "react-native";
+import { ArrowDown, ArrowRight, ArrowUp, CheckCircleIcon, CheckIcon, CircleIcon, ClockIcon, EditIcon, TrashIcon, XIcon} from "lucide-react-native";
+import { PriorityMenu } from "../../../app/components/Task/PriorityMenu";
+import { TaskItemProps } from "@/props/TaskItemProps";
+import {styles} from "@/styles/taskItem";
 
 function getPriorityIcon(priority: Priority) {
     switch (priority) {
         case 'high':
-            return <ArrowUpIcon size={16} color="#EF4444" />;
+            return <ArrowUp size={16} color="#EF4444" />;
         case 'medium':
-            return <ArrowRightIcon size={16} color="#F59E0B" />;
+            return <ArrowRight size={16} color="#F59E0B" />;
         case 'low':
-            return <ArrowDownIcon size={16} color="#10B981" />;
+            return <ArrowDown size={16} color="#10B981" />;
         default:
             return null;
     }
@@ -57,19 +54,7 @@ export function TaskItem({
                       onToggleComplete,
                       onTogglePriorityMenu,
                       onSetPriority,
-                  }: {
-    task: Task;
-    isEditing: boolean;
-    isMenuOpen: boolean;
-    editValue: string;
-    onStartEdit: () => void;
-    onChangeEdit: (text: string) => void;
-    onSaveEdit: () => void;
-    onDelete: () => void;
-    onToggleComplete: () => void;
-    onTogglePriorityMenu: () => void;
-    onSetPriority: (priority: Priority) => void;
-}) {
+                  }: TaskItemProps) {
     const priorityStyle = getPriorityStyle(task.priority);
 
     return (
@@ -178,99 +163,3 @@ export function TaskItem({
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    taskCard: {
-        backgroundColor: '#FFFFFF',
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
-        borderRadius: 16,
-        padding: 12,
-        marginBottom: 10,
-        position: 'relative',
-        overflow: 'visible',
-    },
-    taskCardCompleted: {
-        backgroundColor: '#F9FAFB',
-    },
-    taskRow: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        gap: 10,
-    },
-    checkButton: {
-        marginTop: 2,
-    },
-    taskContent: {
-        flex: 1,
-        minWidth: 0,
-    },
-    nameRow: {
-        flexDirection: 'row',
-        gap: 6,
-        alignItems: 'center',
-        marginBottom: 2,
-        flexWrap: 'wrap',
-    },
-    taskName: {
-        fontSize: 14,
-        color: '#1F2937',
-        flexShrink: 1,
-    },
-    taskNameCompleted: {
-        color: '#6B7280',
-        textDecorationLine: 'line-through',
-    },
-    priorityBadge: {
-        paddingHorizontal: 10,
-        paddingVertical: 3,
-        borderRadius: 9999,
-        borderWidth: 1,
-    },
-    priorityText: {
-        fontSize: 11,
-        textTransform: 'capitalize',
-        fontWeight: '500',
-    },
-    dateRow: {
-        flexDirection: 'row',
-        gap: 4,
-        alignItems: 'center',
-        marginTop: 4,
-    },
-    dateText: {
-        fontSize: 11,
-        color: '#6B7280',
-    },
-    actions: {
-        flexDirection: 'row',
-        gap: 4,
-        marginLeft: 4,
-    },
-    priorityWrapper: {
-        position: 'relative',
-    },
-    editRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
-    editInput: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: '#D1D5DB',
-        borderRadius: 8,
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        backgroundColor: '#FFFFFF',
-    },
-    iconButton: {
-        padding: 6,
-        borderRadius: 9999,
-    },
-    iconButtonSuccess: {
-        padding: 6,
-        borderRadius: 9999,
-        backgroundColor: '#ECFDF3',
-    },
-});

@@ -1,20 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, Pressable, Alert, ScrollView } from 'react-native';
 import { Project } from '../utils/types';
-import {
-    Pencil as EditIcon,
-    Trash2 as TrashIcon,
-    Check as CheckIcon,
-    X as XIcon,
-} from 'lucide-react-native';
-
-interface ProjectListProps {
-    projects: Project[];
-    selectedProjectId: string | null;
-    onSelectProject: (projectId: string) => void;
-    onUpdateProject: (project: Project) => void;
-    onDeleteProject: (projectId: string) => void;
-}
+import { Pencil, Trash2, Check, X } from 'lucide-react-native';
+import {ProjectListProps} from "@/props/ProjectListProps";
+import {styles} from "@/styles/projectList";
 
 export default function ProjectList({
                                 projects,
@@ -79,10 +68,10 @@ export default function ProjectList({
                                         onPress={() => saveEdit(project)}
                                         style={styles.iconButtonSuccess}
                                     >
-                                        <CheckIcon size={16} color="#16A34A" />
+                                        <Check size={16} color="#16A34A" />
                                     </Pressable>
                                     <Pressable onPress={cancelEdit} style={styles.iconButton}>
-                                        <XIcon size={16} color="#6B7280" />
+                                        <X size={16} color="#6B7280" />
                                     </Pressable>
                                 </View>
                             ) : (
@@ -107,14 +96,14 @@ export default function ProjectList({
                                     style={styles.iconButton}
                                     accessibilityLabel="Edit project"
                                 >
-                                    <EditIcon size={16} color="#6B7280" />
+                                    <Pencil size={16} color="#6B7280" />
                                 </Pressable>
                                 <Pressable
                                     onPress={() => confirmDelete(project.id)}
                                     style={styles.iconButton}
                                     accessibilityLabel="Delete project"
                                 >
-                                    <TrashIcon size={16} color="#DC2626" />
+                                    <Trash2 size={16} color="#DC2626" />
                                 </Pressable>
                             </View>
                         )}
@@ -131,81 +120,3 @@ export default function ProjectList({
         </ScrollView>
     );
 }
-
-const styles = StyleSheet.create({
-    wrapper: {
-        flexGrow: 0,
-    },
-    row: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        borderLeftWidth: 4,
-        borderLeftColor: 'transparent',
-    },
-    rowSelected: {
-        backgroundColor: '#EFF6FF',
-        borderLeftColor: '#3B82F6',
-    },
-    colorDot: {
-        width: 10,
-        height: 10,
-        borderRadius: 9999,
-        marginRight: 12,
-    },
-    content: {
-        flex: 1,
-        minWidth: 0,
-    },
-    projectName: {
-        fontSize: 14,
-        color: '#1F2937',
-    },
-    projectNameSelected: {
-        fontWeight: '600',
-    },
-    actions: {
-        flexDirection: 'row',
-        gap: 6,
-        marginLeft: 8,
-    },
-    iconButton: {
-        padding: 6,
-        borderRadius: 9999,
-    },
-    iconButtonSuccess: {
-        padding: 6,
-        borderRadius: 9999,
-        backgroundColor: '#ECFDF3',
-    },
-    editRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
-    input: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: '#D1D5DB',
-        borderRadius: 6,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        fontSize: 14,
-        backgroundColor: '#FFFFFF',
-    },
-    empty: {
-        paddingVertical: 24,
-        paddingHorizontal: 16,
-        alignItems: 'center',
-    },
-    emptyText: {
-        color: '#6B7280',
-        fontSize: 13,
-    },
-    emptySub: {
-        color: '#9CA3AF',
-        fontSize: 11,
-        marginTop: 4,
-    },
-});
