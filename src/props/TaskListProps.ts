@@ -13,4 +13,7 @@ export interface TaskListProps {
     onToggleComplete: (taskId: string, completed: boolean) => void;
     onTogglePriorityMenu: (taskId: string) => void;
     onSetPriority: (taskId: string, priority: Priority) => void;
+    onMoveTaskUp?: (taskId: string) => void;
+    onMoveTaskDown?: (taskId: string) => void;
+    onReorderTasks?: (orderedTasks: Task[]) => void;
 }

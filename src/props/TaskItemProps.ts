@@ -6,10 +6,12 @@ export interface TaskItemProps {
     isMenuOpen: boolean;
     editValue: string;
     onStartEdit: () => void;
-    onChangeEdit: (text: string) => void;
+    onChangeEdit: (value: string) => void;
     onSaveEdit: () => void;
     onDelete: () => void;
     onToggleComplete: () => void;
     onTogglePriorityMenu: () => void;
     onSetPriority: (priority: Priority) => void;
+    onMoveUp?: () => void;
+    onMoveDown?: () => void;
 }

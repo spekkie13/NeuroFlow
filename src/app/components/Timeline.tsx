@@ -1,7 +1,9 @@
+// src/components/Timeline.tsx
 import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { List } from 'lucide-react-native';
-import { Priority, Task } from '../utils/types';
+
+import { Task, Priority } from '../utils/types';
 import { TimelineProps } from '@/props/TimelineProps';
 import { styles } from '@/styles/timeline';
 import { DayView } from '@/app/components/DayView';
@@ -9,10 +11,16 @@ import { TaskModal } from '@/app/components/Task/TaskModal';
 
 export default function Timeline({ project, onAddTask, onUpdateTask }: TimelineProps) {
     const [showAddModal, setShowAddModal] = useState(false);
-    const [initialTab, setInitialTab] = useState<'new' | 'existing'>('new');
-    const [defaultStartDate, setDefaultStartDate] = useState<string>('');
-    const [defaultEndDate, setDefaultEndDate] = useState<string>('');
+    const [modalMode, setModalMode] = useState<'new' | 'existing'>('new');
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
+    const [newTaskName, setNewTaskName] = useState('');
+    const [newTaskPriority, setNewTaskPriority] = useState<Priority>('medium');
+    const [taskStartDate, setTaskStartDate] = useState('');
+    const [taskEndDate, setTaskEndDate] = useState('');
+    const [selectedExistingTaskId, setSelectedExistingTaskId] = useState<string | null>(null);
+
+    // 14-dagen range
     const dates = useMemo(() => {
         const today = new Date();
         return Array.from({ length: 14 }, (_, i) => {
@@ -22,15 +30,17 @@ export default function Timeline({ project, onAddTask, onUpdateTask }: TimelineP
         });
     }, []);
 
+    // ongeplande taken
     const unscheduledTasks = useMemo(
-        () => project.tasks.filter(t => !t.startDate || !t.endDate),
-        [project.tasks]
+        () => project.tasks.filter((t) => !t.startDate || !t.endDate),
+        [project.tasks],
     );
 
+    // taken per dag
     const tasksByDate = useMemo(() => {
-        return dates.map(date => {
+        return dates.map((date) => {
             const dateStr = date.toISOString().split('T')[0];
-            const tasks = project.tasks.filter(task => {
+            const tasks = project.tasks.filter((task) => {
                 if (!task.startDate || !task.endDate) return false;
                 const start = new Date(task.startDate).toISOString().split('T')[0];
                 const end = new Date(task.endDate).toISOString().split('T')[0];
@@ -42,45 +52,47 @@ export default function Timeline({ project, onAddTask, onUpdateTask }: TimelineP
 
     const openScheduleModalForDate = (date: Date) => {
         const dateStr = date.toISOString().split('T')[0];
-        setDefaultStartDate(dateStr);
-        setDefaultEndDate(dateStr);
-        setInitialTab(unscheduledTasks.length > 0 ? 'existing' : 'new');
+        setSelectedDate(dateStr);
+        setTaskStartDate(dateStr);
+        setTaskEndDate(dateStr);
+        setNewTaskName('');
+        setNewTaskPriority('medium');
+        setSelectedExistingTaskId(null);
+
+        setModalMode(unscheduledTasks.length > 0 ? 'existing' : 'new');
         setShowAddModal(true);
-    };
-
-    const handleCreateNewFromModal = (input: {
-        name: string;
-        priority: Priority;
-        startDate: string;
-        endDate: string;
-    }) => {
-        const task: Task = {
-            id: Date.now().toString(),
-            name: input.name.trim(),
-            completed: false,
-            priority: input.priority,
-            startDate: new Date(input.startDate).toISOString(),
-            endDate: new Date(input.endDate).toISOString(),
-            notes: '',
-        };
-        onAddTask(task);
-        setShowAddModal(false);
-    };
-
-    const handleScheduleExistingFromModal = (input: {
-        taskId: string;
-        startDate: string;
-        endDate: string;
-    }) => {
-        onUpdateTask(input.taskId, {
-            startDate: new Date(input.startDate).toISOString(),
-            endDate: new Date(input.endDate).toISOString(),
-        });
-        setShowAddModal(false);
     };
 
     const toggleTaskComplete = (taskId: string, completed: boolean) => {
         onUpdateTask(taskId, { completed });
+    };
+
+    const handleConfirmNewTask = () => {
+        if (!newTaskName.trim() || !taskStartDate || !taskEndDate) return;
+
+        const newTask: Task = {
+            id: Date.now().toString(),
+            name: newTaskName.trim(),
+            completed: false,
+            priority: newTaskPriority,
+            startDate: new Date(taskStartDate).toISOString(),
+            endDate: new Date(taskEndDate).toISOString(),
+            notes: '',
+        };
+
+        onAddTask(newTask);
+        setShowAddModal(false);
+    };
+
+    const handleConfirmExistingTask = () => {
+        if (!selectedExistingTaskId || !taskStartDate || !taskEndDate) return;
+
+        onUpdateTask(selectedExistingTaskId, {
+            startDate: new Date(taskStartDate).toISOString(),
+            endDate: new Date(taskEndDate).toISOString(),
+        });
+
+        setShowAddModal(false);
     };
 
     return (
@@ -103,7 +115,11 @@ export default function Timeline({ project, onAddTask, onUpdateTask }: TimelineP
             </View>
 
             {/* horizontal timeline */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
+            <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.horizontalScroll}
+            >
                 <View style={styles.timelineRow}>
                     {dates.map((date, index) => (
                         <DayView
@@ -118,15 +134,25 @@ export default function Timeline({ project, onAddTask, onUpdateTask }: TimelineP
                 </View>
             </ScrollView>
 
+            {/* modal */}
             <TaskModal
                 visible={showAddModal}
-                onClose={() => setShowAddModal(false)}
+                mode={modalMode}
+                onChangeMode={setModalMode}
                 unscheduledTasks={unscheduledTasks}
-                initialTab={initialTab}
-                defaultStartDate={defaultStartDate}
-                defaultEndDate={defaultEndDate}
-                onCreateNew={handleCreateNewFromModal}
-                onScheduleExisting={handleScheduleExistingFromModal}
+                taskName={newTaskName}
+                onChangeTaskName={setNewTaskName}
+                priority={newTaskPriority}
+                onChangePriority={setNewTaskPriority}
+                startDate={taskStartDate}
+                endDate={taskEndDate}
+                onChangeStartDate={setTaskStartDate}
+                onChangeEndDate={setTaskEndDate}
+                selectedTaskId={selectedExistingTaskId}
+                onChangeSelectedTaskId={setSelectedExistingTaskId}
+                onClose={() => setShowAddModal(false)}
+                onConfirmNew={handleConfirmNewTask}
+                onConfirmExisting={handleConfirmExistingTask}
             />
         </View>
     );

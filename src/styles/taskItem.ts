@@ -94,4 +94,37 @@ export const styles = StyleSheet.create({
         borderRadius: 9999,
         backgroundColor: '#ECFDF3',
     },
+    reorderGroup: {
+        flexDirection: 'column',
+        gap: 8,
+        marginBottom: 12,
+        paddingVertical: 8,
+        paddingHorizontal: 4,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        shadowColor: '#000',
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: 2,
+    },
+    reorderControls: {
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 2,
+        paddingHorizontal: 2,
+        gap: 2,
+    },
+
+    reorderButton: {
+        padding: 4, // heel klein
+        borderRadius: 6,
+    },
+
+    reorderIcon: {
+        opacity: 0.7,
+    },
 });

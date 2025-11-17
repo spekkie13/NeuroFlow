@@ -1,3 +1,6 @@
-import {Priority} from "../app/utils/types";
+import {Priority} from "@/app/utils/types";
 
-export interface PriorityMenuProps { onSelect: (p: Priority) => void }
+export interface PriorityMenuProps {
+    current: Priority;
+    onSelect: (p: Priority) => void
+}

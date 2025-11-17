@@ -133,6 +133,7 @@ export default function Planner({ user, onLogout }: PlannerProps) {
     };
 
     const handleDeleteProject = (projectId: string) => {
+        console.log('deleting project', projectId);
         if (projectId === 'inbox') {
             Alert.alert('Not allowed', 'Inbox cannot be deleted');
             return;
@@ -177,6 +178,16 @@ export default function Planner({ user, onLogout }: PlannerProps) {
                             t.id === taskId ? { ...t, ...updates } : t,
                         ),
                     }
+                    : p,
+            ),
+        );
+    };
+
+    const handleReorderTasks = (projectId: string, orderedTasks: Task[]) => {
+        setProjects((prev) =>
+            prev.map((p) =>
+                p.id === projectId
+                    ? { ...p, tasks: orderedTasks }
                     : p,
             ),
         );
@@ -308,15 +319,19 @@ export default function Planner({ user, onLogout }: PlannerProps) {
                                     allProjects={projects}
                                     onSelectProject={setSelectedProjectId}
                                     onAddProject={handleAddProject}
-                                    onAddTask={task => handleAddTask(selectedProject.id, task)}
+                                    onAddTask={(task) => handleAddTask(selectedProject.id, task)}
                                     onUpdateTask={(taskId, updates) =>
                                         handleUpdateTask(selectedProject.id, taskId, updates)
                                     }
-                                    onDeleteTask={taskId =>
+                                    onDeleteTask={(taskId) =>
                                         handleDeleteTask(selectedProject.id, taskId)
                                     }
                                     onAddToInbox={handleAddToInbox}
+                                    onReorderTasks={(orderedTasks) =>
+                                        handleReorderTasks(selectedProject.id, orderedTasks)
+                                    }
                                 />
+
                             ) : (
                                 <View style={styles.emptyTimeline}>
                                     <Text style={styles.emptyTitle}>Nog geen projecten</Text>

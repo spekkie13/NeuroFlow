@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Text, View, Pressable } from 'react-native';
 import { Task, Priority } from '../utils/types';
-import { ToastOverlay } from '../../app/components/ToastOverlay';
-import { TaskViewProps } from '../../props/TaskViewProps';
-import { TaskHeader } from '../../app/components/Task/TaskHeader';
-import { TaskInput } from '../../app/components/Task/TaskInput';
-import { TaskList } from '../../app/components/Task/TaskList';
-import {styles} from "@/styles/taskView";
+import { ToastOverlay } from '@/app/components/ToastOverlay';
+import { TaskViewProps } from '@/props/TaskViewProps';
+import { TaskHeader } from '@/app/components/Task/TaskHeader';
+import { TaskInput } from '@/app/components/Task/TaskInput';
+import { TaskList } from '@/app/components/Task/TaskList';
+import { styles } from '@/styles/taskView';
 
 export default function TaskView({
                                      project,
@@ -17,6 +17,7 @@ export default function TaskView({
                                      onUpdateTask,
                                      onDeleteTask,
                                      onAddToInbox,
+                                     onReorderTasks,
                                  }: TaskViewProps) {
     const [newTaskName, setNewTaskName] = useState('');
     const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
@@ -59,12 +60,54 @@ export default function TaskView({
 
     const handleSetPriority = (taskId: string, priority: Priority) => {
         onUpdateTask(taskId, { priority });
+        setShowPriorityMenu(null);
+    };
+
+    /**
+     * Reorder binnen dezelfde prioriteit
+     */
+    const handleMoveTask = (taskId: string, direction: 'up' | 'down') => {
+        if (!onReorderTasks) return;
+
+        const tasks = project.tasks;
+        const index = tasks.findIndex(t => t.id === taskId);
+        if (index === -1) return;
+
+        const priority = tasks[index].priority;
+
+        // alle indices met dezelfde priority
+        const samePriorityIndices = tasks
+            .map((t, i) => (t.priority === priority ? i : -1))
+            .filter(i => i !== -1);
+
+        const posInGroup = samePriorityIndices.indexOf(index);
+        if (posInGroup === -1) return;
+
+        const newPosInGroup =
+            direction === 'up' ? posInGroup - 1 : posInGroup + 1;
+
+        // buiten bereik van deze priority groep? -> niks doen
+        if (newPosInGroup < 0 || newPosInGroup >= samePriorityIndices.length) {
+            return;
+        }
+
+        const swapIndex = samePriorityIndices[newPosInGroup];
+
+        const newTasks = [...tasks];
+        const temp = newTasks[index];
+        newTasks[index] = newTasks[swapIndex];
+        newTasks[swapIndex] = temp;
+
+        onReorderTasks(newTasks);
     };
 
     return (
         <View style={styles.wrapper}>
             {showPriorityMenu && (
-                <Pressable style={styles.overlay} onPress={() => setShowPriorityMenu(null)}>
+                <Pressable
+                    style={styles.overlay}
+                    onPress={() => setShowPriorityMenu(null)}
+                >
                     <View />
                 </Pressable>
             )}
@@ -90,21 +133,24 @@ export default function TaskView({
                 <TaskHeader
                     project={project}
                     focusMode={focusMode}
-                    onToggleFocus={() => setFocusMode((p) => !p)}
+                    onToggleFocus={() => setFocusMode(p => !p)}
                     allProjects={allProjects}
                     onSelectProject={onSelectProject}
                 />
 
-                {/* als focus aan staat: laat het zien */}
                 {focusMode && (
                     <View style={styles.focusBanner}>
                         <Text style={styles.focusTitle}>Focusmodus aan</Text>
                         <Text style={styles.focusText}>
-                            Je ziet nu maar één taak. Werk deze af en zet focus uit of voltooi de taak.
+                            Je ziet nu maar één taak. Werk deze af en zet focus uit of
+                            voltooi de taak.
                         </Text>
                         {visibleTasks.length > 0 && (
                             <Text style={styles.focusCurrent}>
-                                Huidige taak: <Text style={styles.focusCurrentName}>{visibleTasks[0].name}</Text>
+                                Huidige taak:{' '}
+                                <Text style={styles.focusCurrentName}>
+                                    {visibleTasks[0].name}
+                                </Text>
                             </Text>
                         )}
                         <Pressable
@@ -123,7 +169,11 @@ export default function TaskView({
                     value={newTaskName}
                     onChange={setNewTaskName}
                     onSubmit={handleCreateTask}
-                    placeholder={isInbox ? 'Dump je taak...' : `Taak voor ${project.name}...`}
+                    placeholder={
+                        isInbox
+                            ? 'Dump je taak...'
+                            : `Taak voor ${project.name}...`
+                    }
                 />
             </View>
 
@@ -146,6 +196,13 @@ export default function TaskView({
                     setShowPriorityMenu((current) => (current === taskId ? null : taskId))
                 }
                 onSetPriority={handleSetPriority}
+                onReorderTasks={(orderedTasks) => {
+                    // Alleen doorgeven naar boven — geen eigen state hier
+                    // We willen de volgorde ook persist in Planner, dus:
+                    orderedTasks.forEach((t, index) => {
+                        // hier niks doen; de echte reorder gebeurt in Planner
+                    });
+                }}
             />
         </View>
     );

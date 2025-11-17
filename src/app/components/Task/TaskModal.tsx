@@ -1,59 +1,65 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { Plus, X, List } from 'lucide-react-native';
-import { Priority } from '@/app/utils/types';
+import { Priority, Task } from '@/app/utils/types';
 import { getPriorityStyle } from '@/helpers/TimelineHelpers';
 import { styles } from '@/styles/taskModal';
-import { TaskModalProps } from "@/props/TaskModalProps";
+
+type TaskModalProps = {
+    visible: boolean;
+    mode: 'new' | 'existing';
+    onChangeMode: (mode: 'new' | 'existing') => void;
+
+    unscheduledTasks: Task[];
+
+    taskName: string;
+    onChangeTaskName: (value: string) => void;
+
+    priority: Priority;
+    onChangePriority: (p: Priority) => void;
+
+    startDate: string;
+    endDate: string;
+    onChangeStartDate: (value: string) => void;
+    onChangeEndDate: (value: string) => void;
+
+    selectedTaskId: string | null;
+    onChangeSelectedTaskId: (id: string | null) => void;
+
+    onClose: () => void;
+    onConfirmNew: () => void;
+    onConfirmExisting: () => void;
+};
 
 export const TaskModal: React.FC<TaskModalProps> = ({
                                                         visible,
-                                                        onClose,
+                                                        mode,
+                                                        onChangeMode,
                                                         unscheduledTasks,
-                                                        initialTab,
-                                                        defaultStartDate,
-                                                        defaultEndDate,
-                                                        onCreateNew,
-                                                        onScheduleExisting,
-                                                    }: TaskModalProps) => {
-    const [modalTab, setModalTab] = useState<'new' | 'existing'>(initialTab);
-    const [newTaskName, setNewTaskName] = useState('');
-    const [newTaskPriority, setNewTaskPriority] = useState<Priority>('medium');
-    const [taskStartDate, setTaskStartDate] = useState(defaultStartDate);
-    const [taskEndDate, setTaskEndDate] = useState(defaultEndDate);
-    const [selectedExistingTaskId, setSelectedExistingTaskId] = useState<string | null>(null);
-
-    useEffect(() => {
-        if (!visible) return;
-        setModalTab(initialTab);
-        setNewTaskName('');
-        setNewTaskPriority('medium');
-        setTaskStartDate(defaultStartDate);
-        setTaskEndDate(defaultEndDate);
-        setSelectedExistingTaskId(null);
-    }, [visible, initialTab, defaultStartDate, defaultEndDate]);
-
-    const handleAddNewTask = () => {
-        if (!newTaskName.trim() || !taskStartDate || !taskEndDate) return;
-        onCreateNew({
-            name: newTaskName.trim(),
-            priority: newTaskPriority,
-            startDate: taskStartDate,
-            endDate: taskEndDate,
-        });
-    };
-
-    const handleAddExistingTask = () => {
-        if (!selectedExistingTaskId || !taskStartDate || !taskEndDate) return;
-        onScheduleExisting({
-            taskId: selectedExistingTaskId,
-            startDate: taskStartDate,
-            endDate: taskEndDate,
-        });
-    };
+                                                        taskName,
+                                                        onChangeTaskName,
+                                                        priority,
+                                                        onChangePriority,
+                                                        startDate,
+                                                        endDate,
+                                                        onChangeStartDate,
+                                                        onChangeEndDate,
+                                                        selectedTaskId,
+                                                        onChangeSelectedTaskId,
+                                                        onClose,
+                                                        onConfirmNew,
+                                                        onConfirmExisting,
+                                                    }) => {
+    const disableNew = !taskName.trim() || !startDate || !endDate;
+    const disableExisting = !selectedTaskId || !startDate || !endDate;
 
     return (
-        <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
+        <Modal
+            visible={visible}
+            animationType="fade"
+            transparent
+            onRequestClose={onClose}
+        >
             <View style={styles.modalOverlay}>
                 <View style={styles.modalCard}>
                     {/* header */}
@@ -66,31 +72,55 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 
                     {/* tabs */}
                     <View style={styles.tabRow}>
-                        <Pressable onPress={() => setModalTab('existing')} style={[styles.tab, modalTab === 'existing' && styles.tabActive]}>
+                        <Pressable
+                            onPress={() => onChangeMode('existing')}
+                            style={[styles.tab, mode === 'existing' && styles.tabActive]}
+                        >
                             <View style={styles.tabInnerRow}>
-                                <List size={16} color={modalTab === 'existing' ? '#2563EB' : '#6B7280'} />
-                                <Text style={[styles.tabText, modalTab === 'existing' && styles.tabTextActive]}>
+                                <List
+                                    size={16}
+                                    color={mode === 'existing' ? '#2563EB' : '#6B7280'}
+                                />
+                                <Text
+                                    style={[
+                                        styles.tabText,
+                                        mode === 'existing' && styles.tabTextActive,
+                                    ]}
+                                >
                                     Add Existing ({unscheduledTasks.length})
                                 </Text>
                             </View>
                         </Pressable>
-                        <Pressable onPress={() => setModalTab('new')} style={[styles.tab, modalTab === 'new' && styles.tabActive]}>
+                        <Pressable
+                            onPress={() => onChangeMode('new')}
+                            style={[styles.tab, mode === 'new' && styles.tabActive]}
+                        >
                             <View style={styles.tabInnerRow}>
-                                <Plus size={16} color={modalTab === 'new' ? '#2563EB' : '#6B7280'} />
-                                <Text style={[styles.tabText, modalTab === 'new' && styles.tabTextActive]}>Create New</Text>
+                                <Plus
+                                    size={16}
+                                    color={mode === 'new' ? '#2563EB' : '#6B7280'}
+                                />
+                                <Text
+                                    style={[
+                                        styles.tabText,
+                                        mode === 'new' && styles.tabTextActive,
+                                    ]}
+                                >
+                                    Create New
+                                </Text>
                             </View>
                         </Pressable>
                     </View>
 
                     {/* body */}
                     <ScrollView style={styles.modalBody}>
-                        {modalTab === 'new' ? (
+                        {mode === 'new' ? (
                             <View style={{ gap: 12 }}>
                                 <View>
                                     <Text style={styles.label}>Task Name</Text>
                                     <TextInput
-                                        value={newTaskName}
-                                        onChangeText={setNewTaskName}
+                                        value={taskName}
+                                        onChangeText={onChangeTaskName}
                                         placeholder="Enter task name..."
                                         style={styles.input}
                                         placeholderTextColor="#9CA3AF"
@@ -101,26 +131,56 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                                     <Text style={styles.label}>Priority</Text>
                                     <View style={styles.priorityRow}>
                                         <Pressable
-                                            onPress={() => setNewTaskPriority('low')}
-                                            style={[styles.priorityButton, newTaskPriority === 'low' && styles.priorityButtonActiveLow]}
+                                            onPress={() => onChangePriority('low')}
+                                            style={[
+                                                styles.priorityButton,
+                                                priority === 'low' &&
+                                                styles.priorityButtonActiveLow,
+                                            ]}
                                         >
-                                            <Text style={[styles.priorityButtonText, newTaskPriority === 'low' && styles.priorityButtonTextActive]}>
+                                            <Text
+                                                style={[
+                                                    styles.priorityButtonText,
+                                                    priority === 'low' &&
+                                                    styles.priorityButtonTextActive,
+                                                ]}
+                                            >
                                                 Low
                                             </Text>
                                         </Pressable>
                                         <Pressable
-                                            onPress={() => setNewTaskPriority('medium')}
-                                            style={[styles.priorityButton, newTaskPriority === 'medium' && styles.priorityButtonActiveMedium]}
+                                            onPress={() => onChangePriority('medium')}
+                                            style={[
+                                                styles.priorityButton,
+                                                priority === 'medium' &&
+                                                styles.priorityButtonActiveMedium,
+                                            ]}
                                         >
-                                            <Text style={[styles.priorityButtonText, newTaskPriority === 'medium' && styles.priorityButtonTextActive]}>
+                                            <Text
+                                                style={[
+                                                    styles.priorityButtonText,
+                                                    priority === 'medium' &&
+                                                    styles.priorityButtonTextActive,
+                                                ]}
+                                            >
                                                 Medium
                                             </Text>
                                         </Pressable>
                                         <Pressable
-                                            onPress={() => setNewTaskPriority('high')}
-                                            style={[styles.priorityButton, newTaskPriority === 'high' && styles.priorityButtonActiveHigh]}
+                                            onPress={() => onChangePriority('high')}
+                                            style={[
+                                                styles.priorityButton,
+                                                priority === 'high' &&
+                                                styles.priorityButtonActiveHigh,
+                                            ]}
                                         >
-                                            <Text style={[styles.priorityButtonText, newTaskPriority === 'high' && styles.priorityButtonTextActive]}>
+                                            <Text
+                                                style={[
+                                                    styles.priorityButtonText,
+                                                    priority === 'high' &&
+                                                    styles.priorityButtonTextActive,
+                                                ]}
+                                            >
                                                 High
                                             </Text>
                                         </Pressable>
@@ -131,8 +191,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                                     <View style={{ flex: 1 }}>
                                         <Text style={styles.label}>Start Date</Text>
                                         <TextInput
-                                            value={taskStartDate}
-                                            onChangeText={setTaskStartDate}
+                                            value={startDate}
+                                            onChangeText={onChangeStartDate}
                                             placeholder="YYYY-MM-DD"
                                             style={styles.input}
                                             placeholderTextColor="#9CA3AF"
@@ -142,8 +202,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                                     <View style={{ flex: 1 }}>
                                         <Text style={styles.label}>End Date</Text>
                                         <TextInput
-                                            value={taskEndDate}
-                                            onChangeText={setTaskEndDate}
+                                            value={endDate}
+                                            onChangeText={onChangeEndDate}
                                             placeholder="YYYY-MM-DD"
                                             style={styles.input}
                                             placeholderTextColor="#9CA3AF"
@@ -156,37 +216,59 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                                 {unscheduledTasks.length === 0 ? (
                                     <View style={styles.emptyUnscheduled}>
                                         <List size={48} color="#9CA3AF" />
-                                        <Text style={styles.emptyUnscheduledTitle}>No unscheduled tasks</Text>
-                                        <Text style={styles.emptyUnscheduledSubtitle}>All tasks have been scheduled</Text>
+                                        <Text style={styles.emptyUnscheduledTitle}>
+                                            No unscheduled tasks
+                                        </Text>
+                                        <Text style={styles.emptyUnscheduledSubtitle}>
+                                            All tasks have been scheduled
+                                        </Text>
                                     </View>
                                 ) : (
                                     <>
                                         <View>
                                             <Text style={styles.label}>Select Task</Text>
                                             <View style={styles.existingList}>
-                                                {unscheduledTasks.map(task => {
+                                                {unscheduledTasks.map((task) => {
                                                     const pStyle = getPriorityStyle(task.priority);
                                                     return (
                                                         <Pressable
                                                             key={task.id}
-                                                            onPress={() => setSelectedExistingTaskId(task.id)}
+                                                            onPress={() =>
+                                                                onChangeSelectedTaskId(task.id)
+                                                            }
                                                             style={[
                                                                 styles.existingItem,
-                                                                selectedExistingTaskId === task.id && styles.existingItemActive,
+                                                                selectedTaskId === task.id &&
+                                                                styles.existingItemActive,
                                                             ]}
                                                         >
                                                             <View style={{ flex: 1 }}>
-                                                                <Text style={styles.existingItemText} numberOfLines={1}>
+                                                                <Text
+                                                                    style={styles.existingItemText}
+                                                                    numberOfLines={1}
+                                                                >
                                                                     {task.name}
                                                                 </Text>
                                                             </View>
                                                             <View
                                                                 style={[
                                                                     styles.priorityPill,
-                                                                    { backgroundColor: pStyle.backgroundColor, borderColor: pStyle.borderColor },
+                                                                    {
+                                                                        backgroundColor:
+                                                                        pStyle.backgroundColor,
+                                                                        borderColor:
+                                                                        pStyle.borderColor,
+                                                                    },
                                                                 ]}
                                                             >
-                                                                <Text style={[styles.priorityPillText, { color: pStyle.color }]}>{task.priority}</Text>
+                                                                <Text
+                                                                    style={[
+                                                                        styles.priorityPillText,
+                                                                        { color: pStyle.color },
+                                                                    ]}
+                                                                >
+                                                                    {task.priority}
+                                                                </Text>
                                                             </View>
                                                         </Pressable>
                                                     );
@@ -198,8 +280,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                                             <View style={{ flex: 1 }}>
                                                 <Text style={styles.label}>Start Date</Text>
                                                 <TextInput
-                                                    value={taskStartDate}
-                                                    onChangeText={setTaskStartDate}
+                                                    value={startDate}
+                                                    onChangeText={onChangeStartDate}
                                                     placeholder="YYYY-MM-DD"
                                                     style={styles.input}
                                                     placeholderTextColor="#9CA3AF"
@@ -209,8 +291,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                                             <View style={{ flex: 1 }}>
                                                 <Text style={styles.label}>End Date</Text>
                                                 <TextInput
-                                                    value={taskEndDate}
-                                                    onChangeText={setTaskEndDate}
+                                                    value={endDate}
+                                                    onChangeText={onChangeEndDate}
                                                     placeholder="YYYY-MM-DD"
                                                     style={styles.input}
                                                     placeholderTextColor="#9CA3AF"
@@ -228,19 +310,27 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                         <Pressable onPress={onClose} style={styles.secondaryBtn}>
                             <Text style={styles.secondaryBtnText}>Cancel</Text>
                         </Pressable>
-                        {modalTab === 'new' ? (
+                        {mode === 'new' ? (
                             <Pressable
-                                onPress={handleAddNewTask}
-                                disabled={!newTaskName.trim() || !taskStartDate || !taskEndDate}
-                                style={[styles.primaryBtn, (!newTaskName.trim() || !taskStartDate || !taskEndDate) && styles.primaryBtnDisabled]}
+                                onPress={onConfirmNew}
+                                disabled={disableNew}
+                                style={[
+                                    styles.primaryBtn,
+                                    disableNew && styles.primaryBtnDisabled,
+                                ]}
                             >
-                                <Text style={styles.primaryBtnText}>Create & Schedule</Text>
+                                <Text style={styles.primaryBtnText}>
+                                    Create &amp; Schedule
+                                </Text>
                             </Pressable>
                         ) : (
                             <Pressable
-                                onPress={handleAddExistingTask}
-                                disabled={!selectedExistingTaskId || !taskStartDate || !taskEndDate}
-                                style={[styles.primaryBtn, (!selectedExistingTaskId || !taskStartDate || !taskEndDate) && styles.primaryBtnDisabled]}
+                                onPress={onConfirmExisting}
+                                disabled={disableExisting}
+                                style={[
+                                    styles.primaryBtn,
+                                    disableExisting && styles.primaryBtnDisabled,
+                                ]}
                             >
                                 <Text style={styles.primaryBtnText}>Schedule Task</Text>
                             </Pressable>

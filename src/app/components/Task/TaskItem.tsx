@@ -1,10 +1,21 @@
-import React from "react";
-import { Priority } from "../../../app/utils/types";
-import { Pressable, Text, TextInput, View} from "react-native";
-import { ArrowDown, ArrowRight, ArrowUp, CheckCircleIcon, CheckIcon, CircleIcon, ClockIcon, EditIcon, TrashIcon, XIcon} from "lucide-react-native";
-import { PriorityMenu } from "../../../app/components/Task/PriorityMenu";
-import { TaskItemProps } from "@/props/TaskItemProps";
-import {styles} from "@/styles/taskItem";
+import React from 'react';
+import { Priority } from '@/app/utils/types';
+import { Pressable, Text, TextInput, View } from 'react-native';
+import {
+    ArrowDown,
+    ArrowRight,
+    ArrowUp,
+    CheckCircle as CheckCircleIcon,
+    Check as CheckIcon,
+    Circle as CircleIcon,
+    Clock as ClockIcon,
+    Edit as EditIcon,
+    Trash2 as TrashIcon,
+    X as XIcon,
+} from 'lucide-react-native';
+import { PriorityMenu } from '@/app/components/Task/PriorityMenu';
+import { TaskItemProps } from '@/props/TaskItemProps';
+import { styles } from '@/styles/taskItem';
 
 function getPriorityIcon(priority: Priority) {
     switch (priority) {
@@ -43,18 +54,20 @@ function getPriorityStyle(priority: Priority) {
 }
 
 export function TaskItem({
-                      task,
-                      isEditing,
-                      isMenuOpen,
-                      editValue,
-                      onStartEdit,
-                      onChangeEdit,
-                      onSaveEdit,
-                      onDelete,
-                      onToggleComplete,
-                      onTogglePriorityMenu,
-                      onSetPriority,
-                  }: TaskItemProps) {
+                             task,
+                             isEditing,
+                             isMenuOpen,
+                             editValue,
+                             onStartEdit,
+                             onChangeEdit,
+                             onSaveEdit,
+                             onDelete,
+                             onToggleComplete,
+                             onTogglePriorityMenu,
+                             onSetPriority,
+                             onMoveUp,
+                             onMoveDown,
+                         }: TaskItemProps) {
     const priorityStyle = getPriorityStyle(task.priority);
 
     return (
@@ -84,10 +97,16 @@ export function TaskItem({
                                 autoFocus
                                 onSubmitEditing={onSaveEdit}
                             />
-                            <Pressable onPress={onSaveEdit} style={styles.iconButtonSuccess}>
+                            <Pressable
+                                onPress={onSaveEdit}
+                                style={styles.iconButtonSuccess}
+                            >
                                 <CheckIcon size={18} color="#16A34A" />
                             </Pressable>
-                            <Pressable onPress={onStartEdit} style={styles.iconButton}>
+                            <Pressable
+                                onPress={onStartEdit}
+                                style={styles.iconButton}
+                            >
                                 <XIcon size={18} color="#6B7280" />
                             </Pressable>
                         </View>
@@ -109,7 +128,8 @@ export function TaskItem({
                                     style={[
                                         styles.priorityBadge,
                                         {
-                                            backgroundColor: priorityStyle.backgroundColor,
+                                            backgroundColor:
+                                            priorityStyle.backgroundColor,
                                             borderColor: priorityStyle.borderColor,
                                         },
                                     ]}
@@ -124,12 +144,18 @@ export function TaskItem({
                                     </Text>
                                 </Pressable>
                             </View>
+
                             {task.startDate && task.endDate && (
                                 <View style={styles.dateRow}>
                                     <ClockIcon size={14} color="#6B7280" />
                                     <Text style={styles.dateText}>
-                                        {new Date(task.startDate).toLocaleDateString()} -{' '}
-                                        {new Date(task.endDate).toLocaleDateString()}
+                                        {new Date(
+                                            task.startDate,
+                                        ).toLocaleDateString()}{' '}
+                                        -{' '}
+                                        {new Date(
+                                            task.endDate,
+                                        ).toLocaleDateString()}
                                     </Text>
                                 </View>
                             )}
@@ -139,18 +165,34 @@ export function TaskItem({
 
                 {!isEditing && (
                     <View style={styles.actions}>
+                        {/* priority menu */}
                         <View style={styles.priorityWrapper}>
-                            <Pressable onPress={onTogglePriorityMenu} style={styles.iconButton}>
+                            <Pressable
+                                onPress={onTogglePriorityMenu}
+                                style={styles.iconButton}
+                            >
                                 {getPriorityIcon(task.priority)}
                             </Pressable>
                             {isMenuOpen && (
                                 <PriorityMenu
-                                    onSelect={(p) => {
-                                        onSetPriority(p);
-                                    }}
+                                    current={task.priority}
+                                    onPick={p => onSetPriority(p)}
                                 />
                             )}
                         </View>
+
+                        {/* reorder up/down binnen dezelfde priority */}
+                        <View style={styles.reorderControls}>
+                            <Pressable onPress={onMoveUp} style={styles.reorderButton}>
+                                <ArrowUp size={14} color="#9CA3AF" style={styles.reorderIcon}/>
+                            </Pressable>
+
+                            <Pressable onPress={onMoveDown} style={styles.reorderButton}>
+                                <ArrowDown size={14} color="#9CA3AF" style={styles.reorderIcon}/>
+                            </Pressable>
+                        </View>
+
+
                         <Pressable onPress={onStartEdit} style={styles.iconButton}>
                             <EditIcon size={18} color="#6B7280" />
                         </Pressable>
