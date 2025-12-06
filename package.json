@@ -1,6 +1,6 @@
 {
   "name": "neuroflow",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "main": "expo-router/entry",
   "expo-router": {
     "root": "./src/app"
@@ -30,8 +30,10 @@
     "expo-dev-client": "^5.2.4",
     "expo-linear-gradient": "~14.1.5",
     "expo-linking": "7.1.7",
+    "expo-localization": "^17.0.7",
     "expo-router": "^5.1.4",
     "expo-updates": "~0.28.17",
+    "lucide-react": "^0.555.0",
     "lucide-react-native": "^0.553.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
