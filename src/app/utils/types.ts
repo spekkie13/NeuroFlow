@@ -1,21 +1,29 @@
-export type Priority = 'high' | 'medium' | 'low';
+export type Priority = 'high' | 'medium' | 'low'
 export interface Task {
-  id: string;
-  name: string;
-  completed: boolean;
-  priority: Priority;
-  startDate: string | null;
-  endDate: string | null;
-  notes: string;
+    id: string
+    name: string
+    completed: boolean
+    priority: Priority
+    startDate: string | null
+    endDate: string | null
+    notes: string
 }
 export interface Project {
-  id: string;
-  name: string;
-  tasks: Task[];
-  color: string;
+    id: string
+    name: string
+    tasks: Task[]
+    color: string
 }
 export interface Account {
-  id: string;
-  name: string;
-  createdAt: string;
+    id: string
+    name: string
+    createdAt: string
+}
+
+export interface User {
+    id: string
+    email: string
+    name: string
+    provider: 'email' | 'google'
+    createdAt: string
 }

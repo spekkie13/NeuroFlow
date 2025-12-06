@@ -1,52 +1,60 @@
-import React from 'react';
-import { View, Text, Pressable } from 'react-native';
-import { ListTodo, Calendar, User, Cog } from 'lucide-react-native';
-import { styles } from "@/styles/bottomNav";
-import { ViewType } from "@/types/ViewType";
-import { BottomNavProps } from "@/props/BottomNavProps";
+// components/BottomNav.tsx
+import React from 'react'
+import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native'
+import { ListTodo, Calendar, User as UserIcon } from 'lucide-react-native'
+import { BottomNavProps, ViewType } from "@/app/props/BottomNavProps";
+import {styles} from "@/app/styles/bottomNav";
 
-
-export default function BottomNav({ currentView, onViewChange }: BottomNavProps) {
+export const BottomNav: React.FC<BottomNavProps> = ({ currentView, onViewChange }: BottomNavProps) => {
     const navItems = [
-        { id: 'tasks' as ViewType, label: 'Tasks', icon: ListTodo },
-        { id: 'timeline' as ViewType, label: 'Timeline', icon: Calendar },
-        { id: 'account' as ViewType, label: 'Account', icon: User },
-        { id: 'settings' as ViewType, label: 'Settings', icon: Cog },
-    ];
+        {
+            id: 'tasks' as ViewType,
+            label: 'Tasks',
+            icon: ListTodo,
+        },
+        {
+            id: 'timeline' as ViewType,
+            label: 'Timeline',
+            icon: Calendar,
+        },
+        {
+            id: 'account' as ViewType,
+            label: 'Account',
+            icon: UserIcon,
+        },
+    ]
 
     return (
-        <View style={styles.navContainer}>
-            <View style={styles.navInner}>
+        <SafeAreaView style={styles.safeArea}>
+            <View style={styles.navContainer}>
                 {navItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = currentView === item.id;
+                    const Icon = item.icon
+                    const isActive = currentView === item.id
+
                     return (
-                        <Pressable
+                        <TouchableOpacity
                             key={item.id}
                             onPress={() => onViewChange(item.id)}
-                            style={({ pressed }) => [
-                                styles.navItem,
-                                pressed && { opacity: 0.8 },
-                            ]}
-                            accessibilityLabel={item.label}
+                            style={styles.navItem}
+                            activeOpacity={0.7}
                         >
                             <Icon
                                 size={24}
                                 strokeWidth={isActive ? 2.5 : 2}
-                                color={isActive ? '#2563EB' : '#6B7280'}
+                                color={isActive ? '#2563eb' : '#6b7280'}
                             />
                             <Text
                                 style={[
-                                    styles.navLabel,
-                                    isActive && styles.navLabelActive,
+                                    styles.label,
+                                    isActive ? styles.labelActive : styles.labelInactive,
                                 ]}
                             >
                                 {item.label}
                             </Text>
-                        </Pressable>
-                    );
+                        </TouchableOpacity>
+                    )
                 })}
             </View>
-        </View>
-    );
+        </SafeAreaView>
+    )
 }

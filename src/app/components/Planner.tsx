@@ -1,401 +1,380 @@
-import React, { useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, ScrollView, Alert, SafeAreaView, Text, Pressable } from 'react-native';
-import { Project, Task, Account } from '../utils/types';
-import TaskView from './TaskView';
-import Timeline from './Timeline';
-import AccountView from './AccountView';
-import BottomNav from './BottomNav';
-import {
-    saveProjects,
-    loadProjects,
-    saveAccounts,
-    loadAccounts,
-    getCurrentAccount,
-    setCurrentAccount,
-} from '../utils/storage';
-import SettingsView from '../../app/components/SettingsView';
-import {PlannerProps} from "@/props/PlannerProps";
-import {styles} from "@/styles/planner";
+import React, { useEffect, useState } from 'react'
+import { SafeAreaView, View, ScrollView, Text, Modal, TouchableOpacity } from 'react-native'
+import { Plus, ChevronDown } from 'lucide-react-native'
+import { useAuth } from '../hooks/useAuth'
+import { useAccounts } from '../hooks/useAccounts'
+import { useProjects } from '../hooks/useProjects'
+import { BottomNav } from './BottomNav'
+import { TaskView } from './tasks/TaskView'
+import { Timeline } from './Timeline'
+import { AccountView } from './account/AccountView'
+import { TextField } from './ui/TextField'
+import { AppButton } from './ui/AppButton'
+import { styles } from "@/app/styles/planner";
+import { PlannerProps, PlannerView } from "@/app/props/PlannerProps";
 
-type ViewType = 'tasks' | 'timeline' | 'account' | 'settings';
+export const Planner: React.FC<PlannerProps> = ({ user }: PlannerProps) => {
+    const [currentView, setCurrentView] = useState<PlannerView>('tasks')
+    const [newProjectName, setNewProjectName] = useState('')
+    const [isProjectModalVisible, setIsProjectModalVisible] = useState(false)
+    const [isProjectPickerVisible, setIsProjectPickerVisible] = useState(false)
+    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+        null,
+    )
 
-export default function Planner({ user, onLogout }: PlannerProps) {
-    const [accounts, setAccounts] = useState<Account[]>([]);
-    const [currentAccountId, setCurrentAccountId] = useState<string | null>(null);
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-    const [currentView, setCurrentView] = useState<ViewType>('tasks');
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const { logout } = useAuth()
 
-    // 1) accounts + current account laden
-    useEffect(() => {
-        const init = async () => {
-            const loadedAccounts = await loadAccounts();
-            setAccounts(loadedAccounts);
+    const {
+        accounts,
+        currentAccountId,
+        isLoading: accountsLoading,
+        addAccount,
+        updateAccount,
+        deleteAccount,
+        switchAccount,
+    } = useAccounts()
 
-            const savedAccountId = await getCurrentAccount();
-
-            if (savedAccountId && loadedAccounts.find(a => a.id === savedAccountId)) {
-                setCurrentAccountId(savedAccountId);
-            } else if (loadedAccounts.length > 0) {
-                const firstId = loadedAccounts[0].id;
-                setCurrentAccountId(firstId);
-                await setCurrentAccount(firstId);
-            } else {
-                setCurrentAccountId(null);
-            }
-
-            setIsLoading(false);
-        };
-
-        init();
-    }, []);
+    const {
+        projects,
+        isLoading: projectsLoading,
+        addProject,
+        updateProject,
+        deleteProject,
+        addTask,
+        updateTask,
+        deleteTask,
+        moveTask,
+    } = useProjects(currentAccountId)
 
     useEffect(() => {
-        const loadForAccount = async () => {
-            if (!currentAccountId) {
-                setProjects([]);
-                setSelectedProjectId(null);
-                return;
-            }
-
-            const loadedProjects = await loadProjects(currentAccountId);
-
-            const hasInbox = loadedProjects.some(p => p.id === 'inbox');
-            let finalProjects = loadedProjects;
-            if (!hasInbox) {
-                const inbox: Project = {
-                    id: 'inbox',
-                    name: 'Inbox',
-                    tasks: [],
-                    color: '#6366F1',
-                };
-                finalProjects = [inbox, ...loadedProjects];
-            }
-
-            setProjects(finalProjects);
-
-            try {
-                const last = await AsyncStorage.getItem('lastProjectId');
-                if (last && finalProjects.find(p => p.id === last)) {
-                    setSelectedProjectId(last);
-                } else if (finalProjects.length > 0) {
-                    const inbox = finalProjects.find(p => p.id === 'inbox');
-                    setSelectedProjectId(inbox ? inbox.id : finalProjects[0].id);
-                } else {
-                    setSelectedProjectId(null);
-                }
-            } catch {
-                if (finalProjects.length > 0) {
-                    const inbox = finalProjects.find(p => p.id === 'inbox');
-                    setSelectedProjectId(inbox ? inbox.id : finalProjects[0].id);
-                }
-            }
-        };
-
-        loadForAccount();
-    }, [currentAccountId]);
-
-    useEffect(() => {
-        const persist = async () => {
-            if (currentAccountId) {
-                await saveProjects(projects, currentAccountId);
-            }
-        };
-        persist();
-    }, [projects, currentAccountId]);
-
-    useEffect(() => {
-        if (!selectedProjectId) return;
-        AsyncStorage.setItem('lastProjectId', selectedProjectId).catch(() => {});
-    }, [selectedProjectId]);
-
-    const selectedProject =
-        selectedProjectId ? projects.find(p => p.id === selectedProjectId) ?? null : null;
-
-    // ==== Project handlers =====
-    const handleAddProject = (name: string, color: string) => {
-        const newProject: Project = {
-            id: Date.now().toString(),
-            name,
-            tasks: [],
-            color,
-        };
-        setProjects(prev => [...prev, newProject]);
-        setSelectedProjectId(newProject.id);
-    };
-
-    const handleUpdateProject = (projectId: string, updates: Partial<Project>) => {
-        setProjects(prev =>
-            prev.map(p => (p.id === projectId ? { ...p, ...updates } : p)),
-        );
-    };
-
-    const handleDeleteProject = (projectId: string) => {
-        console.log('deleting project', projectId);
-        if (projectId === 'inbox') {
-            Alert.alert('Not allowed', 'Inbox cannot be deleted');
-            return;
+        if (!projects.length) {
+            setSelectedProjectId(null)
+            return
         }
-
-        setProjects(prev => {
-            const next = prev.filter(p => p.id !== projectId);
-
-            if (projectId === selectedProjectId) {
-                if (next.length > 0) {
-                    const inbox = next.find(p => p.id === 'inbox');
-                    setSelectedProjectId(inbox ? inbox.id : next[0].id);
-                } else {
-                    setSelectedProjectId(null);
-                }
-            }
-
-            return next;
-        });
-    };
-
-    // ==== Task handlers =====
-    const handleAddTask = (projectId: string, task: Task) => {
-        setProjects(prev =>
-            prev.map(p =>
-                p.id === projectId ? { ...p, tasks: [...p.tasks, task] } : p,
-            ),
-        );
-    };
-
-    const handleUpdateTask = (
-        projectId: string,
-        taskId: string,
-        updates: Partial<Task>,
-    ) => {
-        setProjects(prev =>
-            prev.map(p =>
-                p.id === projectId
-                    ? {
-                        ...p,
-                        tasks: p.tasks.map(t =>
-                            t.id === taskId ? { ...t, ...updates } : t,
-                        ),
-                    }
-                    : p,
-            ),
-        );
-    };
-
-    const handleReorderTasks = (projectId: string, orderedTasks: Task[]) => {
-        setProjects((prev) =>
-            prev.map((p) =>
-                p.id === projectId
-                    ? { ...p, tasks: orderedTasks }
-                    : p,
-            ),
-        );
-    };
-
-    const handleDeleteTask = (projectId: string, taskId: string) => {
-        setProjects(prev =>
-            prev.map(p =>
-                p.id === projectId
-                    ? { ...p, tasks: p.tasks.filter(t => t.id !== taskId) }
-                    : p,
-            ),
-        );
-    };
-
-    // inbox-add direct
-    const handleAddToInbox = (task: Task) => {
-        setProjects(prev => {
-            const inbox = prev.find(p => p.id === 'inbox');
-            if (!inbox) {
-                const newInbox: Project = {
-                    id: 'inbox',
-                    name: 'Inbox',
-                    tasks: [task],
-                    color: '#6366F1',
-                };
-                return [newInbox, ...prev];
-            }
-
-            return prev.map(p =>
-                p.id === 'inbox' ? { ...p, tasks: [...p.tasks, task] } : p,
-            );
-        });
-
-        setSelectedProjectId('inbox');
-    };
-
-    // ==== Account handlers =====
-    const handleAddAccount = (name: string) => {
-        const newAccount: Account = {
-            id: Date.now().toString(),
-            name,
-            createdAt: new Date().toISOString(),
-        };
-        const updatedAccounts = [...accounts, newAccount];
-        setAccounts(updatedAccounts);
-        saveAccounts(updatedAccounts);
-
-        if (!currentAccountId) {
-            setCurrentAccountId(newAccount.id);
-            setCurrentAccount(newAccount.id);
+        if (!selectedProjectId || !projects.some((p) => p.id === selectedProjectId)) {
+            setSelectedProjectId(projects[0].id)
         }
-    };
+    }, [projects, selectedProjectId])
 
-    const handleUpdateAccount = (accountId: string, name: string) => {
-        const updatedAccounts = accounts.map(a =>
-            a.id === accountId ? { ...a, name } : a,
-        );
-        setAccounts(updatedAccounts);
-        saveAccounts(updatedAccounts);
-    };
-
-    const handleDeleteAccount = (accountId: string) => {
-        if (accounts.length === 1) {
-            Alert.alert('Not allowed', 'You must have at least one account');
-            return;
-        }
-        const updatedAccounts = accounts.filter(a => a.id !== accountId);
-        setAccounts(updatedAccounts);
-        saveAccounts(updatedAccounts);
-
-        if (currentAccountId === accountId) {
-            const newAccountId = updatedAccounts[0].id;
-            setCurrentAccountId(newAccountId);
-            setCurrentAccount(newAccountId);
-        }
-    };
-
-    const handleSwitchAccount = (accountId: string) => {
-        setCurrentAccountId(accountId);
-        setCurrentAccount(accountId);
-    };
-
-    if (isLoading) {
-        return (
-            <SafeAreaView style={styles.safeArea}>
-                <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-                    <Text style={{ color: '#6B7280' }}>Loading…</Text>
-                </View>
-            </SafeAreaView>
-        );
+    const handleLogout = async () => {
+        await logout()
     }
 
-    const noWorkspace = !currentAccountId || accounts.length === 0;
+    const openProjectModal = () => {
+        setNewProjectName('')
+        setIsProjectModalVisible(true)
+    }
+
+    const closeProjectModal = () => {
+        setIsProjectModalVisible(false)
+        setNewProjectName('')
+    }
+
+    const handleCreateProject = async () => {
+        const name = newProjectName.trim()
+        if (!name) return
+        await addProject(name)
+        closeProjectModal()
+    }
+
+    const activeProject =
+        projects.length === 0
+            ? null
+            : projects.find((p) => p.id === selectedProjectId) ?? projects[0]
+
+    const openProjectPicker = () => {
+        if (!projects.length) return
+        setIsProjectPickerVisible(true)
+    }
+
+    const closeProjectPicker = () => {
+        setIsProjectPickerVisible(false)
+    }
+
+    const handleSelectProject = (projectId: string) => {
+        setSelectedProjectId(projectId)
+        closeProjectPicker()
+    }
+
+    const renderProjectModal = () => (
+        <Modal
+            visible={isProjectModalVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={closeProjectModal}
+        >
+            <View style={styles.modalOverlay}>
+                <View style={styles.modalCard}>
+                    <Text style={styles.modalTitle}>New Project</Text>
+                    <Text style={styles.modalSubtitle}>
+                        Group related tasks into a project to keep your planning focused.
+                    </Text>
+
+                    <TextField
+                        label="Project name"
+                        placeholder="e.g. Morning routine, Study, Work sprint"
+                        value={newProjectName}
+                        onChangeText={setNewProjectName}
+                        autoCapitalize="sentences"
+                        returnKeyType="done"
+                        onSubmitEditing={handleCreateProject}
+                    />
+
+                    <View style={styles.modalButtonsRow}>
+                        <AppButton
+                            title="Cancel"
+                            variant="outline"
+                            onPress={closeProjectModal}
+                            fullWidth
+                        />
+                        <AppButton
+                            title="Create"
+                            variant="primary"
+                            onPress={handleCreateProject}
+                            fullWidth
+                            disabled={!newProjectName.trim()}
+                        />
+                    </View>
+                </View>
+            </View>
+        </Modal>
+    )
+
+    const renderProjectPickerModal = () => (
+        <Modal
+            visible={isProjectPickerVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={closeProjectPicker}
+        >
+            <View style={styles.modalOverlay}>
+                <View style={styles.pickerCard}>
+                    <Text style={styles.pickerTitle}>Select project</Text>
+                    {projects.map((project) => {
+                        const isActive = project.id === activeProject?.id
+                        return (
+                            <TouchableOpacity
+                                key={project.id}
+                                style={[
+                                    styles.pickerItem,
+                                    isActive && styles.pickerItemActive,
+                                ]}
+                                onPress={() => handleSelectProject(project.id)}
+                            >
+                                <View
+                                    style={[
+                                        styles.projectDot,
+                                        { backgroundColor: project.color },
+                                    ]}
+                                />
+                                <Text
+                                    style={[
+                                        styles.pickerItemText,
+                                        isActive && styles.pickerItemTextActive,
+                                    ]}
+                                    numberOfLines={1}
+                                >
+                                    {project.name}
+                                </Text>
+                            </TouchableOpacity>
+                        )
+                    })}
+                    <AppButton
+                        title="Close"
+                        variant="outline"
+                        onPress={closeProjectPicker}
+                        fullWidth
+                        style={{ marginTop: 8 }}
+                    />
+                </View>
+            </View>
+        </Modal>
+    )
+
+    const renderTasksView = () => {
+        if (!currentAccountId) {
+            return (
+                <View style={styles.center}>
+                    <Text style={styles.emptyTitle}>No active workspace</Text>
+                    <Text style={styles.emptySubtitle}>
+                        Go to the Account tab to create or select a workspace.
+                    </Text>
+                </View>
+            )
+        }
+
+        if (projectsLoading) {
+            return (
+                <View style={styles.center}>
+                    <Text>Loading projects...</Text>
+                </View>
+            )
+        }
+
+        if (!projects.length || !activeProject) {
+            return (
+                <View style={styles.center}>
+                    <Text style={styles.emptyTitle}>No projects yet</Text>
+                    <Text style={styles.emptySubtitle}>
+                        Create your first project to start organizing your tasks.
+                    </Text>
+                    <AppButton
+                        title="Create first project"
+                        variant="primary"
+                        onPress={openProjectModal}
+                        style={{ marginTop: 16 }}
+                        leftIcon={<Plus size={18} color="#ffffff" />}
+                    />
+                    {renderProjectModal()}
+                </View>
+            )
+        }
+
+        return (
+            <View style={{ flex: 1 }}>
+                {/* Header */}
+                <View style={styles.tasksHeader}>
+                    <View style={{ flex: 1 }}>
+                        <Text style={styles.tasksHeaderTitle}>Tasks</Text>
+                        <Text style={styles.tasksHeaderSubtitle}>
+                            Plan tasks inside the selected project.
+                        </Text>
+                    </View>
+                    <AppButton
+                        title="New"
+                        variant="outline"
+                        size="sm"
+                        onPress={openProjectModal}
+                        leftIcon={<Plus size={16} color="#2563eb" />}
+                    />
+                </View>
+
+                {/* Project dropdown */}
+                <View style={styles.projectDropdownWrapper}>
+                    <Text style={styles.dropdownLabel}>Current project</Text>
+                    <TouchableOpacity
+                        style={styles.dropdownButton}
+                        activeOpacity={0.8}
+                        onPress={openProjectPicker}
+                    >
+                        <View style={styles.dropdownLeft}>
+                            <View
+                                style={[
+                                    styles.projectDot,
+                                    { backgroundColor: activeProject.color },
+                                ]}
+                            />
+                            <Text style={styles.dropdownText} numberOfLines={1}>
+                                {activeProject.name}
+                            </Text>
+                        </View>
+                        <ChevronDown size={16} color="#6b7280" />
+                    </TouchableOpacity>
+                </View>
+
+                {/* Active project tasks */}
+                <ScrollView
+                    style={styles.tasksScroll}
+                    contentContainerStyle={styles.tasksContent}
+                >
+                    <TaskView
+                        project={activeProject}
+                        onAddTask={(task) => addTask(activeProject.id, task)}
+                        onUpdateTask={(taskId, updates) =>
+                            updateTask(activeProject.id, taskId, updates)
+                        }
+                        onDeleteTask={(taskId) => deleteTask(activeProject.id, taskId)}
+                        onMoveTask={(taskId, direction) =>
+                            moveTask(activeProject.id, taskId, direction)
+                        }
+                    />
+                </ScrollView>
+
+                {renderProjectModal()}
+                {renderProjectPickerModal()}
+            </View>
+        )
+    }
+
+    const renderTimelineView = () => {
+        if (projects.length === 0) {
+            return (
+                <View style={styles.center}>
+                    <Text style={styles.emptyTitle}>No projects yet</Text>
+                    <Text style={styles.emptySubtitle}>
+                        Go to the Tasks tab to create your first project.
+                    </Text>
+                </View>
+            )
+        }
+
+        return (
+            <ScrollView
+                style={styles.timelineScroll}
+                contentContainerStyle={styles.timelineContent}
+            >
+                {projects.map((project) => (
+                    <View key={project.id} style={styles.projectSection}>
+                        <View style={styles.projectHeader}>
+                            <View
+                                style={[
+                                    styles.projectColorDot,
+                                    { backgroundColor: project.color },
+                                ]}
+                            />
+                            <Text style={styles.projectTitle}>{project.name}</Text>
+                        </View>
+                        <Timeline
+                            project={project}
+                            onAddTask={(task) => addTask(project.id, task)}
+                            onUpdateTask={(taskId, updates) =>
+                                updateTask(project.id, taskId, updates)
+                            }
+                        />
+                    </View>
+                ))}
+            </ScrollView>
+        )
+    }
+
+    const renderAccountView = () => (
+        <AccountView
+            accounts={accounts}
+            currentAccountId={currentAccountId}
+            onAddAccount={addAccount}
+            onUpdateAccount={updateAccount}
+            onDeleteAccount={deleteAccount}
+            onSwitchAccount={switchAccount}
+            user={user}
+            onLogout={handleLogout}
+        />
+    )
+
+    const renderContent = () => {
+        if (accountsLoading) {
+            return (
+                <View style={styles.center}>
+                    <Text>Loading workspaces...</Text>
+                </View>
+            )
+        }
+
+        switch (currentView) {
+            case 'tasks':
+                return renderTasksView()
+            case 'timeline':
+                return renderTimelineView()
+            case 'account':
+                return renderAccountView()
+            default:
+                return null
+        }
+    }
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <View style={styles.container}>
-
-                {noWorkspace ? (
-                    <View style={styles.emptyWorkspace}>
-                        <Text style={styles.wsTitle}>No workspace yet 🧩</Text>
-                        <Text style={styles.wsSubtitle}>
-                            Create a workspace to start organizing your projects.
-                        </Text>
-
-                        <Pressable
-                            onPress={() => handleAddAccount('My First Workspace')}
-                            style={styles.createWorkspaceBtn}
-                        >
-                            <Text style={styles.createWorkspaceBtnText}>+ Create workspace</Text>
-                        </Pressable>
-
-                        <Pressable
-                            onPress={() => setCurrentView('account')}
-                            style={[styles.createWorkspaceBtn, { backgroundColor: '#111827', marginTop: 10 }]}
-                        >
-                            <Text style={[styles.createWorkspaceBtnText, { color: '#FFFFFF' }]}>
-                                Open Accounts
-                            </Text>
-                        </Pressable>
-                    </View>
-                ) : (
-                    <>
-                        {currentView === 'tasks' &&
-                            (selectedProject ? (
-                                <TaskView
-                                    project={selectedProject}
-                                    allProjects={projects}
-                                    onSelectProject={setSelectedProjectId}
-                                    onAddProject={handleAddProject}
-                                    onAddTask={(task) => handleAddTask(selectedProject.id, task)}
-                                    onUpdateTask={(taskId, updates) =>
-                                        handleUpdateTask(selectedProject.id, taskId, updates)
-                                    }
-                                    onDeleteTask={(taskId) =>
-                                        handleDeleteTask(selectedProject.id, taskId)
-                                    }
-                                    onAddToInbox={handleAddToInbox}
-                                    onReorderTasks={(orderedTasks) =>
-                                        handleReorderTasks(selectedProject.id, orderedTasks)
-                                    }
-                                />
-
-                            ) : (
-                                <View style={styles.emptyTimeline}>
-                                    <Text style={styles.emptyTitle}>Nog geen projecten</Text>
-                                    <Text style={styles.emptySubtitle}>
-                                        Maak er eentje aan en we gaan je helpen focussen ✨
-                                    </Text>
-                                </View>
-                            ))}
-
-                        {currentView === 'timeline' && (
-                            <ScrollView
-                                style={styles.timelineContainer}
-                                contentContainerStyle={{ paddingBottom: 90 }}
-                            >
-                                {projects.map(project => (
-                                    <View key={project.id} style={styles.timelineBlock}>
-                                        <View style={styles.timelineHeader}>
-                                            <View
-                                                style={[styles.colorDot, { backgroundColor: project.color }]}
-                                            />
-                                            <Text style={styles.timelineTitle}>{project.name}</Text>
-                                        </View>
-                                        <Timeline
-                                            project={project}
-                                            onAddTask={task => handleAddTask(project.id, task)}
-                                            onUpdateTask={(taskId, updates) =>
-                                                handleUpdateTask(project.id, taskId, updates)
-                                            }
-                                        />
-                                    </View>
-                                ))}
-
-                                {projects.length === 0 && (
-                                    <View style={styles.emptyTimeline}>
-                                        <Text style={styles.emptyTitle}>No projects yet</Text>
-                                        <Text style={styles.emptySubtitle}>
-                                            Go to Tasks view to create your first project
-                                        </Text>
-                                    </View>
-                                )}
-                            </ScrollView>
-                        )}
-
-                        {currentView === 'account' && (
-                            <AccountView
-                                accounts={accounts}
-                                currentAccountId={currentAccountId}
-                                onAddAccount={handleAddAccount}
-                                onUpdateAccount={handleUpdateAccount}
-                                onDeleteAccount={handleDeleteAccount}
-                                onSwitchAccount={handleSwitchAccount}
-                                user={user}
-                                onLogout={onLogout}
-                            />
-                        )}
-
-                        {currentView === 'settings' && (
-                            <SettingsView user={user} onLogout={onLogout} />
-                        )}
-                    </>
-                )}
-
-                <BottomNav currentView={currentView} onViewChange={setCurrentView} />
-            </View>
+            <View style={styles.container}>{renderContent()}</View>
+            <BottomNav currentView={currentView} onViewChange={setCurrentView} />
         </SafeAreaView>
-    );
+    )
 }

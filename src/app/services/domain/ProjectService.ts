@@ -1,0 +1,102 @@
+// services/domain/projectService.ts
+import { Project, Task } from '../../utils/types'
+
+function generateId(): string {
+    return Date.now().toString()
+}
+
+export function createProject(params: { name: string; color: string }): Project {
+    const trimmed = params.name.trim()
+
+    return {
+        id: generateId(),
+        name: trimmed || 'Untitled Project',
+        color: params.color,
+        tasks: [],
+    }
+}
+
+export function withUpdatedProjectName(project: Project, name: string): Project {
+    const trimmed = name.trim()
+    return {
+        ...project,
+        name: trimmed || 'Untitled Project',
+    }
+}
+
+export function withTaskAdded(project: Project, task: Task): Project {
+    return {
+        ...project,
+        tasks: [...project.tasks, task],
+    }
+}
+
+export function withTaskUpdated(
+    project: Project,
+    taskId: string,
+    updates: Partial<Task>,
+): Project {
+    return {
+        ...project,
+        tasks: project.tasks.map((t) =>
+            t.id === taskId
+                ? {
+                    ...t,
+                    ...updates,
+                }
+                : t,
+        ),
+    }
+}
+
+export function withTaskDeleted(project: Project, taskId: string): Project {
+    return {
+        ...project,
+        tasks: project.tasks.filter((t) => t.id !== taskId),
+    }
+}
+
+export type TaskMoveDirection = 'up' | 'down'
+
+export function withTaskMoved(
+    project: Project,
+    taskId: string,
+    direction: TaskMoveDirection,
+): Project {
+    const idx = project.tasks.findIndex((t) => t.id === taskId)
+    if (idx < 0) return project
+
+    const task = project.tasks[idx]
+    const priority = task.priority
+
+    let targetIndex = idx
+
+    if (direction === 'up') {
+        for (let i = idx - 1; i >= 0; i--) {
+            if (project.tasks[i].priority === priority) {
+                targetIndex = i
+                break
+            }
+        }
+    } else {
+        for (let i = idx + 1; i < project.tasks.length; i++) {
+            if (project.tasks[i].priority === priority) {
+                targetIndex = i
+                break
+            }
+        }
+    }
+
+    if (targetIndex === idx) {
+        return project
+    }
+
+    const newTasks = [...project.tasks]
+    const [removed] = newTasks.splice(idx, 1)
+    newTasks.splice(targetIndex, 0, removed)
+
+    return {
+        ...project,
+        tasks: newTasks,
+    }
+}

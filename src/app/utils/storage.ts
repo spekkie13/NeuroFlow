@@ -1,63 +1,68 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Project, Account } from './types';
+// utils/storage.ts
+import { StorageClient } from './storageClient'
+import { Project, Account } from './types'
 
-const PROJECTS_KEY_PREFIX = 'projects_';
-const ACCOUNTS_KEY = 'accounts';
-const CURRENT_ACCOUNT_KEY = 'current_account';
+const PROJECTS_KEY_PREFIX = 'adhd-planner-projects-'
+const ACCOUNTS_KEY = 'adhd-planner-accounts'
+const CURRENT_ACCOUNT_KEY = 'adhd-planner-current-account'
 
-// --- Projects ---
-export const saveProjects = async (projects: Project[], accountId: string): Promise<void> => {
-    try {
-        await AsyncStorage.setItem(`${PROJECTS_KEY_PREFIX}${accountId}`, JSON.stringify(projects));
-    } catch (error) {
-        console.error('Error saving projects:', error);
+/* -------------------------------------------------------------------------- */
+/*                                PROJECTS                                    */
+/* -------------------------------------------------------------------------- */
+
+export async function saveProjects(
+    projects: Project[],
+    accountId: string,
+): Promise<void> {
+    const key = `${PROJECTS_KEY_PREFIX}${accountId}`
+    await StorageClient.setItem<Project[]>(key, projects)
+}
+
+export async function loadProjects(accountId: string): Promise<Project[]> {
+    const key = `${PROJECTS_KEY_PREFIX}${accountId}`
+    const stored = await StorageClient.getItem<Project[]>(key)
+    return stored ?? []
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                ACCOUNTS                                    */
+/* -------------------------------------------------------------------------- */
+
+export async function saveAccounts(accounts: Account[]): Promise<void> {
+    await StorageClient.setItem<Account[]>(ACCOUNTS_KEY, accounts)
+}
+
+export async function loadAccounts(): Promise<Account[]> {
+    const stored = await StorageClient.getItem<Account[]>(ACCOUNTS_KEY)
+
+    // Geen accounts? Maak er eentje aan als default
+    if (!stored || stored.length === 0) {
+        const defaultAccount: Account = {
+            id: Date.now().toString(),
+            name: 'My Account',
+            createdAt: new Date().toISOString(),
+        }
+
+        const accounts = [defaultAccount]
+        await saveAccounts(accounts)
+        await setCurrentAccount(defaultAccount.id)
+
+        return accounts
     }
-};
 
-export const loadProjects = async (accountId: string): Promise<Project[]> => {
-    try {
-        const json = await AsyncStorage.getItem(`${PROJECTS_KEY_PREFIX}${accountId}`);
-        return json ? JSON.parse(json) : [];
-    } catch (error) {
-        console.error('Error loading projects:', error);
-        return [];
-    }
-};
+    return stored
+}
 
-// --- Accounts ---
-export const saveAccounts = async (accounts: Account[]): Promise<void> => {
-    try {
-        await AsyncStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
-    } catch (error) {
-        console.error('Error saving accounts:', error);
-    }
-};
+/* -------------------------------------------------------------------------- */
+/*                             CURRENT ACCOUNT                                */
+/* -------------------------------------------------------------------------- */
 
-export const loadAccounts = async (): Promise<Account[]> => {
-    try {
-        const json = await AsyncStorage.getItem(ACCOUNTS_KEY);
-        return json ? JSON.parse(json) : [];
-    } catch (error) {
-        console.error('Error loading accounts:', error);
-        return [];
-    }
-};
+export async function setCurrentAccount(accountId: string): Promise<void> {
+    // We slaan dit als simpele string op; JSON.stringify op een string is ok
+    await StorageClient.setItem<string>(CURRENT_ACCOUNT_KEY, accountId)
+}
 
-// --- Current account ---
-export const getCurrentAccount = async (): Promise<string | null> => {
-    try {
-        const value = await AsyncStorage.getItem(CURRENT_ACCOUNT_KEY);
-        return value ?? null;
-    } catch (error) {
-        console.error('Error getting current account:', error);
-        return null;
-    }
-};
-
-export const setCurrentAccount = async (accountId: string): Promise<void> => {
-    try {
-        await AsyncStorage.setItem(CURRENT_ACCOUNT_KEY, accountId);
-    } catch (error) {
-        console.error('Error setting current account:', error);
-    }
-};
+export async function getCurrentAccount(): Promise<string | null> {
+    const stored = await StorageClient.getItem<string>(CURRENT_ACCOUNT_KEY)
+    return stored ?? null
+}
