@@ -1,26 +1,18 @@
-import { StyleSheet } from 'react-native';
+import {StyleSheet} from "react-native";
 
 export const styles = StyleSheet.create({
-    priorityHigh: {
-        backgroundColor: '#fef2f2',
-        borderColor: '#fecaca',
-    },
-    priorityMedium: {
-        backgroundColor: '#fffbeb',
-        borderColor: '#fef3c7',
-    },
-    priorityLow: {
-        backgroundColor: '#ecfdf3',
-        borderColor: '#bbf7d0',
+    container: {
+        flex: 1,
     },
     headerRow: {
         flexDirection: 'row',
-        alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: 8,
+        alignItems: 'center',
+        marginBottom: 12,
+        paddingHorizontal: 16,
     },
     headerTitle: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: '600',
         color: '#111827',
     },
@@ -29,7 +21,7 @@ export const styles = StyleSheet.create({
         color: '#6b7280',
         marginTop: 2,
     },
-    unscheduledBanner: {
+    badge: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 10,
@@ -37,136 +29,223 @@ export const styles = StyleSheet.create({
         borderRadius: 999,
         backgroundColor: '#fffbeb',
         borderWidth: 1,
-        borderColor: '#fef3c7',
+        borderColor: '#fed7aa',
     },
-    unscheduledText: {
+    badgeText: {
         marginLeft: 6,
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: '500',
-        color: '#b45309',
+        color: '#92400e',
     },
-    timelineScroll: {
-        marginHorizontal: -24,
+    columnsScroll: {
+        paddingHorizontal: 16,
+        paddingBottom: 12,
     },
-    timelineContent: {
-        paddingHorizontal: 24,
-        paddingBottom: 8,
-    },
-    dayColumn: {
-        width: 180,
-        borderRadius: 10,
+    column: {
+        width: 160,
+        borderRadius: 12,
         borderWidth: 1,
         borderColor: '#e5e7eb',
+        marginRight: 8,
         backgroundColor: '#ffffff',
-        marginRight: 10,
         overflow: 'hidden',
     },
-    dayHeader: {
-        paddingHorizontal: 12,
+    columnToday: {
+        borderColor: '#2563eb',
+        backgroundColor: '#f0f7ff',
+    },
+    columnHeader: {
+        paddingHorizontal: 10,
         paddingVertical: 8,
+        backgroundColor: '#f9fafb',
         borderBottomWidth: 1,
         borderBottomColor: '#e5e7eb',
-        backgroundColor: '#f9fafb',
     },
-    dayHeaderWeekday: {
+    columnWeekday: {
         fontSize: 11,
-        fontWeight: '600',
-        color: '#6b7280',
         textTransform: 'uppercase',
+        letterSpacing: 0.6,
+        color: '#6b7280',
     },
-    dayHeaderDate: {
+    columnDate: {
         fontSize: 14,
         fontWeight: '600',
         color: '#111827',
         marginTop: 2,
     },
-    dayTasks: {
-        padding: 8,
-        minHeight: 200,
+    todayBadge: {
+        marginTop: 4,
+        fontSize: 11,
+        fontWeight: '500',
+        color: '#2563eb',
     },
-    addTaskForDayButton: {
-        marginTop: 8,
+    columnBody: {
+        paddingHorizontal: 8,
+        paddingVertical: 8,
+        minHeight: 140,
+    },
+    taskCard: {
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#d1d5db',
+        marginBottom: 6,
+        backgroundColor: '#ffffff',
+        paddingVertical: 6,
+        paddingHorizontal: 6,
+    },
+    taskCardCompleted: {
+        backgroundColor: '#f9fafb',
+    },
+    taskRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+    },
+    checkButton: {
+        marginRight: 6,
+        paddingTop: 2,
+    },
+    taskContent: {
+        flex: 1,
+    },
+    taskName: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: '#111827',
+    },
+    taskNameCompleted: {
+        color: '#6b7280',
+        textDecorationLine: 'line-through',
+    },
+    taskDates: {
+        fontSize: 11,
+        color: '#6b7280',
+        marginTop: 2,
+    },
+    taskDatesOverdue: {
+        color: '#b91c1c',
+        fontWeight: '500',
+    },
+    priorityBadge: {
+        alignSelf: 'flex-start',
+        marginTop: 4,
+        borderRadius: 999,
+        borderWidth: 1,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+    },
+    priorityBadgeText: {
+        fontSize: 10,
+        fontWeight: '600',
+        textTransform: 'capitalize',
+    },
+    priorityBadgeHigh: {
+        backgroundColor: '#fef2f2',
+        borderColor: '#fecaca',
+    },
+    priorityBadgeMedium: {
+        backgroundColor: '#fffbeb',
+        borderColor: '#fef3c7',
+    },
+    priorityBadgeLow: {
+        backgroundColor: '#ecfdf3',
+        borderColor: '#bbf7d0',
+    },
+    priorityBadgeSmall: {
+        borderRadius: 999,
+        borderWidth: 1,
+        paddingHorizontal: 6,
+        paddingVertical: 1,
+    },
+    addTaskButton: {
+        marginTop: 6,
         borderRadius: 8,
         borderWidth: 1,
         borderStyle: 'dashed',
         borderColor: '#d1d5db',
         paddingVertical: 6,
-        paddingHorizontal: 8,
-        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
+        flexDirection: 'row',
     },
-    addTaskForDayText: {
-        marginLeft: 4,
-        fontSize: 11,
+    addTaskText: {
+        fontSize: 12,
         fontWeight: '500',
         color: '#6b7280',
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(15, 23, 42, 0.35)',
+        backgroundColor: 'rgba(15, 23, 42, 0.45)',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingHorizontal: 24,
+        paddingHorizontal: 16,
     },
     modalCard: {
         width: '100%',
-        maxWidth: 380,
-        borderRadius: 16,
+        maxWidth: 420,
+        borderRadius: 18,
         backgroundColor: '#ffffff',
-        borderWidth: 1,
-        borderColor: '#e5e7eb',
-        overflow: 'hidden',
+        padding: 14,
     },
-    modalHeader: {
+    modalHeaderRow: {
         flexDirection: 'row',
-        alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e5e7eb',
+        alignItems: 'center',
+        marginBottom: 8,
     },
     modalTitle: {
         fontSize: 16,
         fontWeight: '600',
         color: '#111827',
     },
+    modalSubtitle: {
+        fontSize: 12,
+        color: '#6b7280',
+        marginTop: 2,
+    },
     modalCloseButton: {
         padding: 4,
         borderRadius: 999,
     },
-    modalTabs: {
+    modalTabsRow: {
         flexDirection: 'row',
-        borderBottomWidth: 1,
-        borderBottomColor: '#e5e7eb',
+        borderRadius: 999,
+        backgroundColor: '#f3f4f6',
+        padding: 2,
+        marginTop: 8,
+        marginBottom: 10,
     },
     modalTab: {
         flex: 1,
-        paddingVertical: 8,
+        borderRadius: 999,
+        paddingVertical: 6,
     },
     modalTabActive: {
-        borderBottomWidth: 2,
-        borderBottomColor: '#2563eb',
-        backgroundColor: '#eff6ff',
+        backgroundColor: '#ffffff',
+        shadowColor: '#000',
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: 1,
     },
     modalTabInner: {
         flexDirection: 'row',
-        alignItems: 'center',
         justifyContent: 'center',
+        alignItems: 'center',
         gap: 6,
     },
-    modalTabLabel: {
+    modalTabText: {
         fontSize: 12,
-        color: '#6b7280',
         fontWeight: '500',
+        color: '#6b7280',
     },
-    modalTabLabelActive: {
+    modalTabTextActive: {
         color: '#2563eb',
     },
     modalBody: {
-        paddingHorizontal: 16,
-        paddingVertical: 12,
+        maxHeight: 320,
+    },
+    fieldGroup: {
+        marginBottom: 10,
     },
     fieldLabel: {
         fontSize: 12,
@@ -175,121 +254,78 @@ export const styles = StyleSheet.create({
         marginBottom: 4,
     },
     priorityRow: {
-        marginTop: 10,
-    },
-    priorityLabel: {
-        fontSize: 12,
-        fontWeight: '500',
-        color: '#374151',
-        marginBottom: 6,
-    },
-    priorityButtonsRow: {
         flexDirection: 'row',
         gap: 6,
     },
-    prioritySelectButton: {
+    priorityOption: {
         flex: 1,
         borderRadius: 999,
         borderWidth: 1,
         borderColor: '#d1d5db',
         paddingVertical: 6,
         alignItems: 'center',
-        justifyContent: 'center',
     },
-    prioritySelectTextLowActive: {
-        color: '#15803d',
+    priorityOptionActive: {
+        backgroundColor: '#e0f2fe',
+        borderColor: '#38bdf8',
     },
-    prioritySelectButtonLowActive: {
-        backgroundColor: '#ecfdf3',
-        borderColor: '#22c55e',
-    },
-    prioritySelectText: {
+    priorityOptionText: {
         fontSize: 12,
         color: '#4b5563',
-        fontWeight: '500',
+        textTransform: 'capitalize',
     },
-    prioritySelectButtonMediumActive: {
-        backgroundColor: '#fffbeb',
-        borderColor: '#eab308',
-    },
-    prioritySelectTextMediumActive: {
-        color: '#b45309',
-    },
-    prioritySelectButtonHighActive: {
-        backgroundColor: '#fef2f2',
-        borderColor: '#ef4444',
-    },
-    prioritySelectTextHighActive: {
-        color: '#b91c1c',
+    priorityOptionTextActive: {
+        color: '#0f172a',
+        fontWeight: '600',
     },
     datesRow: {
         flexDirection: 'row',
-        marginTop: 8,
+        marginTop: 4,
     },
-    emptyUnscheduled: {
+    emptyExistingBox: {
         alignItems: 'center',
-        paddingVertical: 16,
-        gap: 4,
+        paddingVertical: 24,
+        paddingHorizontal: 8,
     },
-    emptyUnscheduledTitle: {
-        fontSize: 13,
+    emptyExistingTitle: {
+        fontSize: 14,
         fontWeight: '500',
         color: '#4b5563',
+        marginTop: 8,
+        marginBottom: 2,
     },
-    emptyUnscheduledSubtitle: {
-        fontSize: 11,
-        color: '#9ca3af',
-    },
-    existingListWrapper: {
-        marginBottom: 10,
-    },
-    existingLabel: {
+    emptyExistingSubtitle: {
         fontSize: 12,
-        fontWeight: '500',
-        color: '#374151',
-        marginBottom: 4,
+        color: '#9ca3af',
+        textAlign: 'center',
     },
     existingList: {
-        maxHeight: 160,
         borderRadius: 10,
         borderWidth: 1,
         borderColor: '#e5e7eb',
+        maxHeight: 180,
+        padding: 4,
     },
     existingItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 8,
         paddingVertical: 6,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e5e7eb',
+        paddingHorizontal: 8,
+        borderRadius: 8,
+        marginBottom: 4,
     },
     existingItemActive: {
         backgroundColor: '#eff6ff',
     },
-    existingItemTextWrapper: {
+    existingItemName: {
         flex: 1,
-        minWidth: 0,
-        marginRight: 8,
-    },
-    existingItemTitle: {
         fontSize: 13,
         color: '#111827',
-    },
-    priorityBadge: {
-        borderRadius: 999,
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        borderWidth: 1,
-    },
-    priorityBadgeText: {
-        fontSize: 10,
-        fontWeight: '600',
-        textTransform: 'capitalize',
+        marginRight: 8,
     },
     modalFooter: {
         flexDirection: 'row',
         gap: 8,
-        paddingHorizontal: 16,
-        paddingBottom: 12,
+        marginTop: 10,
     },
 })

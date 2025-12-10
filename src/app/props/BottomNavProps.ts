@@ -3,4 +3,4 @@ export interface BottomNavProps {
     onViewChange: (view: ViewType) => void
 }
 
-export type ViewType = 'tasks' | 'timeline' | 'account'
+export type ViewType = 'tasks' | 'timeline' | 'settings'

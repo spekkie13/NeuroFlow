@@ -41,7 +41,16 @@ export const PriorityModal: React.FC<PriorityModalProps> = ({
         >
             <View style={styles.overlay}>
                 <View style={styles.cardSmall}>
-                    <Text style={styles.title}>Set priority</Text>
+                    <View style={styles.headerRow}>
+                        <Text style={styles.title}>Set priority</Text>
+                        <TouchableOpacity
+                            onPress={onClose}
+                            style={styles.closeButton}
+                        >
+                            <X size={18} color="#6b7280" />
+                        </TouchableOpacity>
+                    </View>
+
                     {taskName ? (
                         <Text style={styles.subtitle} numberOfLines={2}>
                             {taskName}
@@ -91,7 +100,6 @@ interface RescheduleModalProps {
     visible: boolean
     taskName?: string
     startDate: string
-    endDate: string
     onChangeStartDate: (value: string) => void
     onChangeEndDate: (value: string) => void
     onSave: () => void
@@ -102,16 +110,20 @@ export const RescheduleModal: React.FC<RescheduleModalProps> = ({
                                                                     visible,
                                                                     taskName,
                                                                     startDate,
-                                                                    endDate,
                                                                     onChangeStartDate,
                                                                     onChangeEndDate,
                                                                     onSave,
                                                                     onCancel,
-                                                                }) => {
+                                                                }: RescheduleModalProps) => {
     if (!visible) return null
 
     const placeholder = getDateInputPlaceholder()
-    const disabled = !startDate || !endDate
+    const disabled = !startDate
+
+    const handleChangeDate = (value: string) => {
+        onChangeStartDate(value)
+        onChangeEndDate(value)
+    }
 
     return (
         <Modal
@@ -138,28 +150,15 @@ export const RescheduleModal: React.FC<RescheduleModalProps> = ({
                         </Text>
                     ) : null}
 
-                    <View style={styles.row}>
-                        <View style={styles.flex}>
-                            <Text style={styles.label}>
-                                New start date ({placeholder})
-                            </Text>
-                            <DateField
-                                value={startDate}
-                                onChangeText={onChangeStartDate}
-                                placeholder={placeholder}
-                            />
-                        </View>
-                        <View style={{ width: 8 }} />
-                        <View style={styles.flex}>
-                            <Text style={styles.label}>
-                                New end date ({placeholder})
-                            </Text>
-                            <DateField
-                                value={endDate}
-                                onChangeText={onChangeEndDate}
-                                placeholder={placeholder}
-                            />
-                        </View>
+                    <View style={styles.fieldGroup}>
+                        <Text style={styles.label}>
+                            New date ({placeholder})
+                        </Text>
+                        <DateField
+                            value={startDate}
+                            onChangeText={handleChangeDate}
+                            placeholder={placeholder}
+                        />
                     </View>
 
                     <View style={styles.footerRow}>
@@ -255,12 +254,9 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: '#111827',
     },
-    row: {
-        flexDirection: 'row',
+    fieldGroup: {
         marginTop: 8,
-    },
-    flex: {
-        flex: 1,
+        marginBottom: 4,
     },
     label: {
         fontSize: 12,

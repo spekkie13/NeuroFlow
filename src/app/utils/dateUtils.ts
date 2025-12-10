@@ -151,3 +151,13 @@ export const getDateInputPlaceholder = (): string => {
     const fmt = getLocalDateFormat()
     return fmt.replace('dd', 'DD').replace('MM', 'MM').replace('yyyy', 'YYYY')
 }
+
+export const startOfDay = (date: Date) => {
+    const d = new Date(date)
+    d.setHours(0, 0, 0, 0)
+    return d
+}
+
+export const isSameDay = (a: Date, b: Date) => {
+    return startOfDay(a).getTime() === startOfDay(b).getTime()
+}

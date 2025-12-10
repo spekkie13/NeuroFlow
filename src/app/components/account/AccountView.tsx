@@ -1,16 +1,6 @@
-// /components/account/AccountView.tsx
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
-import {
-    User as UserIcon,
-    LogOut,
-    Plus,
-    Edit3,
-    Trash2,
-    Mail,
-    Check,
-    X,
-} from 'lucide-react-native'
+import { Plus, Edit3, Trash2, Check, X, UserIcon, User } from 'lucide-react-native'
 import { AccountViewProps } from '../../props/account.props'
 import { accountStyles as styles } from '../../styles/account.styles'
 import { AppButton } from '../ui/AppButton'
@@ -24,18 +14,11 @@ export const AccountView: React.FC<AccountViewProps> = ({
                                                             onUpdateAccount,
                                                             onDeleteAccount,
                                                             onSwitchAccount,
-                                                            user,
-                                                            onLogout,
                                                         }) => {
     const [isAdding, setIsAdding] = useState(false)
     const [newAccountName, setNewAccountName] = useState('')
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editName, setEditName] = useState('')
-
-    const initial = useMemo(
-        () => (user?.name ? user.name.charAt(0).toUpperCase() : 'U'),
-        [user?.name],
-    )
 
     const handleAdd = () => {
         const trimmed = newAccountName.trim()
@@ -62,58 +45,8 @@ export const AccountView: React.FC<AccountViewProps> = ({
         setNewAccountName('')
     }
 
-    const handleLogoutPress = () => {
-        onLogout()
-    }
-
     return (
         <View style={styles.screen}>
-            {/* PROFILE */}
-            <View style={styles.profileCard}>
-                <View style={styles.profileRow}>
-                    <View style={styles.profileLeft}>
-                        <View
-                            style={[
-                                styles.avatar,
-                                { backgroundColor: '#2563eb' }, // primaire kleur
-                            ]}
-                        >
-                            <Text style={styles.avatarText}>{initial}</Text>
-                        </View>
-                        <View style={styles.profileInfo}>
-                            <Text style={styles.profileName}>{user.name}</Text>
-
-                            <View style={styles.profileEmailRow}>
-                                <Mail
-                                    size={14}
-                                    color="#9ca3af"
-                                    style={styles.profileEmailIcon}
-                                />
-                                <Text style={styles.profileEmail}>{user.email}</Text>
-                            </View>
-
-                            <View style={styles.providerBadgeRow}>
-                                <View style={styles.providerBadge}>
-                                    <Text style={styles.providerBadgeText}>
-                                        {user.provider === 'google'
-                                            ? 'Google Account'
-                                            : 'Email Account'}
-                                    </Text>
-                                </View>
-                            </View>
-                        </View>
-                    </View>
-
-                    <AppButton
-                        title="Log out"
-                        variant="danger"
-                        size="sm"
-                        onPress={handleLogoutPress}
-                        leftIcon={<LogOut size={16} color="#dc2626" />}
-                    />
-                </View>
-            </View>
-
             {/* SECTION HEADER */}
             <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Workspace Management</Text>
@@ -121,7 +54,14 @@ export const AccountView: React.FC<AccountViewProps> = ({
                     Manage your workspaces and switch between them
                 </Text>
             </View>
-
+            {/* LOCAL MODE INFO */}
+            <View style={styles.localInfoCard}>
+                <Text style={styles.localInfoTitle}>Local mode only</Text>
+                <Text style={styles.localInfoText}>
+                    All your workspaces and tasks are stored on this device only.
+                    There is currently no account or cloud sync.
+                </Text>
+            </View>
             {/* ADD WORKSPACE */}
             <View style={styles.addCard}>
                 <View style={styles.addTitleRow}>
@@ -175,7 +115,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
 
                 {accounts.length === 0 ? (
                     <View style={styles.listEmptyState}>
-                        <UserIcon
+                        <User
                             size={40}
                             color="#9ca3af"
                             style={styles.listEmptyIcon}

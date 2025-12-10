@@ -1,4 +1,4 @@
-import { Account, User } from '../utils/types'
+import { Account } from '../utils/types'
 
 export interface AccountViewProps {
     accounts: Account[]
@@ -7,6 +7,4 @@ export interface AccountViewProps {
     onUpdateAccount: (accountId: string, name: string) => void
     onDeleteAccount: (accountId: string) => void
     onSwitchAccount: (accountId: string) => void
-    user: User
-    onLogout: () => void
 }

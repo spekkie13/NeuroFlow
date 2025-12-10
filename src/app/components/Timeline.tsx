@@ -1,18 +1,13 @@
-// components/timeline/Timeline.tsx
 import React, { useMemo, useState } from 'react'
-import { Modal, ScrollView, Text, TouchableOpacity, View, StyleSheet } from 'react-native'
+import { Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Plus, List, CheckCircle2, Circle, X } from 'lucide-react-native'
-import { Project, Task, Priority } from '@/app/utils/types'
-import { formatLocalDate, formatLocalDateRange, getDateInputPlaceholder, parseLocalDate, toIsoDateString } from '../utils/dateUtils'
+import { styles } from '@/app/styles/timeline'
+import { TimelineProps } from "@/app/props/TimelineProps";
+import { Task, Priority } from '@/app/utils/types'
+import { startOfDay, formatLocalDate, formatLocalDateRange, getDateInputPlaceholder, parseLocalDate, toIsoDateString } from '../utils/dateUtils'
 import { AppButton } from './ui/AppButton'
 import { TextField } from './ui/TextField'
 import { DateField } from './ui/DateField'
-
-interface TimelineProps {
-    project: Project
-    onAddTask: (task: Task) => void
-    onUpdateTask: (taskId: string, updates: Partial<Task>) => void
-}
 
 type ModalTab = 'new' | 'existing'
 
@@ -25,14 +20,17 @@ export const Timeline: React.FC<TimelineProps> = ({
     const [selectedDate, setSelectedDate] = useState<Date | null>(null)
     const [modalTab, setModalTab] = useState<ModalTab>('new')
     const [newTaskName, setNewTaskName] = useState('')
-    const [newTaskPriority, setNewTaskPriority] =
-        useState<Priority>('medium')
+    const [newTaskPriority, setNewTaskPriority] = useState<Priority>('medium')
     const [taskStartDate, setTaskStartDate] = useState('')
     const [taskEndDate, setTaskEndDate] = useState('')
     const [selectedExistingTaskId, setSelectedExistingTaskId] =
         useState<string | null>(null)
 
     const today = useMemo(() => new Date(), [])
+
+    const isToday = (date: Date) => {
+        return startOfDay(date).getTime() === startOfDay(today).getTime()
+    }
 
     const dates = useMemo(() => {
         return Array.from({ length: 14 }, (_, i) => {
@@ -44,7 +42,7 @@ export const Timeline: React.FC<TimelineProps> = ({
 
     const isOverdue = (task: Task) => {
         if (!task.endDate || task.completed) return false
-        return new Date(task.endDate) < today
+        return startOfDay(new Date(task.endDate)) < startOfDay(today)
     }
 
     // Taken zonder datum OF overdue (niet voltooid)
@@ -78,8 +76,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                 low: 2,
             }
             tasksForDay.sort(
-                (a, b) =>
-                    priorityOrder[a.priority] - priorityOrder[b.priority],
+                (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority],
             )
 
             return { date, tasks: tasksForDay }
@@ -145,8 +142,7 @@ export const Timeline: React.FC<TimelineProps> = ({
     }
 
     const handleAddExistingTask = () => {
-        if (!selectedExistingTaskId || !taskStartDate || !taskEndDate)
-            return
+        if (!selectedExistingTaskId || !taskStartDate || !taskEndDate) return
 
         const start = parseLocalDate(taskStartDate)
         const end = parseLocalDate(taskEndDate)
@@ -189,8 +185,8 @@ export const Timeline: React.FC<TimelineProps> = ({
                     <View style={styles.badge}>
                         <List size={16} color="#92400e" />
                         <Text style={styles.badgeText}>
-                            {selectableExistingTasks.length} unscheduled or overdue
-                            task{selectableExistingTasks.length !== 1 ? 's' : ''}
+                            {selectableExistingTasks.length} task
+                            {selectableExistingTasks.length !== 1 ? 's' : ''} need scheduling
                         </Text>
                     </View>
                 )}
@@ -213,10 +209,19 @@ export const Timeline: React.FC<TimelineProps> = ({
                     })
 
                     return (
-                        <View key={index} style={styles.column}>
+                        <View
+                            key={index}
+                            style={[
+                                styles.column,
+                                isToday(date) && styles.columnToday,
+                            ]}
+                        >
                             <View style={styles.columnHeader}>
                                 <Text style={styles.columnWeekday}>{weekday}</Text>
                                 <Text style={styles.columnDate}>{dayMonth}</Text>
+                                {isToday(date) && (
+                                    <Text style={styles.todayBadge}>Today</Text>
+                                )}
                             </View>
 
                             <View style={styles.columnBody}>
@@ -274,7 +279,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                                                                 overdue && styles.taskDatesOverdue,
                                                             ]}
                                                         >
-                                                            {overdue ? 'Overdue · ' : ''}
+                                                            {overdue ? 'Needs attention · ' : ''}
                                                             {dateRange}
                                                         </Text>
                                                     )}
@@ -386,7 +391,6 @@ export const Timeline: React.FC<TimelineProps> = ({
                         </View>
 
                         <ScrollView style={styles.modalBody}>
-
                             {modalTab === 'new' ? (
                                 <>
                                     <View style={styles.fieldGroup}>
@@ -405,8 +409,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                                         <View style={styles.priorityRow}>
                                             {(['low', 'medium', 'high'] as Priority[]).map(
                                                 (prio) => {
-                                                    const active =
-                                                        newTaskPriority === prio
+                                                    const active = newTaskPriority === prio
                                                     return (
                                                         <TouchableOpacity
                                                             key={prio}
@@ -464,7 +467,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                                         <View style={styles.emptyExistingBox}>
                                             <List size={40} color="#9ca3af" />
                                             <Text style={styles.emptyExistingTitle}>
-                                                No unscheduled or overdue tasks
+                                                No tasks need scheduling
                                             </Text>
                                             <Text style={styles.emptyExistingSubtitle}>
                                                 All tasks are scheduled and up to date
@@ -479,8 +482,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                                                 <View style={styles.existingList}>
                                                     {selectableExistingTasks.map((task) => {
                                                         const active =
-                                                            selectedExistingTaskId ===
-                                                            task.id
+                                                            selectedExistingTaskId === task.id
                                                         return (
                                                             <TouchableOpacity
                                                                 key={task.id}
@@ -591,325 +593,3 @@ export const Timeline: React.FC<TimelineProps> = ({
         </View>
     )
 }
-
-// --- styles (lokaal in deze file, je mag ze later naar /styles/timeline.styles.ts trekken) ---
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 12,
-        paddingHorizontal: 16,
-    },
-    headerTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#111827',
-    },
-    headerSubtitle: {
-        fontSize: 12,
-        color: '#6b7280',
-        marginTop: 2,
-    },
-    badge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: 999,
-        backgroundColor: '#fffbeb',
-        borderWidth: 1,
-        borderColor: '#fed7aa',
-    },
-    badgeText: {
-        marginLeft: 6,
-        fontSize: 11,
-        fontWeight: '500',
-        color: '#92400e',
-    },
-    columnsScroll: {
-        paddingHorizontal: 16,
-        paddingBottom: 12,
-    },
-    column: {
-        width: 160,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#e5e7eb',
-        marginRight: 8,
-        backgroundColor: '#ffffff',
-        overflow: 'hidden',
-    },
-    columnHeader: {
-        paddingHorizontal: 10,
-        paddingVertical: 8,
-        backgroundColor: '#f9fafb',
-        borderBottomWidth: 1,
-        borderBottomColor: '#e5e7eb',
-    },
-    columnWeekday: {
-        fontSize: 11,
-        textTransform: 'uppercase',
-        letterSpacing: 0.6,
-        color: '#6b7280',
-    },
-    columnDate: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#111827',
-        marginTop: 2,
-    },
-    columnBody: {
-        paddingHorizontal: 8,
-        paddingVertical: 8,
-        minHeight: 140,
-    },
-    taskCard: {
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: '#d1d5db',
-        marginBottom: 6,
-        backgroundColor: '#ffffff',
-        paddingVertical: 6,
-        paddingHorizontal: 6,
-    },
-    taskCardCompleted: {
-        backgroundColor: '#f9fafb',
-    },
-    taskRow: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-    },
-    checkButton: {
-        marginRight: 6,
-        paddingTop: 2,
-    },
-    taskContent: {
-        flex: 1,
-    },
-    taskName: {
-        fontSize: 12,
-        fontWeight: '500',
-        color: '#111827',
-    },
-    taskNameCompleted: {
-        color: '#6b7280',
-        textDecorationLine: 'line-through',
-    },
-    taskDates: {
-        fontSize: 11,
-        color: '#6b7280',
-        marginTop: 2,
-    },
-    taskDatesOverdue: {
-        color: '#b91c1c',
-        fontWeight: '500',
-    },
-    priorityBadge: {
-        alignSelf: 'flex-start',
-        marginTop: 4,
-        borderRadius: 999,
-        borderWidth: 1,
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-    },
-    priorityBadgeText: {
-        fontSize: 10,
-        fontWeight: '600',
-        textTransform: 'capitalize',
-    },
-    priorityBadgeHigh: {
-        backgroundColor: '#fef2f2',
-        borderColor: '#fecaca',
-    },
-    priorityBadgeMedium: {
-        backgroundColor: '#fffbeb',
-        borderColor: '#fef3c7',
-    },
-    priorityBadgeLow: {
-        backgroundColor: '#ecfdf3',
-        borderColor: '#bbf7d0',
-    },
-    priorityBadgeSmall: {
-        borderRadius: 999,
-        borderWidth: 1,
-        paddingHorizontal: 6,
-        paddingVertical: 1,
-    },
-    addTaskButton: {
-        marginTop: 6,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderStyle: 'dashed',
-        borderColor: '#d1d5db',
-        paddingVertical: 6,
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'row',
-    },
-    addTaskText: {
-        fontSize: 12,
-        fontWeight: '500',
-        color: '#6b7280',
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(15, 23, 42, 0.45)',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 16,
-    },
-    modalCard: {
-        width: '100%',
-        maxWidth: 420,
-        borderRadius: 18,
-        backgroundColor: '#ffffff',
-        padding: 14,
-    },
-    modalHeaderRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    modalTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#111827',
-    },
-    modalSubtitle: {
-        fontSize: 12,
-        color: '#6b7280',
-        marginTop: 2,
-    },
-    modalCloseButton: {
-        padding: 4,
-        borderRadius: 999,
-    },
-    modalTabsRow: {
-        flexDirection: 'row',
-        borderRadius: 999,
-        backgroundColor: '#f3f4f6',
-        padding: 2,
-        marginTop: 8,
-        marginBottom: 10,
-    },
-    modalTab: {
-        flex: 1,
-        borderRadius: 999,
-        paddingVertical: 6,
-    },
-    modalTabActive: {
-        backgroundColor: '#ffffff',
-        shadowColor: '#000',
-        shadowOpacity: 0.06,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 2 },
-        elevation: 1,
-    },
-    modalTabInner: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: 6,
-    },
-    modalTabText: {
-        fontSize: 12,
-        fontWeight: '500',
-        color: '#6b7280',
-    },
-    modalTabTextActive: {
-        color: '#2563eb',
-    },
-    modalBody: {
-        maxHeight: 320,
-    },
-    fieldGroup: {
-        marginBottom: 10,
-    },
-    fieldLabel: {
-        fontSize: 12,
-        fontWeight: '500',
-        color: '#374151',
-        marginBottom: 4,
-    },
-    priorityRow: {
-        flexDirection: 'row',
-        gap: 6,
-    },
-    priorityOption: {
-        flex: 1,
-        borderRadius: 999,
-        borderWidth: 1,
-        borderColor: '#d1d5db',
-        paddingVertical: 6,
-        alignItems: 'center',
-    },
-    priorityOptionActive: {
-        backgroundColor: '#e0f2fe',
-        borderColor: '#38bdf8',
-    },
-    priorityOptionText: {
-        fontSize: 12,
-        color: '#4b5563',
-        textTransform: 'capitalize',
-    },
-    priorityOptionTextActive: {
-        color: '#0f172a',
-        fontWeight: '600',
-    },
-    datesRow: {
-        flexDirection: 'row',
-        marginTop: 4,
-    },
-    emptyExistingBox: {
-        alignItems: 'center',
-        paddingVertical: 24,
-        paddingHorizontal: 8,
-    },
-    emptyExistingTitle: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: '#4b5563',
-        marginTop: 8,
-        marginBottom: 2,
-    },
-    emptyExistingSubtitle: {
-        fontSize: 12,
-        color: '#9ca3af',
-        textAlign: 'center',
-    },
-    existingList: {
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: '#e5e7eb',
-        maxHeight: 180,
-        padding: 4,
-    },
-    existingItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 6,
-        paddingHorizontal: 8,
-        borderRadius: 8,
-        marginBottom: 4,
-    },
-    existingItemActive: {
-        backgroundColor: '#eff6ff',
-    },
-    existingItemName: {
-        flex: 1,
-        fontSize: 13,
-        color: '#111827',
-        marginRight: 8,
-    },
-    modalFooter: {
-        flexDirection: 'row',
-        gap: 8,
-        marginTop: 10,
-    },
-})

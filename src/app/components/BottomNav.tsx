@@ -3,7 +3,7 @@ import React from 'react'
 import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native'
 import { ListTodo, Calendar, User as UserIcon } from 'lucide-react-native'
 import { BottomNavProps, ViewType } from "@/app/props/BottomNavProps";
-import {styles} from "@/app/styles/bottomNav";
+import { styles } from "@/app/styles/bottomNav";
 
 export const BottomNav: React.FC<BottomNavProps> = ({ currentView, onViewChange }: BottomNavProps) => {
     const navItems = [
@@ -18,8 +18,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentView, onViewChange 
             icon: Calendar,
         },
         {
-            id: 'account' as ViewType,
-            label: 'Account',
+            id: 'settings' as ViewType,
+            label: 'Settings',
             icon: UserIcon,
         },
     ]

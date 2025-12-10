@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView, View, ScrollView, Text, Modal, TouchableOpacity } from 'react-native'
 import { Plus, ChevronDown } from 'lucide-react-native'
-import { useAuth } from '../hooks/useAuth'
 import { useAccounts } from '../hooks/useAccounts'
 import { useProjects } from '../hooks/useProjects'
 import { BottomNav } from './BottomNav'
@@ -11,9 +10,9 @@ import { AccountView } from './account/AccountView'
 import { TextField } from './ui/TextField'
 import { AppButton } from './ui/AppButton'
 import { styles } from "@/app/styles/planner";
-import { PlannerProps, PlannerView } from "@/app/props/PlannerProps";
+import { PlannerView } from "@/app/props/PlannerProps";
 
-export const Planner: React.FC<PlannerProps> = ({ user }: PlannerProps) => {
+export const Planner: React.FC = () => {
     const [currentView, setCurrentView] = useState<PlannerView>('tasks')
     const [newProjectName, setNewProjectName] = useState('')
     const [isProjectModalVisible, setIsProjectModalVisible] = useState(false)
@@ -21,8 +20,6 @@ export const Planner: React.FC<PlannerProps> = ({ user }: PlannerProps) => {
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
         null,
     )
-
-    const { logout } = useAuth()
 
     const {
         accounts,
@@ -38,8 +35,8 @@ export const Planner: React.FC<PlannerProps> = ({ user }: PlannerProps) => {
         projects,
         isLoading: projectsLoading,
         addProject,
-        updateProject,
-        deleteProject,
+        // updateProject,
+        // deleteProject,
         addTask,
         updateTask,
         deleteTask,
@@ -55,10 +52,6 @@ export const Planner: React.FC<PlannerProps> = ({ user }: PlannerProps) => {
             setSelectedProjectId(projects[0].id)
         }
     }, [projects, selectedProjectId])
-
-    const handleLogout = async () => {
-        await logout()
-    }
 
     const openProjectModal = () => {
         setNewProjectName('')
@@ -345,8 +338,6 @@ export const Planner: React.FC<PlannerProps> = ({ user }: PlannerProps) => {
             onUpdateAccount={updateAccount}
             onDeleteAccount={deleteAccount}
             onSwitchAccount={switchAccount}
-            user={user}
-            onLogout={handleLogout}
         />
     )
 
@@ -364,7 +355,7 @@ export const Planner: React.FC<PlannerProps> = ({ user }: PlannerProps) => {
                 return renderTasksView()
             case 'timeline':
                 return renderTimelineView()
-            case 'account':
+            case 'settings':
                 return renderAccountView()
             default:
                 return null

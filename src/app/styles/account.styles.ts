@@ -275,4 +275,26 @@ export const accountStyles = StyleSheet.create({
     grow: {
         flex: 1,
     },
+
+    localInfoCard: {
+        marginTop: 8,
+        marginBottom: 16,
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        borderRadius: 12,
+        backgroundColor: '#EFF6FF', // zachte blauw-tint
+    },
+
+    localInfoTitle: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#1D4ED8', // zelfde blauw als elders in je app
+        marginBottom: 2,
+    },
+
+    localInfoText: {
+        fontSize: 12,
+        color: '#4B5563',
+        lineHeight: 16,
+    },
 })
