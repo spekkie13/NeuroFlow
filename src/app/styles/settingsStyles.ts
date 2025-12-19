@@ -1,7 +1,6 @@
-// /styles/account.styles.ts
 import { StyleSheet } from 'react-native'
 
-export const accountStyles = StyleSheet.create({
+export const settingsStyles = StyleSheet.create({
     screen: {
         flex: 1,
         paddingHorizontal: 24,
@@ -111,6 +110,7 @@ export const accountStyles = StyleSheet.create({
     addTitleRow: {
         flexDirection: 'row',
         alignItems: 'center',
+        textAlign: 'center',
         marginBottom: 8,
     },
     addTitleIcon: {

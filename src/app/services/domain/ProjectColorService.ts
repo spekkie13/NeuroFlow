@@ -1,5 +1,4 @@
-// services/domain/projectColorService.ts
-import { Project } from '../../utils/types'
+import { Project } from "@/app/models/Project";
 
 const PROJECT_COLOR_PALETTE = [
     '#2563eb', // blue

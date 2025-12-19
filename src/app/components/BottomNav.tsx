@@ -58,3 +58,5 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentView, onViewChange 
         </SafeAreaView>
     )
 }
+
+export default BottomNav;

@@ -1,9 +1,9 @@
-import { Account } from '../utils/types'
+import {Account} from "@/app/models/Account";
 
 export interface AccountViewProps {
     accounts: Account[]
     currentAccountId: string | null
-    onAddAccount: (name: string) => void
+    onAddWorkspace: (name: string) => void
     onUpdateAccount: (accountId: string, name: string) => void
     onDeleteAccount: (accountId: string) => void
     onSwitchAccount: (accountId: string) => void

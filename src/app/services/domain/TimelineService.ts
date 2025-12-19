@@ -1,6 +1,7 @@
 // services/domain/timelineService.ts
-import { Project, Task } from '../../utils/types'
 import { doesTaskCoverDate, isTaskScheduled } from './TaskService'
+import { Project } from "@/app/models/Project";
+import { Task } from "@/app/models/Task";
 
 export interface TimelineDay {
     date: Date

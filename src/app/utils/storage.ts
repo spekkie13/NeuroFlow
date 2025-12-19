@@ -1,6 +1,6 @@
-// utils/storage.ts
 import { StorageClient } from './storageClient'
-import { Project, Account } from './types'
+import { Account } from "@/app/models/Account";
+import { Project } from "@/app/models/Project";
 
 const PROJECTS_KEY_PREFIX = 'adhd-planner-projects-'
 const ACCOUNTS_KEY = 'adhd-planner-accounts'

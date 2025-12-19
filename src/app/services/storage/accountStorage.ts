@@ -1,10 +1,5 @@
-// services/storage/accountStorage.ts
-import { Account } from '@/app/utils/types'
-import {
-    getJsonItem,
-    removeItem,
-    setJsonItem,
-} from './baseStorage'
+import { Account } from "@/app/models/Account";
+import { getJsonItem, removeItem, setJsonItem } from './baseStorage'
 
 const ACCOUNTS_KEY = 'adhd-planner:accounts'
 const CURRENT_ACCOUNT_KEY = 'adhd-planner:accounts:current'

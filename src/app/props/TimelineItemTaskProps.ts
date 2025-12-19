@@ -1,4 +1,4 @@
-import {Task} from "@/app/utils/types";
+import { Task } from "@/app/models/Task";
 
 export interface TimelineTaskItemProps {
     task: Task

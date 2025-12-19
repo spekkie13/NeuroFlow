@@ -20,6 +20,7 @@ export const AppButton: React.FC<AppButtonProps> = ({
                                                         accessibilityLabel,
                                                     }: AppButtonProps) => {
     const isDisabled = disabled || loading
+    const hasText = Boolean(title && title.trim().length > 0)
 
     const { containerStyle, textBaseStyle, spinnerColor } = getStylesForVariant(
         variant,
@@ -44,14 +45,22 @@ export const AppButton: React.FC<AppButtonProps> = ({
                 />
             )}
 
-            {!loading && leftIcon && <View style={styles.iconLeft}>{leftIcon}</View>}
+            {!loading && leftIcon && (
+                <View style={hasText ? styles.iconLeft : undefined}>
+                    {leftIcon}
+                </View>
+            )}
 
-            <Text style={[styles.baseText, textBaseStyle, textStyle]} numberOfLines={1}>
-                {title}
-            </Text>
+            {hasText && (
+                <Text style={[styles.baseText, textBaseStyle, textStyle]} numberOfLines={1}>
+                    {title}
+                </Text>
+            )}
 
             {!loading && rightIcon && (
-                <View style={styles.iconRight}>{rightIcon}</View>
+                <View style={hasText ? styles.iconRight : undefined}>
+                    {rightIcon}
+                </View>
             )}
         </TouchableOpacity>
     )

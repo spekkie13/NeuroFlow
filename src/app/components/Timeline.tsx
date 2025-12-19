@@ -2,12 +2,14 @@ import React, { useMemo, useState } from 'react'
 import { Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Plus, List, CheckCircle2, Circle, X } from 'lucide-react-native'
 import { styles } from '@/app/styles/timeline'
+import { Priority } from "@/app/models/Priority";
+import { Task } from "@/app/models/Task";
 import { TimelineProps } from "@/app/props/TimelineProps";
-import { Task, Priority } from '@/app/utils/types'
 import { startOfDay, formatLocalDate, formatLocalDateRange, getDateInputPlaceholder, parseLocalDate, toIsoDateString } from '../utils/dateUtils'
 import { AppButton } from './ui/AppButton'
 import { TextField } from './ui/TextField'
 import { DateField } from './ui/DateField'
+
 
 type ModalTab = 'new' | 'existing'
 
@@ -217,11 +219,21 @@ export const Timeline: React.FC<TimelineProps> = ({
                             ]}
                         >
                             <View style={styles.columnHeader}>
-                                <Text style={styles.columnWeekday}>{weekday}</Text>
+                                <View style={styles.columnHeaderTopRow}>
+                                    <Text style={styles.columnWeekday}>{weekday}</Text>
+
+                                    {/* Always render to keep height consistent */}
+                                    <Text
+                                        style={[
+                                            styles.todayBadgeInline,
+                                            !isToday(date) && styles.todayBadgeHidden,
+                                        ]}
+                                    >
+                                        Today
+                                    </Text>
+                                </View>
+
                                 <Text style={styles.columnDate}>{dayMonth}</Text>
-                                {isToday(date) && (
-                                    <Text style={styles.todayBadge}>Today</Text>
-                                )}
                             </View>
 
                             <View style={styles.columnBody}>

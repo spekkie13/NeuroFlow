@@ -1,28 +1,8 @@
 import React from 'react'
-import {
-    Modal,
-    Text,
-    TouchableOpacity,
-    View,
-    StyleSheet,
-} from 'react-native'
-import {
-    ArrowDown,
-    ArrowRight,
-    ArrowUp,
-    X,
-} from 'lucide-react-native'
+import { Modal, Text, TouchableOpacity, View, StyleSheet } from 'react-native'
+import { ArrowDown, ArrowRight, ArrowUp, X } from 'lucide-react-native'
 import { AppButton } from '../ui/AppButton'
-import { DateField } from '../ui/DateField'
-import { Priority } from '../../utils/types'
-import { getDateInputPlaceholder } from '../../utils/dateUtils'
-
-interface PriorityModalProps {
-    visible: boolean
-    taskName?: string
-    onSetPriority: (priority: Priority) => void
-    onClose: () => void
-}
+import { PriorityModalProps } from "@/app/props/ui/PriorityModalProps";
 
 export const PriorityModal: React.FC<PriorityModalProps> = ({
                                                                 visible,
@@ -96,92 +76,6 @@ export const PriorityModal: React.FC<PriorityModalProps> = ({
     )
 }
 
-interface RescheduleModalProps {
-    visible: boolean
-    taskName?: string
-    startDate: string
-    onChangeStartDate: (value: string) => void
-    onChangeEndDate: (value: string) => void
-    onSave: () => void
-    onCancel: () => void
-}
-
-export const RescheduleModal: React.FC<RescheduleModalProps> = ({
-                                                                    visible,
-                                                                    taskName,
-                                                                    startDate,
-                                                                    onChangeStartDate,
-                                                                    onChangeEndDate,
-                                                                    onSave,
-                                                                    onCancel,
-                                                                }: RescheduleModalProps) => {
-    if (!visible) return null
-
-    const placeholder = getDateInputPlaceholder()
-    const disabled = !startDate
-
-    const handleChangeDate = (value: string) => {
-        onChangeStartDate(value)
-        onChangeEndDate(value)
-    }
-
-    return (
-        <Modal
-            visible={visible}
-            transparent
-            animationType="fade"
-            onRequestClose={onCancel}
-        >
-            <View style={styles.overlay}>
-                <View style={styles.card}>
-                    <View style={styles.headerRow}>
-                        <Text style={styles.title}>Reschedule task</Text>
-                        <TouchableOpacity
-                            onPress={onCancel}
-                            style={styles.closeButton}
-                        >
-                            <X size={18} color="#6b7280" />
-                        </TouchableOpacity>
-                    </View>
-
-                    {taskName ? (
-                        <Text style={styles.subtitle} numberOfLines={2}>
-                            {taskName}
-                        </Text>
-                    ) : null}
-
-                    <View style={styles.fieldGroup}>
-                        <Text style={styles.label}>
-                            New date ({placeholder})
-                        </Text>
-                        <DateField
-                            value={startDate}
-                            onChangeText={handleChangeDate}
-                            placeholder={placeholder}
-                        />
-                    </View>
-
-                    <View style={styles.footerRow}>
-                        <AppButton
-                            title="Cancel"
-                            variant="outline"
-                            onPress={onCancel}
-                            fullWidth
-                        />
-                        <AppButton
-                            title="Save"
-                            variant="primary"
-                            onPress={onSave}
-                            fullWidth
-                            disabled={disabled}
-                        />
-                    </View>
-                </View>
-            </View>
-        </Modal>
-    )
-}
-
 const styles = StyleSheet.create({
     overlay: {
         flex: 1,
@@ -193,13 +87,6 @@ const styles = StyleSheet.create({
     cardSmall: {
         width: '100%',
         maxWidth: 360,
-        borderRadius: 16,
-        backgroundColor: '#ffffff',
-        padding: 16,
-    },
-    card: {
-        width: '100%',
-        maxWidth: 400,
         borderRadius: 16,
         backgroundColor: '#ffffff',
         padding: 16,
@@ -253,20 +140,5 @@ const styles = StyleSheet.create({
         fontSize: 13,
         fontWeight: '500',
         color: '#111827',
-    },
-    fieldGroup: {
-        marginTop: 8,
-        marginBottom: 4,
-    },
-    label: {
-        fontSize: 12,
-        fontWeight: '500',
-        color: '#374151',
-        marginBottom: 4,
-    },
-    footerRow: {
-        flexDirection: 'row',
-        gap: 8,
-        marginTop: 12,
     },
 })

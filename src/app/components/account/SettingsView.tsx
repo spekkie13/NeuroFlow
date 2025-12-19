@@ -1,30 +1,30 @@
 import React, { useState } from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
-import { Plus, Edit3, Trash2, Check, X, UserIcon, User } from 'lucide-react-native'
+import { Edit3, Trash2, Check, X, UserIcon, User } from 'lucide-react-native'
 import { AccountViewProps } from '../../props/account.props'
-import { accountStyles as styles } from '../../styles/account.styles'
+import { settingsStyles as styles } from '../../styles/settingsStyles'
 import { AppButton } from '../ui/AppButton'
 import { TextField } from '../ui/TextField'
 import { IconButton } from '../ui/IconButton'
 
-export const AccountView: React.FC<AccountViewProps> = ({
+export const SettingsView: React.FC<AccountViewProps> = ({
                                                             accounts,
                                                             currentAccountId,
-                                                            onAddAccount,
+                                                            onAddWorkspace,
                                                             onUpdateAccount,
                                                             onDeleteAccount,
                                                             onSwitchAccount,
                                                         }) => {
     const [isAdding, setIsAdding] = useState(false)
-    const [newAccountName, setNewAccountName] = useState('')
+    const [newWorkspaceName, setNewWorkspaceName] = useState('')
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editName, setEditName] = useState('')
 
     const handleAdd = () => {
-        const trimmed = newAccountName.trim()
+        const trimmed = newWorkspaceName.trim()
         if (!trimmed) return
-        onAddAccount(trimmed)
-        setNewAccountName('')
+        onAddWorkspace(trimmed)
+        setNewWorkspaceName('')
         setIsAdding(false)
     }
 
@@ -42,7 +42,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
 
     const handleCancelAdd = () => {
         setIsAdding(false)
-        setNewAccountName('')
+        setNewWorkspaceName('')
     }
 
     return (
@@ -65,7 +65,6 @@ export const AccountView: React.FC<AccountViewProps> = ({
             {/* ADD WORKSPACE */}
             <View style={styles.addCard}>
                 <View style={styles.addTitleRow}>
-                    <Plus size={18} color="#111827" style={styles.addTitleIcon} />
                     <Text style={styles.addTitle}>Add New Workspace</Text>
                 </View>
 
@@ -73,8 +72,8 @@ export const AccountView: React.FC<AccountViewProps> = ({
                     <View style={styles.addRow}>
                         <View style={styles.grow}>
                             <TextField
-                                value={newAccountName}
-                                onChangeText={setNewAccountName}
+                                value={newWorkspaceName}
+                                onChangeText={setNewWorkspaceName}
                                 placeholder="Workspace name"
                                 returnKeyType="done"
                                 onSubmitEditing={handleAdd}
@@ -86,7 +85,7 @@ export const AccountView: React.FC<AccountViewProps> = ({
                                 variant="primary"
                                 size="sm"
                                 onPress={handleAdd}
-                                disabled={!newAccountName.trim()}
+                                disabled={!newWorkspaceName.trim()}
                             />
                             <AppButton
                                 title="Cancel"

@@ -1,5 +1,5 @@
-// services/domain/taskService.ts
-import { Priority, Task } from '../../utils/types'
+import { Priority } from "@/app/models/Priority";
+import { Task } from "@/app/models/Task";
 
 function generateId(): string {
     return Date.now().toString()

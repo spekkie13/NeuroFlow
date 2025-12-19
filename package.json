@@ -1,6 +1,6 @@
 {
   "name": "neuroflow",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "expo-router/entry",
   "expo-router": {
     "root": "./src/app"
@@ -11,7 +11,8 @@
     "web": "expo start --web",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "build": "expo export --platform web --output-dir dist"
+    "build": "expo export --platform web --output-dir dist",
+    "build:apk": "eas build --platform android --profile apk"
   },
   "engines": {
     "node": ">=20.19.4"

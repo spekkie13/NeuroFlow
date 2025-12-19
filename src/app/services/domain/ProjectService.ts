@@ -1,5 +1,5 @@
-// services/domain/projectService.ts
-import { Project, Task } from '../../utils/types'
+import { Project } from "@/app/models/Project";
+import { Task } from "@/app/models/Task";
 
 function generateId(): string {
     return Date.now().toString()

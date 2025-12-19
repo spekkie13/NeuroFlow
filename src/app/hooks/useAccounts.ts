@@ -1,12 +1,12 @@
 // hooks/useAccounts.ts
 import { useEffect, useState } from 'react'
-import { Account } from '../utils/types'
 import {
     getCurrentAccountId,
     loadAccounts,
     saveAccounts,
     setCurrentAccountId,
 } from '../services/storage/accountStorage'
+import {Account} from "@/app/models/Account";
 
 interface UseAccountsResult {
     accounts: Account[]

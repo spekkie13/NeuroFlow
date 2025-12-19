@@ -328,4 +328,19 @@ export const styles = StyleSheet.create({
         gap: 8,
         marginTop: 10,
     },
+    columnHeaderTopRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+
+    todayBadgeInline: {
+        fontSize: 11,
+        fontWeight: '600',
+        color: '#2563eb',
+    },
+
+    todayBadgeHidden: {
+        opacity: 0,
+    },
 })

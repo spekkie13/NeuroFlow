@@ -1,10 +1,5 @@
-// hooks/useProjects.ts
 import { useEffect, useState } from 'react'
-import { Project, Task } from '../utils/types'
-import {
-    loadProjectsForAccount,
-    saveProjectsForAccount,
-} from '../services/storage/projectStorage'
+import { loadProjectsForAccount, saveProjectsForAccount } from '../services/storage/projectStorage'
 import {
     createProject,
     withTaskAdded,
@@ -15,6 +10,8 @@ import {
     TaskMoveDirection,
 } from '../services/domain/ProjectService'
 import { getNextProjectColor } from '../services/domain/ProjectColorService'
+import { Project } from "@/app/models/Project";
+import { Task } from "@/app/models/Task";
 
 interface UseProjectsResult {
     projects: Project[]
@@ -36,21 +33,16 @@ interface UseProjectsResult {
     ) => Promise<void>
 }
 
-export function useProjects(accountId: string | null): UseProjectsResult {
+export function useProjects(): UseProjectsResult {
     const [projects, setProjects] = useState<Project[]>([])
     const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
-        if (!accountId) {
-            setProjects([])
-            return
-        }
-
         let mounted = true
 
         const init = async () => {
             setIsLoading(true)
-            const loaded = await loadProjectsForAccount(accountId)
+            const loaded = await loadProjectsForAccount()
             if (!mounted) return
             setProjects(loaded)
             setIsLoading(false)
@@ -61,12 +53,11 @@ export function useProjects(accountId: string | null): UseProjectsResult {
         return () => {
             mounted = false
         }
-    }, [accountId])
+    }, [])
 
     const persist = async (next: Project[]) => {
         setProjects(next)
-        if (!accountId) return
-        await saveProjectsForAccount(accountId, next)
+        await saveProjectsForAccount(next)
     }
 
     const addProject = async (name: string, color?: string) => {

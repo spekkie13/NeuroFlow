@@ -10,3 +10,5 @@ export const App: React.FC = () => {
         <Root />
     )
 }
+
+export default App;

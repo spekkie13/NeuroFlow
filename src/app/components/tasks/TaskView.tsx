@@ -1,22 +1,30 @@
-// components/tasks/TaskView.tsx
 import React, { useMemo, useState } from 'react'
 import { Text, View, TouchableOpacity } from 'react-native'
-import {Plus, CheckCircle2, Circle, Edit3, Trash2, ArrowUp, ArrowDown, Clock, Flag, X} from 'lucide-react-native'
-import { Project, Task, Priority } from '../../utils/types'
+import {
+    Plus,
+    CheckCircle2,
+    Circle,
+    Edit3,
+    Trash2,
+    ArrowUp,
+    ArrowDown,
+    Clock,
+    Flag,
+    X,
+    MoreHorizontal,
+} from 'lucide-react-native'
+
 import { AppButton } from '../ui/AppButton'
 import { TextField } from '../ui/TextField'
 import { IconButton } from '../ui/IconButton'
-import { formatLocalDateRange, parseLocalDate, toIsoDateString } from '../../utils/dateUtils'
-import { PriorityModal, RescheduleModal } from './TaskModals'
-import { styles } from "@/app/styles/taskView";
-
-export interface TaskViewProps {
-    project: Project
-    onAddTask: (task: Task) => void
-    onUpdateTask: (taskId: string, updates: Partial<Task>) => void
-    onDeleteTask: (taskId: string) => void
-    onMoveTask?: (taskId: string, direction: 'up' | 'down') => void
-}
+import { formatLocalDateRange, parseLocalDate, toIsoDateString, startOfDay } from '../../utils/dateUtils'
+import { PriorityModal } from './PriorityModal'
+import { RescheduleModal } from '@/app/components/tasks/RescheduleModal'
+import { styles } from '@/app/styles/taskView'
+import { TaskViewProps } from '@/app/props/TaskViewProps'
+import { Priority } from '@/app/models/Priority'
+import { Task } from '@/app/models/Task'
+import { MenuItem } from '@/app/components/ui/MenuItem'
 
 export const TaskView: React.FC<TaskViewProps> = ({
                                                       project,
@@ -29,45 +37,32 @@ export const TaskView: React.FC<TaskViewProps> = ({
     const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
     const [editTaskName, setEditTaskName] = useState('')
 
-    const [priorityModalTask, setPriorityModalTask] =
-        useState<Task | null>(null)
+    const [priorityModalTask, setPriorityModalTask] = useState<Task | null>(null)
 
-    const [rescheduleTask, setRescheduleTask] =
-        useState<Task | null>(null)
+    const [rescheduleTask, setRescheduleTask] = useState<Task | null>(null)
     const [rescheduleStart, setRescheduleStart] = useState('')
     const [rescheduleEnd, setRescheduleEnd] = useState('')
 
+    const [openMenuTaskId, setOpenMenuTaskId] = useState<string | null>(null)
+
     const today = useMemo(() => new Date(), [])
 
-    const sortedTasks = useMemo(() => {
-        const priorityOrder: Record<Priority, number> = {
-            high: 0,
-            medium: 1,
-            low: 2,
-        }
-
-        const copy = [...project.tasks]
-
-        copy.sort((a, b) => {
-            // incomplete eerst
-            if (a.completed && !b.completed) return 1
-            if (!a.completed && b.completed) return -1
-
-            // priority high -> low
-            const priorityDifference =
-                priorityOrder[a.priority] - priorityOrder[b.priority]
-            if (priorityDifference !== 0) return priorityDifference
-
-            return Number(a.id) - Number(b.id)
-        })
-
-        return copy
+    // ✅ Belangrijk: behoud de volgorde zoals project.tasks die aanlevert
+    // (jouw onMoveTask hoort die array-volgorde te veranderen)
+    const orderedTasks = useMemo(() => {
+        return [...project.tasks]
     }, [project.tasks])
 
     const completedCount = useMemo(
         () => project.tasks.filter((t) => t.completed).length,
         [project.tasks],
     )
+
+    const closeMenu = () => setOpenMenuTaskId(null)
+
+    const toggleMenu = (taskId: string) => {
+        setOpenMenuTaskId((prev) => (prev === taskId ? null : taskId))
+    }
 
     const handleAddTask = () => {
         const trimmed = newTaskName.trim()
@@ -88,23 +83,24 @@ export const TaskView: React.FC<TaskViewProps> = ({
     }
 
     const startEditing = (task: Task) => {
+        closeMenu()
         setEditingTaskId(task.id)
         setEditTaskName(task.name)
     }
 
     const saveEdit = (taskId: string) => {
         const trimmed = editTaskName.trim()
-        onUpdateTask(taskId, {
-            name: trimmed || 'Untitled Task',
-        })
+        onUpdateTask(taskId, { name: trimmed || 'Untitled Task' })
         setEditingTaskId(null)
     }
 
     const toggleCompleted = (task: Task) => {
+        closeMenu()
         onUpdateTask(task.id, { completed: !task.completed })
     }
 
     const openPriorityModal = (task: Task) => {
+        closeMenu()
         setPriorityModalTask(task)
     }
 
@@ -115,15 +111,11 @@ export const TaskView: React.FC<TaskViewProps> = ({
     }
 
     const openRescheduleModal = (task: Task) => {
+        closeMenu()
         setRescheduleTask(task)
 
         if (task.startDate && task.endDate) {
-            const range = formatLocalDateRange(
-                task.startDate,
-                task.endDate,
-                true,
-            ) as string[] | string
-
+            const range = formatLocalDateRange(task.startDate, task.endDate, true) as string[] | string
             if (Array.isArray(range)) {
                 setRescheduleStart(range[0])
                 setRescheduleEnd(range[1])
@@ -131,6 +123,11 @@ export const TaskView: React.FC<TaskViewProps> = ({
                 setRescheduleStart(range)
                 setRescheduleEnd(range)
             }
+        } else if (task.startDate) {
+            const single = formatLocalDateRange(task.startDate, task.startDate, true) as string[] | string
+            const val = Array.isArray(single) ? single[0] : single
+            setRescheduleStart(val)
+            setRescheduleEnd(val)
         } else {
             setRescheduleStart('')
             setRescheduleEnd('')
@@ -142,16 +139,12 @@ export const TaskView: React.FC<TaskViewProps> = ({
 
         const start = parseLocalDate(rescheduleStart)
         const end = parseLocalDate(rescheduleEnd)
-
         if (!start || !end) return
 
         const startIso = toIsoDateString(start)!
         const endIso = toIsoDateString(end)!
 
-        onUpdateTask(rescheduleTask.id, {
-            startDate: startIso,
-            endDate: endIso,
-        })
+        onUpdateTask(rescheduleTask.id, { startDate: startIso, endDate: endIso })
 
         setRescheduleTask(null)
         setRescheduleStart('')
@@ -166,7 +159,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
 
     const isOverdue = (task: Task) => {
         if (!task.endDate || task.completed) return false
-        return new Date(task.endDate) < today
+        return startOfDay(new Date(task.endDate)) < startOfDay(today)
     }
 
     const getPriorityBadgeStyle = (priority: Priority) => {
@@ -184,22 +177,14 @@ export const TaskView: React.FC<TaskViewProps> = ({
         <View style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <Text
-                    style={[styles.projectName, { color: project.color }]}
-                >
-                    {project.name}
-                </Text>
+                <Text style={[styles.projectName, { color: project.color }]}>{project.name}</Text>
                 <View style={styles.headerMetaRow}>
                     <Text style={styles.headerMetaText}>
-                        <Text style={styles.headerMetaNumber}>
-                            {project.tasks.length}
-                        </Text>{' '}
-                        tasks
+                        <Text style={styles.headerMetaNumber}>{project.tasks.length}</Text> tasks
                     </Text>
                     <Text style={styles.headerMetaDot}>•</Text>
                     <Text style={styles.headerMetaText}>
-                        <Text style={styles.headerMetaNumber}>{completedCount}</Text>{' '}
-                        completed
+                        <Text style={styles.headerMetaNumber}>{completedCount}</Text> completed
                     </Text>
                 </View>
             </View>
@@ -215,6 +200,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
                         onSubmitEditing={handleAddTask}
                     />
                 </View>
+
                 <View style={{ marginLeft: 8 }}>
                     <AppButton
                         title=""
@@ -228,232 +214,188 @@ export const TaskView: React.FC<TaskViewProps> = ({
             </View>
 
             {/* Task list */}
-            {sortedTasks.length === 0 ? (
+            {orderedTasks.length === 0 ? (
                 <View style={styles.emptyState}>
                     <Text style={styles.emptyTitle}>No tasks yet</Text>
-                    <Text style={styles.emptySubtitle}>
-                        Add your first task to get started
-                    </Text>
+                    <Text style={styles.emptySubtitle}>Add your first task to get started</Text>
                 </View>
             ) : (
                 <View style={styles.list}>
-                    {sortedTasks.map((task, index) => {
+                    {orderedTasks.map((task, index) => {
                         const rangeLabel = task.startDate
-                            ? formatLocalDateRange(
-                                task.startDate,
-                                task.endDate || task.startDate,
-                            )
+                            ? formatLocalDateRange(task.startDate, task.endDate || task.startDate)
                             : null
 
                         const overdue = isOverdue(task)
+                        const menuOpen = openMenuTaskId === task.id
+
+                        const canMoveUp = !!onMoveTask && index > 0
+                        const canMoveDown = !!onMoveTask && index < orderedTasks.length - 1
 
                         return (
-                            <View key={task.id} style={styles.card}>
-                                <View style={styles.cardRow}>
-                                    {/* Checkbox */}
-                                    <TouchableOpacity
-                                        style={styles.checkbox}
-                                        onPress={() => toggleCompleted(task)}
-                                        activeOpacity={0.7}
-                                        accessibilityLabel={
-                                            task.completed
-                                                ? 'Mark as incomplete'
-                                                : 'Mark as complete'
-                                        }
-                                    >
-                                        {task.completed ? (
-                                            <CheckCircle2
-                                                size={22}
-                                                color="#22c55e"
-                                            />
-                                        ) : (
-                                            <Circle size={22} color="#9ca3af" />
-                                        )}
-                                    </TouchableOpacity>
-
-                                    {/* Content */}
-                                    <View style={styles.cardContent}>
-                                        {editingTaskId === task.id ? (
-                                            <View style={styles.editRow}>
-                                                <View style={{ flex: 1 }}>
-                                                    <TextField
-                                                        value={editTaskName}
-                                                        onChangeText={setEditTaskName}
-                                                        returnKeyType="done"
-                                                        onSubmitEditing={() =>
-                                                            saveEdit(task.id)
-                                                        }
-                                                    />
-                                                </View>
-                                                <IconButton
-                                                    icon={
-                                                        <CheckCircle2
-                                                            size={20}
-                                                            color="#16a34a"
+                            <View
+                                key={task.id}
+                                style={[styles.taskItem, menuOpen && styles.taskItemMenuOpen]}
+                            >
+                                <View
+                                    style={[styles.taskItemInner, menuOpen && styles.taskItemInnerMenuOpen]}
+                                >
+                                    <View style={styles.card}>
+                                        <View style={styles.mainRow}>
+                                            {/* LEFT: title + date */}
+                                            <View style={styles.leftCol}>
+                                                {editingTaskId === task.id ? (
+                                                    <View style={styles.editRow}>
+                                                        <View style={{ flex: 1 }}>
+                                                            <TextField
+                                                                value={editTaskName}
+                                                                onChangeText={setEditTaskName}
+                                                                returnKeyType="done"
+                                                                onSubmitEditing={() => saveEdit(task.id)}
+                                                            />
+                                                        </View>
+                                                        <IconButton
+                                                            icon={<CheckCircle2 size={20} color="#16a34a" />}
+                                                            variant="success"
+                                                            onPress={() => saveEdit(task.id)}
+                                                            accessibilityLabel="Save task name"
                                                         />
-                                                    }
-                                                    variant="success"
-                                                    onPress={() => saveEdit(task.id)}
-                                                    accessibilityLabel="Save task name"
-                                                />
-                                                <IconButton
-                                                    icon={<X size={20} color="#6b7280" />}
-                                                    variant="subtle"
-                                                    onPress={() => setEditingTaskId(null)}
-                                                    accessibilityLabel="Cancel editing"
-                                                />
+                                                        <IconButton
+                                                            icon={<X size={20} color="#6b7280" />}
+                                                            variant="subtle"
+                                                            onPress={() => setEditingTaskId(null)}
+                                                            accessibilityLabel="Cancel editing"
+                                                        />
+                                                    </View>
+                                                ) : (
+                                                    <>
+                                                        <View style={styles.titleRow}>
+                                                            <TouchableOpacity
+                                                                style={styles.checkbox}
+                                                                onPress={() => toggleCompleted(task)}
+                                                                activeOpacity={0.7}
+                                                                accessibilityLabel={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
+                                                            >
+                                                                {task.completed ? (
+                                                                    <CheckCircle2 size={22} color="#22c55e" />
+                                                                ) : (
+                                                                    <Circle size={22} color="#9ca3af" />
+                                                                )}
+                                                            </TouchableOpacity>
+
+                                                            <Text
+                                                                style={[styles.taskName, task.completed && styles.taskNameCompleted]}
+                                                                numberOfLines={2}
+                                                            >
+                                                                {task.name}
+                                                            </Text>
+                                                        </View>
+
+                                                        <View style={styles.dateRow}>
+                                                            {rangeLabel ? (
+                                                                <>
+                                                                    <Clock
+                                                                        size={14}
+                                                                        color={overdue ? '#b91c1c' : '#6b7280'}
+                                                                        style={{ marginRight: 4 }}
+                                                                    />
+                                                                    <Text style={[styles.dateText, overdue && styles.dateTextOverdue]}>
+                                                                        {overdue ? 'Overdue · ' : ''}
+                                                                        {rangeLabel}
+                                                                    </Text>
+                                                                </>
+                                                            ) : (
+                                                                <View style={styles.dateRowPlaceholder} />
+                                                            )}
+                                                        </View>
+                                                    </>
+                                                )}
                                             </View>
-                                        ) : (
-                                            <>
-                                                <View style={styles.titleRow}>
-                                                    <Text
-                                                        style={[
-                                                            styles.taskName,
-                                                            task.completed &&
-                                                            styles.taskNameCompleted,
-                                                        ]}
-                                                        numberOfLines={2}
-                                                    >
-                                                        {task.name}
-                                                    </Text>
-                                                    <View
-                                                        style={[
-                                                            styles.priorityBadge,
-                                                            getPriorityBadgeStyle(
-                                                                task.priority,
-                                                            ),
-                                                        ]}
+
+                                            {/* RIGHT: priority + actions (same row, centered) */}
+                                            {editingTaskId !== task.id && (
+                                                <View style={styles.rightCol}>
+                                                    <TouchableOpacity
+                                                        activeOpacity={0.8}
+                                                        onPress={() => openPriorityModal(task)}
+                                                        style={[styles.priorityBadge, getPriorityBadgeStyle(task.priority)]}
+                                                        accessibilityLabel="Set priority"
                                                     >
                                                         <Flag size={11} color="#111827" />
-                                                        <Text
-                                                            style={styles.priorityText}
-                                                        >
-                                                            {task.priority}
-                                                        </Text>
+                                                        <Text style={styles.priorityText}>{task.priority}</Text>
+                                                    </TouchableOpacity>
+
+                                                    <View style={styles.actionsRow}>
+                                                        <IconButton
+                                                            icon={<Clock size={18} color={overdue ? '#b91c1c' : '#6b7280'} />}
+                                                            variant="neutral"
+                                                            onPress={() => openRescheduleModal(task)}
+                                                            accessibilityLabel="Schedule / reschedule task"
+                                                        />
+                                                        <IconButton
+                                                            icon={<MoreHorizontal size={18} color="#6b7280" />}
+                                                            variant="neutral"
+                                                            onPress={() => toggleMenu(task.id)}
+                                                            accessibilityLabel="More actions"
+                                                        />
                                                     </View>
                                                 </View>
-
-                                                {rangeLabel && (
-                                                    <View style={styles.dateRow}>
-                                                        <Clock
-                                                            size={14}
-                                                            color={
-                                                                overdue
-                                                                    ? '#b91c1c'
-                                                                    : '#6b7280'
-                                                            }
-                                                            style={{ marginRight: 4 }}
-                                                        />
-                                                        <Text
-                                                            style={[
-                                                                styles.dateText,
-                                                                overdue &&
-                                                                styles.dateTextOverdue,
-                                                            ]}
-                                                        >
-                                                            {overdue ? 'Overdue · ' : ''}
-                                                            {rangeLabel}
-                                                        </Text>
-                                                    </View>
-                                                )}
-                                            </>
-                                        )}
+                                            )}
+                                        </View>
                                     </View>
 
-                                    {/* Actions */}
-                                    {editingTaskId !== task.id && (
-                                        <View style={styles.actions}>
-                                            {/* Priority */}
-                                            <IconButton
-                                                icon={
-                                                    <Flag size={18} color="#6b7280" />
-                                                }
-                                                variant="neutral"
-                                                onPress={() => openPriorityModal(task)}
-                                                accessibilityLabel="Set priority"
-                                            />
+                                    {/* ✅ ABSOLUTE menu => does NOT push next task down */}
+                                    {editingTaskId !== task.id && menuOpen && (
+                                        <View style={styles.inlineMenuOverlay} pointerEvents="box-none">
+                                            <View style={styles.inlineMenu}>
+                                                <MenuItem
+                                                    icon={<Edit3 size={16} color="#374151" />}
+                                                    label="Edit"
+                                                    onPress={() => startEditing(task)}
+                                                />
 
-                                            <IconButton
-                                                icon={
-                                                    <Clock
-                                                        size={18}
-                                                        color={
-                                                            overdue ? '#b91c1c' : '#6b7280'
-                                                        }
-                                                    />
-                                                }
-                                                variant="neutral"
-                                                onPress={() => openRescheduleModal(task)}
-                                                accessibilityLabel="Reschedule task"
-                                            />
+                                                <MenuItem
+                                                    icon={<Clock size={16} color="#374151" />}
+                                                    label={task.startDate ? 'Reschedule' : 'Schedule'}
+                                                    onPress={() => openRescheduleModal(task)}
+                                                />
 
-                                            {/* Edit */}
-                                            <IconButton
-                                                icon={
-                                                    <Edit3 size={18} color="#6b7280" />
-                                                }
-                                                variant="neutral"
-                                                onPress={() => startEditing(task)}
-                                                accessibilityLabel="Edit task"
-                                            />
+                                                {onMoveTask ? (
+                                                    <>
+                                                        <View style={styles.inlineMenuDivider} />
+                                                        <MenuItem
+                                                            icon={<ArrowUp size={16} color={canMoveUp ? '#374151' : '#d1d5db'} />}
+                                                            label="Move up"
+                                                            disabled={!canMoveUp}
+                                                            onPress={() => {
+                                                                closeMenu()
+                                                                onMoveTask?.(task.id, 'up')
+                                                            }}
+                                                        />
+                                                        <MenuItem
+                                                            icon={<ArrowDown size={16} color={canMoveDown ? '#374151' : '#d1d5db'} />}
+                                                            label="Move down"
+                                                            disabled={!canMoveDown}
+                                                            onPress={() => {
+                                                                closeMenu()
+                                                                onMoveTask?.(task.id, 'down')
+                                                            }}
+                                                        />
+                                                    </>
+                                                ) : null}
 
-                                            {onMoveTask && (
-                                                <>
-                                                    <IconButton
-                                                        icon={
-                                                            <ArrowUp
-                                                                size={18}
-                                                                color={
-                                                                    index === 0
-                                                                        ? '#d1d5db'
-                                                                        : '#6b7280'
-                                                                }
-                                                            />
-                                                        }
-                                                        variant="subtle"
-                                                        onPress={() =>
-                                                            index > 0 &&
-                                                            onMoveTask(task.id, 'up')
-                                                        }
-                                                        disabled={index === 0}
-                                                        accessibilityLabel="Move task up"
-                                                    />
-                                                    <IconButton
-                                                        icon={
-                                                            <ArrowDown
-                                                                size={18}
-                                                                color={
-                                                                    index ===
-                                                                    sortedTasks.length - 1
-                                                                        ? '#d1d5db'
-                                                                        : '#6b7280'
-                                                                }
-                                                            />
-                                                        }
-                                                        variant="subtle"
-                                                        onPress={() =>
-                                                            index <
-                                                            sortedTasks.length - 1 &&
-                                                            onMoveTask(task.id, 'down')
-                                                        }
-                                                        disabled={
-                                                            index ===
-                                                            sortedTasks.length - 1
-                                                        }
-                                                        accessibilityLabel="Move task down"
-                                                    />
-                                                </>
-                                            )}
+                                                <View style={styles.inlineMenuDivider} />
 
-                                            {/* Delete */}
-                                            <IconButton
-                                                icon={
-                                                    <Trash2 size={18} color="#ef4444" />
-                                                }
-                                                variant="danger"
-                                                onPress={() => onDeleteTask(task.id)}
-                                                accessibilityLabel="Delete task"
-                                            />
+                                                <MenuItem
+                                                    icon={<Trash2 size={16} color="#ef4444" />}
+                                                    label="Delete"
+                                                    danger
+                                                    onPress={() => {
+                                                        closeMenu()
+                                                        onDeleteTask(task.id)
+                                                    }}
+                                                />
+                                            </View>
                                         </View>
                                     )}
                                 </View>
@@ -463,7 +405,6 @@ export const TaskView: React.FC<TaskViewProps> = ({
                 </View>
             )}
 
-            {/* Priority modal */}
             <PriorityModal
                 visible={!!priorityModalTask}
                 taskName={priorityModalTask?.name}
@@ -471,7 +412,6 @@ export const TaskView: React.FC<TaskViewProps> = ({
                 onClose={() => setPriorityModalTask(null)}
             />
 
-            {/* Reschedule modal */}
             <RescheduleModal
                 visible={!!rescheduleTask}
                 taskName={rescheduleTask?.name}

@@ -1,21 +1,17 @@
-// services/storage/projectStorage.ts
-import { Project } from '@/app/utils/types'
 import { getJsonItem, setJsonItem } from './baseStorage'
+import { Project } from "@/app/models/Project";
 
-const PROJECTS_KEY_PREFIX = 'adhd-planner:projects:'
+const PROJECTS_KEY_PREFIX = 'adhd-planner:projects:local'
 
-function keyForAccount(accountId: string): string {
-    return `${PROJECTS_KEY_PREFIX}${accountId}`
+function keyForAccount(): string {
+    return `${PROJECTS_KEY_PREFIX}`
 }
 
-export async function loadProjectsForAccount(accountId: string): Promise<Project[]> {
-    const stored = await getJsonItem<Project[]>(keyForAccount(accountId))
+export async function loadProjectsForAccount(): Promise<Project[]> {
+    const stored = await getJsonItem<Project[]>(keyForAccount())
     return stored ?? []
 }
 
-export async function saveProjectsForAccount(
-    accountId: string,
-    projects: Project[],
-): Promise<void> {
-    await setJsonItem(keyForAccount(accountId), projects)
+export async function saveProjectsForAccount(projects: Project[]): Promise<void> {
+    await setJsonItem(keyForAccount(), projects)
 }

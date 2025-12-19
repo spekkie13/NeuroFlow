@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView, View, ScrollView, Text, Modal, TouchableOpacity } from 'react-native'
 import { Plus, ChevronDown } from 'lucide-react-native'
-import { useAccounts } from '../hooks/useAccounts'
 import { useProjects } from '../hooks/useProjects'
 import { BottomNav } from './BottomNav'
 import { TaskView } from './tasks/TaskView'
 import { Timeline } from './Timeline'
-import { AccountView } from './account/AccountView'
+import { SettingsView } from './account/SettingsView'
 import { TextField } from './ui/TextField'
 import { AppButton } from './ui/AppButton'
 import { styles } from "@/app/styles/planner";
 import { PlannerView } from "@/app/props/PlannerProps";
+import {useAccounts} from "@/app/hooks/useAccounts";
 
 export const Planner: React.FC = () => {
     const [currentView, setCurrentView] = useState<PlannerView>('tasks')
@@ -41,7 +41,7 @@ export const Planner: React.FC = () => {
         updateTask,
         deleteTask,
         moveTask,
-    } = useProjects(currentAccountId)
+    } = useProjects()
 
     useEffect(() => {
         if (!projects.length) {
@@ -331,10 +331,10 @@ export const Planner: React.FC = () => {
     }
 
     const renderAccountView = () => (
-        <AccountView
+        <SettingsView
             accounts={accounts}
             currentAccountId={currentAccountId}
-            onAddAccount={addAccount}
+            onAddWorkspace={addAccount}
             onUpdateAccount={updateAccount}
             onDeleteAccount={deleteAccount}
             onSwitchAccount={switchAccount}
@@ -369,3 +369,5 @@ export const Planner: React.FC = () => {
         </SafeAreaView>
     )
 }
+
+export default Planner;

@@ -1,9 +1,10 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native'
 
 export const styles = StyleSheet.create({
     container: {
         marginBottom: 24,
     },
+
     header: {
         marginBottom: 8,
     },
@@ -20,10 +21,6 @@ export const styles = StyleSheet.create({
         fontSize: 12,
         color: '#6b7280',
     },
-    headerMetaStrong: {
-        fontWeight: '600',
-        color: '#374151',
-    },
     headerMetaDot: {
         marginHorizontal: 4,
         fontSize: 12,
@@ -33,16 +30,13 @@ export const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#111827',
     },
+
     addRow: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 12,
     },
-    addButton: {
-        marginLeft: 8,
-        width: 44,
-        paddingHorizontal: 0,
-    },
+
     emptyState: {
         paddingVertical: 32,
         borderRadius: 12,
@@ -62,103 +56,123 @@ export const styles = StyleSheet.create({
         fontSize: 13,
         color: '#9ca3af',
     },
-    tasksContainer: {
+
+    list: {
         gap: 8,
-        paddingBottom: 4,
     },
-    taskCard: {
+
+    taskItem: {
+        marginBottom: 10,
+        position: 'relative', // ✅ nodig voor zIndex stacking
+    },
+
+    taskItemMenuOpen: {
+        zIndex: 9999,     // ✅ tilt deze hele task boven de rest
+        elevation: 9999,  // ✅ Android
+    },
+
+    taskItemInner: {
+        position: 'relative',
+    },
+
+    taskItemInnerMenuOpen: {
+        zIndex: 9999,
+        elevation: 9999,
+    },
+
+    inlineMenuOverlay: {
+        position: 'absolute',
+        right: 0,
+        top: '100%',
+        marginTop: 6,
+        zIndex: 10000,     // ✅ hoger dan de task zelf
+        elevation: 10000,  // ✅ Android
+    },
+
+    card: {
         borderRadius: 12,
         borderWidth: 1,
         borderColor: '#e5e7eb',
+        padding: 10,
         backgroundColor: '#ffffff',
-        padding: 8,
     },
-    taskCardActive: {
-        shadowColor: '#000',
-        shadowOpacity: 0.04,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 4,
-        elevation: 1,
-    },
-    taskCardCompleted: {
-        backgroundColor: '#f9fafb',
-    },
-    taskRow: {
+
+    mainRow: {
         flexDirection: 'row',
-        alignItems: 'flex-start',
-        gap: 8,
+        alignItems: 'stretch',
     },
-    checkButton: {
-        paddingTop: 2,
-    },
-    taskContent: {
+
+    leftCol: {
         flex: 1,
-        minWidth: 0,
+        paddingRight: 10,
     },
-    taskTitleRow: {
-        marginBottom: 2,
+
+    // top row in left side: checkbox + title
+    titleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        minHeight: 26,
+        columnGap: 10,
     },
-    taskTitle: {
+
+    checkbox: {
+        marginRight: 2,
+    },
+
+    taskName: {
+        flex: 1,
         fontSize: 14,
         fontWeight: '500',
         color: '#111827',
+        lineHeight: 18,
     },
-    taskTitleCompleted: {
+    taskNameCompleted: {
         color: '#6b7280',
         textDecorationLine: 'line-through',
     },
-    taskMetaRow: {
+
+    dateRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 2,
-        gap: 6,
-        flexWrap: 'wrap',
+        minHeight: 18,
+        marginTop: 4,
     },
-    taskDatesRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
+    dateRowPlaceholder: {
+        height: 18,
+        width: 1,
     },
-    taskDatesIcon: {
-        marginRight: 4,
-    },
-    taskDatesText: {
-        fontSize: 11,
+    dateText: {
+        fontSize: 12,
         color: '#6b7280',
+        lineHeight: 16,
+        includeFontPadding: false as any,
     },
-    taskOverdueRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    taskOverdueText: {
-        fontSize: 11,
+    dateTextOverdue: {
         color: '#b91c1c',
         fontWeight: '500',
     },
-    rescheduleRow: {
-        marginTop: 4,
-    },
-    rescheduleLink: {
-        fontSize: 12,
-        color: '#2563eb',
-        fontWeight: '500',
-    },
-    priorityBadge: {
-        marginTop: 7,
+
+    // ✅ RIGHT: priority + (clock + …) ON ONE LINE, vertically centered to leftCol height
+    rightCol: {
+        alignSelf: 'stretch',
+        justifyContent: 'center',
         flexDirection: 'row',
         alignItems: 'center',
-        alignSelf: 'center',
+        columnGap: 8,
+    },
+
+    priorityBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
         borderRadius: 999,
-        paddingHorizontal: 10,
-        paddingVertical: 2,
         borderWidth: 1,
+        paddingHorizontal: 10,
+        height: 24,
+        paddingVertical: 0,
+        flexShrink: 0,
     },
-    priorityBadgeText: {
-        fontSize: 11,
-        lineHeight: 13,
-        fontWeight: '600',
-        textTransform: 'capitalize',
-        marginLeft: 4,
-    },
+
     priorityHigh: {
         backgroundColor: '#fef2f2',
         borderColor: '#fecaca',
@@ -171,201 +185,84 @@ export const styles = StyleSheet.create({
         backgroundColor: '#ecfdf3',
         borderColor: '#bbf7d0',
     },
-    actions: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        verticalAlign: 'middle',
-        gap: 4,
-        height: 28,
-    },
-    editRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
-    editInput: {
-        flex: 1,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#d1d5db',
-        paddingHorizontal: 8,
-        paddingVertical: 6,
-        fontSize: 13,
-        color: '#111827',
-        backgroundColor: '#ffffff',
-    },
-    reorderGroup: {
-        flexDirection: 'column',
-        gap: 2,
-        marginHorizontal: 2,
-    },
-    // Modal shared overlay
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(15, 23, 42, 0.35)',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 24,
-    },
-    // Priority modal
-    priorityModalCard: {
-        width: '100%',
-        maxWidth: 320,
-        borderRadius: 14,
-        backgroundColor: '#ffffff',
-        padding: 14,
-        borderWidth: 1,
-        borderColor: '#e5e7eb',
-    },
-    modalTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#111827',
-        marginBottom: 2,
-    },
-    modalSubtitle: {
-        fontSize: 12,
-        color: '#6b7280',
-        marginBottom: 10,
-    },
-    modalOptions: {
-        gap: 6,
-    },
-    modalOption: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 8,
-        paddingHorizontal: 8,
-        borderRadius: 10,
-        borderWidth: 1,
-    },
-    modalOptionHigh: {
-        backgroundColor: '#fef2f2',
-        borderColor: '#fecaca',
-    },
-    modalOptionMedium: {
-        backgroundColor: '#fffbeb',
-        borderColor: '#fef3c7',
-    },
-    modalOptionLow: {
-        backgroundColor: '#ecfdf3',
-        borderColor: '#bbf7d0',
-    },
-    modalOptionLabel: {
-        marginLeft: 8,
-        fontSize: 13,
-        fontWeight: '500',
-        color: '#111827',
-    },
-    // Reschedule modal
-    rescheduleModalCard: {
-        width: '100%',
-        maxWidth: 380,
-        borderRadius: 16,
-        backgroundColor: '#ffffff',
-        borderWidth: 1,
-        borderColor: '#e5e7eb',
-        padding: 16,
-    },
-    modalHeaderRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 4,
-    },
-    modalCloseButton: {
-        padding: 4,
-        borderRadius: 999,
-    },
-    datesRow: {
-        flexDirection: 'row',
-        marginTop: 12,
-        marginBottom: 12,
-    },
-    fieldLabel: {
-        fontSize: 12,
-        fontWeight: '500',
-        color: '#374151',
-        marginBottom: 4,
-    },
-    modalFooterRow: {
-        flexDirection: 'row',
-        gap: 8,
-    },
-    metaText: {
-        fontSize: 12,
-        color: '#6b7280',
-    },
-    metaDot: {
-        marginHorizontal: 6,
-        fontSize: 12,
-        color: '#d1d5db',
-    },
-    emptyBox: {
-        borderRadius: 12,
-        borderWidth: 1,
-        borderStyle: 'dashed',
-        borderColor: '#e5e7eb',
-        paddingVertical: 24,
-        paddingHorizontal: 12,
-        alignItems: 'center',
-        marginTop: 8,
-    },
-    list: {
-        gap: 8,
-    },
-    card: {
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#e5e7eb',
-        padding: 10,
-        backgroundColor: '#ffffff',
-        marginBottom: 8,
-    },
-    cardRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    checkbox: {
-        marginRight: 8,
-        paddingTop: 2,
-    },
-    cardContent: {
-        flex: 1,
-    },
-    titleRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    taskName: {
-        flex: 1,
-        fontSize: 14,
-        fontWeight: '500',
-        color: '#111827',
-    },
-    taskNameCompleted: {
-        color: '#6b7280',
-        textDecorationLine: 'line-through',
-    },
+
     priorityText: {
         fontSize: 11,
         fontWeight: '600',
         marginLeft: 4,
         textTransform: 'capitalize',
         color: '#111827',
+        lineHeight: 14,
+        includeFontPadding: false as any,
+        textAlignVertical: 'center' as any,
     },
-    dateRow: {
+
+    actionsRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 4,
+        gap: 4,
+        height: 28,
     },
-    dateText: {
+
+    editRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+
+    inlineMenu: {
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+        backgroundColor: '#ffffff',
+        padding: 6,
+        minWidth: 240,  // ✅ wider so labels stay next to icons
+        maxWidth: 280,
+        shadowColor: '#000',
+        shadowOpacity: 0.08,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 6 },
+    },
+
+    inlineMenuDivider: {
+        height: 1,
+        backgroundColor: '#e5e7eb',
+        marginVertical: 6,
+        marginHorizontal: 6,
+        opacity: 0.7,
+    },
+
+    // keep these if your MenuItem uses them; otherwise safe to leave
+    inlineMenuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 8,
+        paddingHorizontal: 10,
+        borderRadius: 8,
+        width: '100%',
+    },
+    inlineMenuItemDanger: {
+        backgroundColor: '#fef2f2',
+    },
+    inlineMenuItemDisabled: {
+        opacity: 0.5,
+    },
+    inlineMenuIcon: {
+        width: 18,
+        height: 18,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+    },
+    inlineMenuLabel: {
         fontSize: 12,
-        color: '#6b7280',
+        fontWeight: '600',
+        color: '#111827',
     },
-    dateTextOverdue: {
+    inlineMenuLabelDanger: {
         color: '#b91c1c',
-        fontWeight: '500',
+    },
+    inlineMenuLabelDisabled: {
+        color: '#6b7280',
     },
 })
