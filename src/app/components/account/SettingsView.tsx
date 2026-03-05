@@ -1,19 +1,19 @@
 import React, { useState } from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Edit3, Trash2, Check, X, UserIcon, User } from 'lucide-react-native'
-import { AccountViewProps } from '../../props/account.props'
-import { settingsStyles as styles } from '../../styles/settingsStyles'
-import { AppButton } from '../ui/AppButton'
-import { TextField } from '../ui/TextField'
-import { IconButton } from '../ui/IconButton'
+import { AppButton } from '@/app/components/ui/AppButton'
+import { TextField } from '@/app/components/ui/TextField'
+import { IconButton } from '@/app/components/ui/IconButton'
+import { SettingsViewProps } from '@/app/props/settings.props'
+import { styles } from '@/app/styles/settingsStyles'
 
-export const SettingsView: React.FC<AccountViewProps> = ({
-                                                            accounts,
-                                                            currentAccountId,
+export const SettingsView: React.FC<SettingsViewProps> = ({
+                                                            workspaces,
+                                                            currentWorkspaceId,
                                                             onAddWorkspace,
-                                                            onUpdateAccount,
-                                                            onDeleteAccount,
-                                                            onSwitchAccount,
+                                                            onUpdateWorkspace,
+                                                            onDeleteWorkspace,
+                                                            onSwitchWorkspace,
                                                         }) => {
     const [isAdding, setIsAdding] = useState(false)
     const [newWorkspaceName, setNewWorkspaceName] = useState('')
@@ -36,7 +36,7 @@ export const SettingsView: React.FC<AccountViewProps> = ({
     const handleEdit = (accountId: string) => {
         const trimmed = editName.trim()
         if (!trimmed) return
-        onUpdateAccount(accountId, trimmed)
+        onUpdateWorkspace(accountId, trimmed)
         setEditingId(null)
     }
 
@@ -112,7 +112,7 @@ export const SettingsView: React.FC<AccountViewProps> = ({
                     <Text style={styles.listHeaderTitle}>Your Workspaces</Text>
                 </View>
 
-                {accounts.length === 0 ? (
+                {workspaces.length === 0 ? (
                     <View style={styles.listEmptyState}>
                         <User
                             size={40}
@@ -126,13 +126,13 @@ export const SettingsView: React.FC<AccountViewProps> = ({
                     </View>
                 ) : (
                     <ScrollView>
-                        {accounts.map((account) => {
-                            const isActive = currentAccountId === account.id
-                            const isEditing = editingId === account.id
+                        {workspaces.map((workspace) => {
+                            const isActive = currentWorkspaceId === workspace.id
+                            const isEditing = editingId === workspace.id
 
                             return (
                                 <View
-                                    key={account.id}
+                                    key={workspace.id}
                                     style={[
                                         styles.workspaceRow,
                                         isActive && styles.workspaceRowActive,
@@ -163,12 +163,12 @@ export const SettingsView: React.FC<AccountViewProps> = ({
                                                     onChangeText={setEditName}
                                                     placeholder="Workspace name"
                                                     returnKeyType="done"
-                                                    onSubmitEditing={() => handleEdit(account.id)}
+                                                    onSubmitEditing={() => handleEdit(workspace.id)}
                                                 />
                                                 <IconButton
                                                     icon={<Check size={18} color="#16a34a" />}
                                                     variant="success"
-                                                    onPress={() => handleEdit(account.id)}
+                                                    onPress={() => handleEdit(workspace.id)}
                                                     accessibilityLabel="Save workspace name"
                                                 />
                                                 <IconButton
@@ -183,7 +183,7 @@ export const SettingsView: React.FC<AccountViewProps> = ({
                                                 <TouchableOpacity
                                                     activeOpacity={0.8}
                                                     onPress={() =>
-                                                        !isActive && onSwitchAccount(account.id)
+                                                        !isActive && onSwitchWorkspace(workspace.id)
                                                     }
                                                 >
                                                     <View style={styles.workspaceNameRow}>
@@ -194,7 +194,7 @@ export const SettingsView: React.FC<AccountViewProps> = ({
                                                             ]}
                                                             numberOfLines={1}
                                                         >
-                                                            {account.name}
+                                                            {workspace.name}
                                                         </Text>
                                                         {isActive && (
                                                             <View style={styles.workspaceActiveBadge}>
@@ -208,7 +208,7 @@ export const SettingsView: React.FC<AccountViewProps> = ({
                                                 <Text style={styles.workspaceCreatedAt}>
                                                     Created{' '}
                                                     {new Date(
-                                                        account.createdAt,
+                                                        workspace.createdAt,
                                                     ).toLocaleDateString()}
                                                 </Text>
                                             </>
@@ -223,22 +223,22 @@ export const SettingsView: React.FC<AccountViewProps> = ({
                                                     title="Switch"
                                                     variant="outline"
                                                     size="xs"
-                                                    onPress={() => onSwitchAccount(account.id)}
+                                                    onPress={() => onSwitchWorkspace(workspace.id)}
                                                 />
                                             )}
                                             <IconButton
                                                 icon={<Edit3 size={18} color="#6b7280" />}
                                                 variant="neutral"
                                                 onPress={() =>
-                                                    startEdit(account.id, account.name)
+                                                    startEdit(workspace.id, workspace.name)
                                                 }
                                                 accessibilityLabel="Edit workspace"
                                             />
-                                            {accounts.length > 1 && (
+                                            {workspaces.length > 1 && (
                                                 <IconButton
                                                     icon={<Trash2 size={18} color="#ef4444" />}
                                                     variant="danger"
-                                                    onPress={() => onDeleteAccount(account.id)}
+                                                    onPress={() => onDeleteWorkspace(workspace.id)}
                                                     accessibilityLabel="Delete workspace"
                                                 />
                                             )}

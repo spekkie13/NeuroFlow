@@ -1,30 +1,17 @@
 import React, { useMemo, useState } from 'react'
 import { Text, View, TouchableOpacity } from 'react-native'
-import {
-    Plus,
-    CheckCircle2,
-    Circle,
-    Edit3,
-    Trash2,
-    ArrowUp,
-    ArrowDown,
-    Clock,
-    Flag,
-    X,
-    MoreHorizontal,
-} from 'lucide-react-native'
-
-import { AppButton } from '../ui/AppButton'
-import { TextField } from '../ui/TextField'
-import { IconButton } from '../ui/IconButton'
-import { formatLocalDateRange, parseLocalDate, toIsoDateString, startOfDay } from '../../utils/dateUtils'
-import { PriorityModal } from './PriorityModal'
+import { Plus, CheckCircle2, Circle, Edit3, Trash2, ArrowUp, ArrowDown, Clock, Flag, X, MoreHorizontal } from 'lucide-react-native'
+import { AppButton } from '@/app/components/ui/AppButton'
+import { TextField } from '@/app/components/ui/TextField'
+import { IconButton } from '@/app/components/ui/IconButton'
+import { MenuItem } from '@/app/components/ui/MenuItem'
+import { PriorityModal } from '@/app/components/tasks/PriorityModal'
 import { RescheduleModal } from '@/app/components/tasks/RescheduleModal'
-import { styles } from '@/app/styles/taskView'
-import { TaskViewProps } from '@/app/props/TaskViewProps'
+import { formatLocalDateRange, parseLocalDate, toIsoDateString, startOfDay } from '@/app/utils/dateUtils'
 import { Priority } from '@/app/models/Priority'
 import { Task } from '@/app/models/Task'
-import { MenuItem } from '@/app/components/ui/MenuItem'
+import { TaskViewProps } from '@/app/props/TaskViewProps'
+import { styles } from '@/app/styles/taskView'
 
 export const TaskView: React.FC<TaskViewProps> = ({
                                                       project,
@@ -46,9 +33,6 @@ export const TaskView: React.FC<TaskViewProps> = ({
     const [openMenuTaskId, setOpenMenuTaskId] = useState<string | null>(null)
 
     const today = useMemo(() => new Date(), [])
-
-    // ✅ Belangrijk: behoud de volgorde zoals project.tasks die aanlevert
-    // (jouw onMoveTask hoort die array-volgorde te veranderen)
     const orderedTasks = useMemo(() => {
         return [...project.tasks]
     }, [project.tasks])

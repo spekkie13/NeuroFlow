@@ -1,44 +1,44 @@
 // hooks/useAccounts.ts
 import { useEffect, useState } from 'react'
 import {
-    getCurrentAccountId,
-    loadAccounts,
+    getCurrentWorkspaceId,
+    loadWorkspaces,
     saveAccounts,
-    setCurrentAccountId,
+    setCurrentWorkspaceId,
 } from '../services/storage/accountStorage'
 import {Workspace} from "@/app/models/Workspace";
 
 interface UseAccountsResult {
-    accounts: Workspace[]
-    currentAccountId: string | null
+    workspaces: Workspace[]
+    currentWorkspaceId: string | null
     isLoading: boolean
-    addAccount: (name: string) => Promise<void>
-    updateAccount: (id: string, name: string) => Promise<void>
-    deleteAccount: (id: string) => Promise<void>
-    switchAccount: (id: string) => Promise<void>
+    addWorkspace: (name: string) => Promise<void>
+    updateWorkspace: (id: string, name: string) => Promise<void>
+    deleteWorkspace: (id: string) => Promise<void>
+    switchWorkspace: (id: string) => Promise<void>
 }
 
-export function useAccounts(): UseAccountsResult {
-    const [accounts, setAccounts] = useState<Workspace[]>([])
-    const [currentAccountId, setCurrentId] = useState<string | null>(null)
+export function useWorkspaces(): UseAccountsResult {
+    const [workspaces, setWorkspaces] = useState<Workspace[]>([])
+    const [currentWorkspaceId, setCurrentId] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
         let mounted = true
         const init = async () => {
-            const loadedAccounts = await loadAccounts()
-            const savedId = await getCurrentAccountId()
+            const loadedWorkspaces = await loadWorkspaces()
+            const savedId = await getCurrentWorkspaceId()
             if (!mounted) return
 
-            setAccounts(loadedAccounts)
+            setWorkspaces(loadedWorkspaces)
             const validId =
-                savedId && loadedAccounts.some((a) => a.id === savedId)
+                savedId && loadedWorkspaces.some((a) => a.id === savedId)
                     ? savedId
-                    : loadedAccounts[0]?.id ?? null
+                    : loadedWorkspaces[0]?.id ?? null
 
             if (validId) {
                 setCurrentId(validId)
-                await setCurrentAccountId(validId)
+                await setCurrentWorkspaceId(validId)
             }
 
             setIsLoading(false)
@@ -50,22 +50,22 @@ export function useAccounts(): UseAccountsResult {
     }, [])
 
     const persist = async (next: Workspace[]) => {
-        setAccounts(next)
+        setWorkspaces(next)
         await saveAccounts(next)
     }
 
-    const addAccount = async (name: string) => {
-        const newAcc: Workspace = {
+    const addWorkspace = async (name: string) => {
+        const newWorkspace: Workspace = {
             id: Date.now().toString(),
             name,
             createdAt: new Date().toISOString(),
         }
-        const next = [...accounts, newAcc]
+        const next = [...workspaces, newWorkspace]
         await persist(next)
     }
 
-    const updateAccount = async (id: string, name: string) => {
-        const next = accounts.map((a) =>
+    const updateWorkspace = async (id: string, name: string) => {
+        const next = workspaces.map((a) =>
             a.id === id
                 ? {
                     ...a,
@@ -76,33 +76,32 @@ export function useAccounts(): UseAccountsResult {
         await persist(next)
     }
 
-    const deleteAccount = async (id: string) => {
-        if (accounts.length <= 1) {
-            // voorkomt verwijdering laatste account; UI kan hierop inspelen
+    const deleteWorkspace = async (id: string) => {
+        if (workspaces.length <= 1) {
             return
         }
-        const next = accounts.filter((a) => a.id !== id)
+        const next = workspaces.filter((a) => a.id !== id)
         await persist(next)
 
-        if (currentAccountId === id && next.length > 0) {
+        if (currentWorkspaceId === id && next.length > 0) {
             const newId = next[0].id
             setCurrentId(newId)
-            await setCurrentAccountId(newId)
+            await setCurrentWorkspaceId(newId)
         }
     }
 
-    const switchAccount = async (id: string) => {
+    const switchWorkspace = async (id: string) => {
         setCurrentId(id)
-        await setCurrentAccountId(id)
+        await setCurrentWorkspaceId(id)
     }
 
     return {
-        accounts,
-        currentAccountId,
+        workspaces: workspaces,
+        currentWorkspaceId: currentWorkspaceId,
         isLoading,
-        addAccount,
-        updateAccount,
-        deleteAccount,
-        switchAccount,
+        addWorkspace,
+        updateWorkspace,
+        deleteWorkspace,
+        switchWorkspace,
     }
 }

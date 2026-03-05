@@ -1,5 +1,5 @@
 import { StorageClient } from './storageClient'
-import { Account } from "@/app/models/Account";
+import { Workspace } from "@/app/models/Workspace";
 import { Project } from "@/app/models/Project";
 
 const PROJECTS_KEY_PREFIX = 'adhd-planner-projects-'
@@ -28,16 +28,16 @@ export async function loadProjects(accountId: string): Promise<Project[]> {
 /*                                ACCOUNTS                                    */
 /* -------------------------------------------------------------------------- */
 
-export async function saveAccounts(accounts: Account[]): Promise<void> {
-    await StorageClient.setItem<Account[]>(ACCOUNTS_KEY, accounts)
+export async function saveAccounts(accounts: Workspace[]): Promise<void> {
+    await StorageClient.setItem<Workspace[]>(ACCOUNTS_KEY, accounts)
 }
 
-export async function loadAccounts(): Promise<Account[]> {
-    const stored = await StorageClient.getItem<Account[]>(ACCOUNTS_KEY)
+export async function loadAccounts(): Promise<Workspace[]> {
+    const stored = await StorageClient.getItem<Workspace[]>(ACCOUNTS_KEY)
 
     // Geen accounts? Maak er eentje aan als default
     if (!stored || stored.length === 0) {
-        const defaultAccount: Account = {
+        const defaultAccount: Workspace = {
             id: Date.now().toString(),
             name: 'My Account',
             createdAt: new Date().toISOString(),

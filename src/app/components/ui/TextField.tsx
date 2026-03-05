@@ -1,25 +1,8 @@
-// components/ui/TextField.tsx
 import React from 'react'
-import {
-    TextInput,
-    TextInputProps,
-    View,
-    Text,
-    StyleSheet,
-    ViewStyle,
-    TextStyle,
-} from 'react-native'
+import { TextInput, View, Text, StyleSheet } from 'react-native'
+import { TextFieldProps } from "@/app/props/ui/TextFieldProps";
 
-interface Props extends TextInputProps {
-    label?: string
-    errorText?: string
-    leftIcon?: React.ReactNode
-    rightIcon?: React.ReactNode
-    containerStyle?: ViewStyle
-    inputStyle?: TextStyle
-}
-
-export const TextField: React.FC<Props> = ({
+export const TextField: React.FC<TextFieldProps> = ({
                                                label,
                                                errorText,
                                                leftIcon,

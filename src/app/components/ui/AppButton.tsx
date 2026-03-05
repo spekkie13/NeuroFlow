@@ -1,9 +1,9 @@
 import React from 'react'
 import { ActivityIndicator, Text, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native'
-import { uiColors, uiRadius } from '../../styles/uiTheme'
-import { styles } from '../../styles/ui/appButton'
-import {AppButtonProps} from "@/app/props/ui/AppButtonProps";
-import {AppButtonSize, AppButtonVariant} from "@/app/constants/uiConstants";
+import { AppButtonProps } from "@/app/props/ui/AppButtonProps";
+import { AppButtonSize, AppButtonVariant } from "@/app/constants/uiConstants";
+import { styles } from '@/app/styles/ui/appButton'
+import { uiColors, uiRadius } from '@/app/styles/uiTheme'
 
 export const AppButton: React.FC<AppButtonProps> = ({
                                                         title,

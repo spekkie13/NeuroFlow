@@ -129,6 +129,7 @@ const styles = StyleSheet.create({
     },
     footerRow: {
         flexDirection: 'row',
+        justifyContent: 'center', // 🔥 centreert de groep
         gap: 8,
         marginTop: 12,
     },

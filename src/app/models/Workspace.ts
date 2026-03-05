@@ -1,4 +1,4 @@
-export interface Account {
+export interface Workspace {
     id: string
     name: string
     createdAt: string

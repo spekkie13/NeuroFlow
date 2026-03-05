@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native'
 
-export const settingsStyles = StyleSheet.create({
+export const styles = StyleSheet.create({
     screen: {
         flex: 1,
         paddingHorizontal: 24,

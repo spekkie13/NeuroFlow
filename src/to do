@@ -1,3 +1,7 @@
 TO DO:
-- add a modal to give a project a unique name
+- center the buttons on the add new project modal
+- center the buttons on the add new task modal
 - figure out how to deal with 2 tasks with the same name
+
+- Brainstorm about a condensed view toggle?
+- Simplify the Timeline View (1 header instead of 1 header per project)

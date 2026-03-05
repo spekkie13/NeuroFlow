@@ -1,7 +1,7 @@
-import {Account} from "@/app/models/Account";
+import {Workspace} from "@/app/models/Workspace";
 
 export interface SettingsViewProps {
-    accounts: Account[]
+    workspaces: Workspace[]
     currentWorkspaceId: string | null
     onAddWorkspace: (name: string) => void
     onUpdateWorkspace: (accountId: string, name: string) => void

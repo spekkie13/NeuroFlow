@@ -1,9 +1,11 @@
-import {StyleProp, TextInputProps, TextStyle, ViewStyle} from "react-native";
+import {TextInputProps, TextStyle, ViewStyle} from "react-native";
+import React from "react";
 
 export interface TextFieldProps extends TextInputProps {
     label?: string
-    helperText?: string
-    error?: string
-    containerStyle?: StyleProp<ViewStyle>
-    inputStyle?: StyleProp<TextStyle>
+    errorText?: string
+    leftIcon?: React.ReactNode
+    rightIcon?: React.ReactNode
+    containerStyle?: ViewStyle
+    inputStyle?: TextStyle
 }
