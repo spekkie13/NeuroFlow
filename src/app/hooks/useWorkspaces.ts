@@ -6,10 +6,10 @@ import {
     saveAccounts,
     setCurrentAccountId,
 } from '../services/storage/accountStorage'
-import {Account} from "@/app/models/Account";
+import {Workspace} from "@/app/models/Workspace";
 
 interface UseAccountsResult {
-    accounts: Account[]
+    accounts: Workspace[]
     currentAccountId: string | null
     isLoading: boolean
     addAccount: (name: string) => Promise<void>
@@ -19,7 +19,7 @@ interface UseAccountsResult {
 }
 
 export function useAccounts(): UseAccountsResult {
-    const [accounts, setAccounts] = useState<Account[]>([])
+    const [accounts, setAccounts] = useState<Workspace[]>([])
     const [currentAccountId, setCurrentId] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(true)
 
@@ -49,13 +49,13 @@ export function useAccounts(): UseAccountsResult {
         }
     }, [])
 
-    const persist = async (next: Account[]) => {
+    const persist = async (next: Workspace[]) => {
         setAccounts(next)
         await saveAccounts(next)
     }
 
     const addAccount = async (name: string) => {
-        const newAcc: Account = {
+        const newAcc: Workspace = {
             id: Date.now().toString(),
             name,
             createdAt: new Date().toISOString(),

@@ -1,35 +1,34 @@
 import React, { useEffect, useState } from 'react'
-import { SafeAreaView, View, ScrollView, Text, Modal, TouchableOpacity } from 'react-native'
+import { SafeAreaView, View, ScrollView, Text, TouchableOpacity } from 'react-native'
 import { Plus, ChevronDown } from 'lucide-react-native'
-import { useProjects } from '../hooks/useProjects'
-import { BottomNav } from './BottomNav'
-import { TaskView } from './tasks/TaskView'
-import { Timeline } from './Timeline'
-import { SettingsView } from './account/SettingsView'
-import { TextField } from './ui/TextField'
-import { AppButton } from './ui/AppButton'
-import { styles } from "@/app/styles/planner";
+import { TaskView } from '@/app/components/tasks/TaskView'
+import { AppButton } from '@/app/components/ui/AppButton'
+import { Timeline } from '@/app/components/Timeline'
+import { BottomNav } from '@/app/components/BottomNav'
+import { SettingsView } from '@/app/components/account/SettingsView'
+import { CreateProjectModal } from '@/app/components/planner/CreateProjectModal'
+import { ProjectPickerModal } from '@/app/components/planner/ProjectPickerModal'
+import { useWorkspaces } from "@/app/hooks/useWorkspaces";
+import { useProjects } from '@/app/hooks/useProjects'
 import { PlannerView } from "@/app/props/PlannerProps";
-import {useAccounts} from "@/app/hooks/useAccounts";
+import { styles } from "@/app/styles/planner";
 
 export const Planner: React.FC = () => {
     const [currentView, setCurrentView] = useState<PlannerView>('tasks')
     const [newProjectName, setNewProjectName] = useState('')
     const [isProjectModalVisible, setIsProjectModalVisible] = useState(false)
     const [isProjectPickerVisible, setIsProjectPickerVisible] = useState(false)
-    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-        null,
-    )
+    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
 
     const {
-        accounts,
-        currentAccountId,
+        workspaces,
+        currentWorkspaceId,
         isLoading: accountsLoading,
-        addAccount,
-        updateAccount,
-        deleteAccount,
-        switchAccount,
-    } = useAccounts()
+        addWorkspace,
+        updateWorkspace,
+        deleteWorkspace,
+        switchWorkspace,
+    } = useWorkspaces()
 
     const {
         projects,
@@ -89,103 +88,8 @@ export const Planner: React.FC = () => {
         closeProjectPicker()
     }
 
-    const renderProjectModal = () => (
-        <Modal
-            visible={isProjectModalVisible}
-            transparent
-            animationType="fade"
-            onRequestClose={closeProjectModal}
-        >
-            <View style={styles.modalOverlay}>
-                <View style={styles.modalCard}>
-                    <Text style={styles.modalTitle}>New Project</Text>
-                    <Text style={styles.modalSubtitle}>
-                        Group related tasks into a project to keep your planning focused.
-                    </Text>
-
-                    <TextField
-                        label="Project name"
-                        placeholder="e.g. Morning routine, Study, Work sprint"
-                        value={newProjectName}
-                        onChangeText={setNewProjectName}
-                        autoCapitalize="sentences"
-                        returnKeyType="done"
-                        onSubmitEditing={handleCreateProject}
-                    />
-
-                    <View style={styles.modalButtonsRow}>
-                        <AppButton
-                            title="Cancel"
-                            variant="outline"
-                            onPress={closeProjectModal}
-                            fullWidth
-                        />
-                        <AppButton
-                            title="Create"
-                            variant="primary"
-                            onPress={handleCreateProject}
-                            fullWidth
-                            disabled={!newProjectName.trim()}
-                        />
-                    </View>
-                </View>
-            </View>
-        </Modal>
-    )
-
-    const renderProjectPickerModal = () => (
-        <Modal
-            visible={isProjectPickerVisible}
-            transparent
-            animationType="fade"
-            onRequestClose={closeProjectPicker}
-        >
-            <View style={styles.modalOverlay}>
-                <View style={styles.pickerCard}>
-                    <Text style={styles.pickerTitle}>Select project</Text>
-                    {projects.map((project) => {
-                        const isActive = project.id === activeProject?.id
-                        return (
-                            <TouchableOpacity
-                                key={project.id}
-                                style={[
-                                    styles.pickerItem,
-                                    isActive && styles.pickerItemActive,
-                                ]}
-                                onPress={() => handleSelectProject(project.id)}
-                            >
-                                <View
-                                    style={[
-                                        styles.projectDot,
-                                        { backgroundColor: project.color },
-                                    ]}
-                                />
-                                <Text
-                                    style={[
-                                        styles.pickerItemText,
-                                        isActive && styles.pickerItemTextActive,
-                                    ]}
-                                    numberOfLines={1}
-                                >
-                                    {project.name}
-                                </Text>
-                            </TouchableOpacity>
-                        )
-                    })}
-                    <AppButton
-                        title="Close"
-                        variant="outline"
-                        onPress={closeProjectPicker}
-                        fullWidth
-                        style={{ marginTop: 8 }}
-                    />
-                </View>
-            </View>
-        </Modal>
-    )
-
     const renderTasksView = () => {
-        if (!currentAccountId) {
+        if (!currentWorkspaceId) {
             return (
                 <View style={styles.center}>
                     <Text style={styles.emptyTitle}>No active workspace</Text>
@@ -204,6 +108,25 @@ export const Planner: React.FC = () => {
             )
         }
 
+        const modals = (
+            <>
+                <CreateProjectModal
+                    visible={isProjectModalVisible}
+                    projectName={newProjectName}
+                    onChangeProjectName={setNewProjectName}
+                    onCreate={handleCreateProject}
+                    onCancel={closeProjectModal}
+                />
+                <ProjectPickerModal
+                    visible={isProjectPickerVisible}
+                    projects={projects}
+                    activeProjectId={activeProject?.id ?? null}
+                    onSelectProject={handleSelectProject}
+                    onClose={closeProjectPicker}
+                />
+            </>
+        )
+
         if (!projects.length || !activeProject) {
             return (
                 <View style={styles.center}>
@@ -218,7 +141,7 @@ export const Planner: React.FC = () => {
                         style={{ marginTop: 16 }}
                         leftIcon={<Plus size={18} color="#ffffff" />}
                     />
-                    {renderProjectModal()}
+                    {modals}
                 </View>
             )
         }
@@ -283,8 +206,7 @@ export const Planner: React.FC = () => {
                     />
                 </ScrollView>
 
-                {renderProjectModal()}
-                {renderProjectPickerModal()}
+                {modals}
             </View>
         )
     }
@@ -330,14 +252,14 @@ export const Planner: React.FC = () => {
         )
     }
 
-    const renderAccountView = () => (
+    const renderSettingsView = () => (
         <SettingsView
-            accounts={accounts}
-            currentAccountId={currentAccountId}
-            onAddWorkspace={addAccount}
-            onUpdateAccount={updateAccount}
-            onDeleteAccount={deleteAccount}
-            onSwitchAccount={switchAccount}
+            workspaces={workspaces}
+            currentWorkspaceId={currentWorkspaceId}
+            onAddWorkspace={addWorkspace}
+            onUpdateWorkspace={updateWorkspace}
+            onDeleteWorkspace={deleteWorkspace}
+            onSwitchWorkspace={switchWorkspace}
         />
     )
 
@@ -356,7 +278,7 @@ export const Planner: React.FC = () => {
             case 'timeline':
                 return renderTimelineView()
             case 'settings':
-                return renderAccountView()
+                return renderSettingsView()
             default:
                 return null
         }
