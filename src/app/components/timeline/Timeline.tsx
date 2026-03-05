@@ -3,6 +3,7 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Plus, List, CheckCircle2, Circle } from 'lucide-react-native'
 import { ScheduleTaskModal } from '@/app/components/timeline/ScheduleTaskModal'
 import { startOfDay, formatLocalDateRange } from '../../utils/dateUtils'
+import { getPriorityStyle } from '@/app/utils/priorityUtils'
 import { Priority } from "@/app/models/Priority";
 import { Task } from "@/app/models/Task";
 import { TimelineProps } from "@/app/props/timeline/TimelineProps";
@@ -61,14 +62,6 @@ export const Timeline: React.FC<TimelineProps> = ({
             return { date, tasks: tasksForDay }
         })
     }, [dates, project.tasks])
-
-    const getPriorityBadgeStyle = (priority: Priority) => {
-        switch (priority) {
-            case 'high': return styles.priorityBadgeHigh
-            case 'medium': return styles.priorityBadgeMedium
-            case 'low': return styles.priorityBadgeLow
-        }
-    }
 
     const openAddModalForDate = (date: Date) => {
         setSelectedDate(date)
@@ -204,7 +197,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                                                     <View
                                                         style={[
                                                             styles.priorityBadge,
-                                                            getPriorityBadgeStyle(task.priority),
+                                                            getPriorityStyle(task.priority, styles.priorityBadgeHigh, styles.priorityBadgeMedium, styles.priorityBadgeLow),
                                                         ]}
                                                     >
                                                         <Text style={styles.priorityBadgeText}>

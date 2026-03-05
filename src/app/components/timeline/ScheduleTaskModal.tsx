@@ -13,6 +13,7 @@ import {
 import { Priority } from '@/app/models/Priority'
 import { Task } from '@/app/models/Task'
 import { ScheduleTaskModalProps } from '@/app/props/ui/ScheduleTaskModalProps'
+import { getPriorityStyle } from '@/app/utils/priorityUtils'
 import { styles } from '@/app/styles/timeline'
 
 type ModalTab = 'new' | 'existing'
@@ -66,14 +67,6 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
             date: toIsoDateString(start)!,
         })
         onClose()
-    }
-
-    const getPriorityBadgeStyle = (priority: Priority) => {
-        switch (priority) {
-            case 'high': return styles.priorityBadgeHigh
-            case 'medium': return styles.priorityBadgeMedium
-            case 'low': return styles.priorityBadgeLow
-        }
     }
 
     const placeholder = getDateInputPlaceholder()
@@ -236,7 +229,7 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
                                                             <View
                                                                 style={[
                                                                     styles.priorityBadgeSmall,
-                                                                    getPriorityBadgeStyle(task.priority),
+                                                                    getPriorityStyle(task.priority, styles.priorityBadgeHigh, styles.priorityBadgeMedium, styles.priorityBadgeLow),
                                                                 ]}
                                                             >
                                                                 <Text style={styles.priorityBadgeText}>
