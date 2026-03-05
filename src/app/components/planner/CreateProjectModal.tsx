@@ -2,15 +2,8 @@ import React from 'react'
 import { Modal, Text, View } from 'react-native'
 import { AppButton } from '@/app/components/ui/AppButton'
 import { TextField } from '@/app/components/ui/TextField'
+import { CreateProjectModalProps } from '@/app/props/planner/CreateProjectModalProps'
 import { styles } from '@/app/styles/planner'
-
-interface CreateProjectModalProps {
-    visible: boolean
-    projectName: string
-    onChangeProjectName: (name: string) => void
-    onCreate: () => void
-    onCancel: () => void
-}
 
 export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     visible,

@@ -1,16 +1,8 @@
 import React from 'react'
 import { Modal, Text, TouchableOpacity, View } from 'react-native'
 import { AppButton } from '@/app/components/ui/AppButton'
-import { Project } from '@/app/models/Project'
+import { ProjectPickerModalProps } from '@/app/props/planner/ProjectPickerModalProps'
 import { styles } from '@/app/styles/planner'
-
-interface ProjectPickerModalProps {
-    visible: boolean
-    projects: Project[]
-    activeProjectId: string | null
-    onSelectProject: (projectId: string) => void
-    onClose: () => void
-}
 
 export const ProjectPickerModal: React.FC<ProjectPickerModalProps> = ({
     visible,

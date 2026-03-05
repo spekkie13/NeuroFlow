@@ -10,7 +10,7 @@ import { CreateProjectModal } from '@/app/components/planner/CreateProjectModal'
 import { ProjectPickerModal } from '@/app/components/planner/ProjectPickerModal'
 import { useWorkspaces } from "@/app/hooks/useWorkspaces";
 import { useProjects } from '@/app/hooks/useProjects'
-import { PlannerView } from "@/app/props/PlannerProps";
+import { PlannerView } from "@/app/props/planner/PlannerProps";
 import { styles } from "@/app/styles/planner";
 
 export const Planner: React.FC = () => {

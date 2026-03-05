@@ -12,18 +12,10 @@ import {
 } from '@/app/utils/dateUtils'
 import { Priority } from '@/app/models/Priority'
 import { Task } from '@/app/models/Task'
+import { ScheduleTaskModalProps } from '@/app/props/ui/ScheduleTaskModalProps'
 import { styles } from '@/app/styles/timeline'
 
 type ModalTab = 'new' | 'existing'
-
-interface ScheduleTaskModalProps {
-    visible: boolean
-    selectedDate: Date | null
-    selectableExistingTasks: Task[]
-    onAddNewTask: (task: Task) => void
-    onUpdateTask: (taskId: string, updates: Partial<Task>) => void
-    onClose: () => void
-}
 
 export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
     visible,

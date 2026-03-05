@@ -1,5 +1,6 @@
 import React from "react";
 import {Text, TouchableOpacity, View} from "react-native";
+import {MenuItemProps} from "@/app/props/ui/MenuItemProps";
 import {styles} from "@/app/styles/taskView";
 
 export const MenuItem = ({
@@ -8,13 +9,7 @@ export const MenuItem = ({
                              onPress,
                              danger,
                              disabled,
-                         }: {
-    icon: React.ReactNode
-    label: string
-    onPress: () => void
-    danger?: boolean
-    disabled?: boolean
-}) => (
+                         }: MenuItemProps) => (
     <TouchableOpacity
         activeOpacity={0.85}
         onPress={disabled ? undefined : onPress}
