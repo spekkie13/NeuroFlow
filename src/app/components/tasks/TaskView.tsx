@@ -10,7 +10,7 @@ import { RescheduleModal } from '@/app/components/tasks/RescheduleModal'
 import { formatLocalDateRange, parseLocalDate, toIsoDateString, startOfDay } from '@/app/utils/dateUtils'
 import { Priority } from '@/app/models/Priority'
 import { Task } from '@/app/models/Task'
-import { TaskViewProps } from '@/app/props/TaskViewProps'
+import { TaskViewProps } from '@/app/props/tasks/TaskViewProps'
 import { styles } from '@/app/styles/taskView'
 
 export const TaskView: React.FC<TaskViewProps> = ({

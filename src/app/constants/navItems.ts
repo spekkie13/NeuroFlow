@@ -1,4 +1,4 @@
-import {ViewType} from "@/app/props/BottomNavProps";
+import {ViewType} from "@/app/props/ui/BottomNavProps";
 import {Calendar, ListTodo, User as UserIcon} from "lucide-react-native";
 
 export const navItems = [

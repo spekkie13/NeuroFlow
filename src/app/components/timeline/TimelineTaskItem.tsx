@@ -1,4 +1,4 @@
-import {TimelineTaskItemProps} from "@/app/props/TimelineItemTaskProps";
+import {TimelineTaskItemProps} from "@/app/props/timeline/TimelineItemTaskProps";
 import React, {useMemo} from "react";
 import { TouchableOpacity, View, Text } from "react-native";
 import { ArrowDown, ArrowUp, CheckCircle2, Circle } from "lucide-react-native";

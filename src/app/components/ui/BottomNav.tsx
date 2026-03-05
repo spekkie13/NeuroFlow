@@ -1,7 +1,7 @@
 import React from 'react'
 import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native'
 import { ListTodo, Calendar, User as UserIcon } from 'lucide-react-native'
-import { BottomNavProps, ViewType } from "@/app/props/BottomNavProps";
+import { BottomNavProps, ViewType } from "@/app/props/ui/BottomNavProps";
 import { styles } from "@/app/styles/bottomNav";
 import {navItems} from "@/app/constants/navItems";
 

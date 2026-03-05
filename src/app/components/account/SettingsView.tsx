@@ -4,7 +4,7 @@ import { Edit3, Trash2, Check, X, UserIcon, User } from 'lucide-react-native'
 import { AppButton } from '@/app/components/ui/AppButton'
 import { TextField } from '@/app/components/ui/TextField'
 import { IconButton } from '@/app/components/ui/IconButton'
-import { SettingsViewProps } from '@/app/props/settings.props'
+import { SettingsViewProps } from '@/app/props/account/settings.props'
 import { styles } from '@/app/styles/settingsStyles'
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
@@ -14,7 +14,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                                                             onUpdateWorkspace,
                                                             onDeleteWorkspace,
                                                             onSwitchWorkspace,
-                                                        }) => {
+                                                        } : SettingsViewProps) => {
     const [isAdding, setIsAdding] = useState(false)
     const [newWorkspaceName, setNewWorkspaceName] = useState('')
     const [editingId, setEditingId] = useState<string | null>(null)

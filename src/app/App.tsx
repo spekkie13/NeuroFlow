@@ -1,5 +1,5 @@
 import React from 'react'
-import { Planner } from '@/app/components/Planner'
+import { Planner } from '@/app/components/planner/Planner'
 
 const Root: React.FC = () => {
     return <Planner />

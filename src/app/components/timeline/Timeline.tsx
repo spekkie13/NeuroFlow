@@ -2,10 +2,10 @@ import React, { useMemo, useState } from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Plus, List, CheckCircle2, Circle } from 'lucide-react-native'
 import { ScheduleTaskModal } from '@/app/components/timeline/ScheduleTaskModal'
-import { startOfDay, formatLocalDateRange } from '../utils/dateUtils'
+import { startOfDay, formatLocalDateRange } from '../../utils/dateUtils'
 import { Priority } from "@/app/models/Priority";
 import { Task } from "@/app/models/Task";
-import { TimelineProps } from "@/app/props/TimelineProps";
+import { TimelineProps } from "@/app/props/timeline/TimelineProps";
 import { styles } from '@/app/styles/timeline'
 
 export const Timeline: React.FC<TimelineProps> = ({
