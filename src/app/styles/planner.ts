@@ -147,6 +147,7 @@ export const styles = StyleSheet.create({
     modalButtonsRow: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
         gap: 8,
         marginTop: 8,
     },

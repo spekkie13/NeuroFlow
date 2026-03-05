@@ -280,7 +280,11 @@ export const styles = StyleSheet.create({
     },
     datesRow: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         marginTop: 4,
+    },
+    dateFieldWrapper: {
+        width: '48%',
     },
     emptyExistingBox: {
         alignItems: 'center',
@@ -325,6 +329,8 @@ export const styles = StyleSheet.create({
     },
     modalFooter: {
         flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
         gap: 8,
         marginTop: 10,
     },

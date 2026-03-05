@@ -8,15 +8,13 @@ function generateId(): string {
 export function createTask(params: {
     name: string
     priority?: Priority
-    startDate?: string | null
-    endDate?: string | null
+    date?: string | null
     notes?: string
 }): Task {
     const {
         name,
         priority = 'medium',
-        startDate = null,
-        endDate = null,
+        date = null,
         notes = '',
     } = params
 
@@ -27,8 +25,7 @@ export function createTask(params: {
         name: trimmed || 'Untitled Task',
         completed: false,
         priority,
-        startDate,
-        endDate,
+        date,
         notes,
     }
 }
@@ -60,15 +57,14 @@ export function withPriority(task: Task, priority: Priority): Task {
 }
 
 export function isTaskScheduled(task: Task): boolean {
-    return Boolean(task.startDate && task.endDate)
+    return Boolean(task.date)
 }
 
 export function doesTaskCoverDate(task: Task, date: Date): boolean {
-    if (!task.startDate || !task.endDate) return false
+    if (!task.date) return false
 
     const target = new Date(date.toISOString().split('T')[0])
-    const start = new Date(new Date(task.startDate).toISOString().split('T')[0])
-    const end = new Date(new Date(task.endDate).toISOString().split('T')[0])
+    const start = new Date(new Date(task.date).toISOString().split('T')[0])
 
-    return target >= start && target <= end
+    return target.getTime() === start.getTime()
 }

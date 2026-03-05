@@ -36,16 +36,14 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
     const [modalTab, setModalTab] = useState<ModalTab>('new')
     const [newTaskName, setNewTaskName] = useState('')
     const [newTaskPriority, setNewTaskPriority] = useState<Priority>('medium')
-    const [taskStartDate, setTaskStartDate] = useState('')
-    const [taskEndDate, setTaskEndDate] = useState('')
+    const [taskDate, setTaskDate] = useState('')
     const [selectedExistingTaskId, setSelectedExistingTaskId] = useState<string | null>(null)
 
     useEffect(() => {
         if (!visible) return
         const opts: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' }
         const formatted = selectedDate ? formatLocalDate(selectedDate, opts) : ''
-        setTaskStartDate(formatted)
-        setTaskEndDate(formatted)
+        setTaskDate(formatted)
         setNewTaskName('')
         setNewTaskPriority('medium')
         setSelectedExistingTaskId(null)
@@ -53,17 +51,15 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
     }, [visible])
 
     const handleAddNewTask = () => {
-        if (!newTaskName.trim() || !taskStartDate || !taskEndDate) return
-        const start = parseLocalDate(taskStartDate)
-        const end = parseLocalDate(taskEndDate)
-        if (!start || !end) return
+        if (!newTaskName.trim() || !taskDate) return
+        const start = parseLocalDate(taskDate)
+        if (!start) return
         const newTask: Task = {
             id: Date.now().toString(),
             name: newTaskName.trim(),
             completed: false,
             priority: newTaskPriority,
-            startDate: toIsoDateString(start)!,
-            endDate: toIsoDateString(end)!,
+            date: toIsoDateString(start)!,
             notes: '',
         }
         onAddNewTask(newTask)
@@ -71,13 +67,11 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
     }
 
     const handleAddExistingTask = () => {
-        if (!selectedExistingTaskId || !taskStartDate || !taskEndDate) return
-        const start = parseLocalDate(taskStartDate)
-        const end = parseLocalDate(taskEndDate)
-        if (!start || !end) return
+        if (!selectedExistingTaskId || !taskDate) return
+        const start = parseLocalDate(taskDate)
+        if (!start) return
         onUpdateTask(selectedExistingTaskId, {
-            startDate: toIsoDateString(start)!,
-            endDate: toIsoDateString(end)!,
+            date: toIsoDateString(start)!,
         })
         onClose()
     }
@@ -201,27 +195,13 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
                                     </View>
                                 </View>
 
-                                <View style={styles.datesRow}>
-                                    <View style={{ flex: 1, marginRight: 6 }}>
-                                        <Text style={styles.fieldLabel}>
-                                            Start date ({placeholder})
-                                        </Text>
-                                        <DateField
-                                            value={taskStartDate}
-                                            onChangeText={setTaskStartDate}
-                                            placeholder={placeholder}
-                                        />
-                                    </View>
-                                    <View style={{ flex: 1, marginLeft: 6 }}>
-                                        <Text style={styles.fieldLabel}>
-                                            End date ({placeholder})
-                                        </Text>
-                                        <DateField
-                                            value={taskEndDate}
-                                            onChangeText={setTaskEndDate}
-                                            placeholder={placeholder}
-                                        />
-                                    </View>
+                                <View style={styles.fieldGroup}>
+                                    <Text style={styles.fieldLabel}>Date ({placeholder})</Text>
+                                    <DateField
+                                        value={taskDate}
+                                        onChangeText={setTaskDate}
+                                        placeholder={placeholder}
+                                    />
                                 </View>
                             </>
                         ) : (
@@ -277,27 +257,13 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
                                             </View>
                                         </View>
 
-                                        <View style={styles.datesRow}>
-                                            <View style={{ flex: 1, marginRight: 6 }}>
-                                                <Text style={styles.fieldLabel}>
-                                                    Start date ({placeholder})
-                                                </Text>
-                                                <DateField
-                                                    value={taskStartDate}
-                                                    onChangeText={setTaskStartDate}
-                                                    placeholder={placeholder}
-                                                />
-                                            </View>
-                                            <View style={{ flex: 1, marginLeft: 6 }}>
-                                                <Text style={styles.fieldLabel}>
-                                                    End date ({placeholder})
-                                                </Text>
-                                                <DateField
-                                                    value={taskEndDate}
-                                                    onChangeText={setTaskEndDate}
-                                                    placeholder={placeholder}
-                                                />
-                                            </View>
+                                        <View style={styles.fieldGroup}>
+                                            <Text style={styles.fieldLabel}>Date ({placeholder})</Text>
+                                            <DateField
+                                                value={taskDate}
+                                                onChangeText={setTaskDate}
+                                                placeholder={placeholder}
+                                            />
                                         </View>
                                     </>
                                 )}
@@ -313,7 +279,7 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
                                 variant="primary"
                                 onPress={handleAddNewTask}
                                 fullWidth
-                                disabled={!newTaskName.trim() || !taskStartDate || !taskEndDate}
+                                disabled={!newTaskName.trim() || !taskDate}
                             />
                         ) : (
                             <AppButton
@@ -321,9 +287,7 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
                                 variant="primary"
                                 onPress={handleAddExistingTask}
                                 fullWidth
-                                disabled={
-                                    !selectedExistingTaskId || !taskStartDate || !taskEndDate
-                                }
+                                disabled={!selectedExistingTaskId || !taskDate}
                             />
                         )}
                     </View>

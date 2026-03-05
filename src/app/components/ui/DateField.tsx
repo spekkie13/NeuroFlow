@@ -1,5 +1,5 @@
 import React, {useMemo, useState} from 'react'
-import { Platform, TouchableOpacity, View } from 'react-native'
+import { Platform, TouchableOpacity, View, ViewStyle } from 'react-native'
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker'
 import { Calendar } from 'lucide-react-native'
 import { TextField } from './TextField'
@@ -10,6 +10,7 @@ interface DateFieldProps {
     onChangeText: (value: string) => void
     onChangeDate?: (date: Date | null) => void
     placeholder?: string
+    style?: ViewStyle
 }
 
 export const DateField: React.FC<DateFieldProps> = ({
@@ -17,6 +18,7 @@ export const DateField: React.FC<DateFieldProps> = ({
                                                         onChangeText,
                                                         onChangeDate,
                                                         placeholder,
+                                                        style,
                                                     }) => {
     const [showPicker, setShowPicker] = useState(false)
 
@@ -44,7 +46,7 @@ export const DateField: React.FC<DateFieldProps> = ({
     }
 
     return (
-        <View>
+        <View style={style}>
             <TextField
                 value={value}
                 onChangeText={(text) => {

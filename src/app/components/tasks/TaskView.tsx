@@ -28,7 +28,6 @@ export const TaskView: React.FC<TaskViewProps> = ({
 
     const [rescheduleTask, setRescheduleTask] = useState<Task | null>(null)
     const [rescheduleStart, setRescheduleStart] = useState('')
-    const [rescheduleEnd, setRescheduleEnd] = useState('')
 
     const [openMenuTaskId, setOpenMenuTaskId] = useState<string | null>(null)
 
@@ -57,8 +56,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
             name: trimmed,
             completed: false,
             priority: 'medium',
-            startDate: null,
-            endDate: null,
+            date: null,
             notes: '',
         }
 
@@ -97,53 +95,31 @@ export const TaskView: React.FC<TaskViewProps> = ({
     const openRescheduleModal = (task: Task) => {
         closeMenu()
         setRescheduleTask(task)
-
-        if (task.startDate && task.endDate) {
-            const range = formatLocalDateRange(task.startDate, task.endDate, true) as string[] | string
-            if (Array.isArray(range)) {
-                setRescheduleStart(range[0])
-                setRescheduleEnd(range[1])
-            } else {
-                setRescheduleStart(range)
-                setRescheduleEnd(range)
-            }
-        } else if (task.startDate) {
-            const single = formatLocalDateRange(task.startDate, task.startDate, true) as string[] | string
-            const val = Array.isArray(single) ? single[0] : single
-            setRescheduleStart(val)
-            setRescheduleEnd(val)
+        if (task.date) {
+            const val = formatLocalDateRange(task.date, task.date, true)
+            setRescheduleStart(Array.isArray(val) ? val[0] : val as string)
         } else {
             setRescheduleStart('')
-            setRescheduleEnd('')
         }
     }
 
     const handleSaveReschedule = () => {
         if (!rescheduleTask) return
-
         const start = parseLocalDate(rescheduleStart)
-        const end = parseLocalDate(rescheduleEnd)
-        if (!start || !end) return
-
-        const startIso = toIsoDateString(start)!
-        const endIso = toIsoDateString(end)!
-
-        onUpdateTask(rescheduleTask.id, { startDate: startIso, endDate: endIso })
-
+        if (!start) return
+        onUpdateTask(rescheduleTask.id, { date: toIsoDateString(start)! })
         setRescheduleTask(null)
         setRescheduleStart('')
-        setRescheduleEnd('')
     }
 
     const closeRescheduleModal = () => {
         setRescheduleTask(null)
         setRescheduleStart('')
-        setRescheduleEnd('')
     }
 
     const isOverdue = (task: Task) => {
-        if (!task.endDate || task.completed) return false
-        return startOfDay(new Date(task.endDate)) < startOfDay(today)
+        if (!task.date || task.completed) return false
+        return startOfDay(new Date(task.date)) < startOfDay(today)
     }
 
     const getPriorityBadgeStyle = (priority: Priority) => {
@@ -206,8 +182,8 @@ export const TaskView: React.FC<TaskViewProps> = ({
             ) : (
                 <View style={styles.list}>
                     {orderedTasks.map((task, index) => {
-                        const rangeLabel = task.startDate
-                            ? formatLocalDateRange(task.startDate, task.endDate || task.startDate)
+                        const rangeLabel = task.date
+                            ? formatLocalDateRange(task.date, task.date)
                             : null
 
                         const overdue = isOverdue(task)
@@ -340,7 +316,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
 
                                                 <MenuItem
                                                     icon={<Clock size={16} color="#374151" />}
-                                                    label={task.startDate ? 'Reschedule' : 'Schedule'}
+                                                    label={task.date ? 'Reschedule' : 'Schedule'}
                                                     onPress={() => openRescheduleModal(task)}
                                                 />
 
@@ -399,9 +375,8 @@ export const TaskView: React.FC<TaskViewProps> = ({
             <RescheduleModal
                 visible={!!rescheduleTask}
                 taskName={rescheduleTask?.name}
-                startDate={rescheduleStart}
-                onChangeStartDate={setRescheduleStart}
-                onChangeEndDate={setRescheduleEnd}
+                date={rescheduleStart}
+                onChangeDate={setRescheduleStart}
                 onSave={handleSaveReschedule}
                 onCancel={closeRescheduleModal}
             />

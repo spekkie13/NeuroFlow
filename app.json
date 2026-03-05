@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "version": "0.1.5",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "enabled": false
+    },
+    "extra": {
+      "eas": {
+        "projectId": "35f96657-1f62-4166-a775-8b418ffae12a"
+      }
+    },
+    "android": {
+      "package": "com.spekkie13.neuroflow"
+    },
+    "ios": {
+      "bundleIdentifier": "com.spekkie13.neuroflow",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}

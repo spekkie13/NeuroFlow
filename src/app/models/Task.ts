@@ -5,7 +5,6 @@ export interface Task {
     name: string
     completed: boolean
     priority: Priority
-    startDate: string | null
-    endDate: string | null
+    date: string | null
     notes: string
 }

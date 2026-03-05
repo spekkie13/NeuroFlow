@@ -31,17 +31,12 @@ export const Timeline: React.FC<TimelineProps> = ({
     }, [today])
 
     const isOverdue = (task: Task) => {
-        if (!task.endDate || task.completed) return false
-        return startOfDay(new Date(task.endDate)) < startOfDay(today)
+        if (!task.date || task.completed) return false
+        return startOfDay(new Date(task.date)) < startOfDay(today)
     }
 
-    // Taken zonder datum OF overdue (niet voltooid)
     const selectableExistingTasks = useMemo(
-        () =>
-            project.tasks.filter((task) => {
-                const hasNoDates = !task.startDate || !task.endDate
-                return hasNoDates || isOverdue(task)
-            }),
+        () => project.tasks.filter((task) => !task.date || isOverdue(task)),
         [project.tasks],
     )
 
@@ -49,14 +44,8 @@ export const Timeline: React.FC<TimelineProps> = ({
         return dates.map((date) => {
             const dateStr = date.toISOString().split('T')[0]
             const tasksForDay = project.tasks.filter((task) => {
-                if (!task.startDate || !task.endDate) return false
-                const startStr = new Date(task.startDate)
-                    .toISOString()
-                    .split('T')[0]
-                const endStr = new Date(task.endDate)
-                    .toISOString()
-                    .split('T')[0]
-                return dateStr >= startStr && dateStr <= endStr
+                if (!task.date) return false
+                return new Date(task.date).toISOString().split('T')[0] === dateStr
             })
 
             // sorteer op priority: high > medium > low
@@ -155,8 +144,8 @@ export const Timeline: React.FC<TimelineProps> = ({
                             <View style={styles.columnBody}>
                                 {tasks.map((task) => {
                                     const dateRange = formatLocalDateRange(
-                                        task.startDate,
-                                        task.endDate,
+                                        task.date,
+                                        task.date,
                                     )
                                     const overdue = isOverdue(task)
 

@@ -9,21 +9,15 @@ import {AppButton} from "@/app/components/ui/AppButton";
 export const RescheduleModal: React.FC<RescheduleModalProps> = ({
                                                                     visible,
                                                                     taskName,
-                                                                    startDate,
-                                                                    onChangeStartDate,
-                                                                    onChangeEndDate,
+                                                                    date,
+                                                                    onChangeDate,
                                                                     onSave,
                                                                     onCancel,
                                                                 }: RescheduleModalProps) => {
     if (!visible) return null
 
     const placeholder = getDateInputPlaceholder()
-    const disabled = !startDate
-
-    const handleChangeDate = (value: string) => {
-        onChangeStartDate(value)
-        onChangeEndDate(value)
-    }
+    const disabled = !date
 
     return (
         <Modal
@@ -55,8 +49,8 @@ export const RescheduleModal: React.FC<RescheduleModalProps> = ({
                             New date ({placeholder})
                         </Text>
                         <DateField
-                            value={startDate}
-                            onChangeText={handleChangeDate}
+                            value={date}
+                            onChangeText={onChangeDate}
                             placeholder={placeholder}
                         />
                     </View>
