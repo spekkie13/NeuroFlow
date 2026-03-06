@@ -1,7 +1,14 @@
-import {ViewType} from "@/app/props/ui/BottomNavProps";
-import {Calendar, ListTodo, User as UserIcon} from "lucide-react-native";
+import { ComponentType } from 'react'
+import { ViewType } from "@/app/props/ui/BottomNavProps";
+import { Calendar, ListTodo, User as UserIcon } from "lucide-react-native";
 
-export const navItems = [
+type NavItem = {
+    id: ViewType
+    label: string
+    icon: ComponentType<{ size?: number; color?: string; strokeWidth?: number }>
+}
+
+export const navItems: NavItem[] = [
     {
         id: 'tasks' as ViewType,
         label: 'Tasks',

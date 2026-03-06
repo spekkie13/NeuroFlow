@@ -55,7 +55,8 @@ export function useProjects(): UseProjectsResult {
         }
     }, [])
 
-    const persist = async (next: Project[]) => {
+    // Optimistic update: apply state immediately, then persist to storage.
+    const persist = async (next: Project[]): Promise<void> => {
         setProjects(next)
         await saveProjectsForAccount(next)
     }

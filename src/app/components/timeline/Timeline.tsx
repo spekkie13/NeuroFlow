@@ -12,6 +12,8 @@ import { Task } from "@/app/models/Task";
 import { TimelineProps } from "@/app/props/timeline/TimelineProps";
 import { styles } from '@/app/styles/timeline'
 
+// Cast View to accept web-only mouse event props (onMouseDown etc.) that
+// React Native's type definitions don't include but are valid on web builds.
 const WebView = View as React.ComponentType<any>
 
 export type TimelineHandle = { scrollToToday: () => void }
@@ -50,22 +52,27 @@ export const Timeline = ({
     const [isGrabbing, setIsGrabbing] = useState(false)
     const [isScrolled, setIsScrolled] = useState(false)
 
-    const handleMouseDown = (e: any) => {
+    // Mouse event handlers for click-and-drag scrolling on web.
+    // Parameters typed as `any` because React Native's types don't include
+    // web MouseEvent; the underlying DOM event is accessed at runtime.
+    const handleMouseDown = (e: any): void => {
         isDragging.current = true
         setIsGrabbing(true)
         dragStartX.current = e.clientX
+        // getScrollableNode() is a React Native Web internal that returns the
+        // underlying DOM element, giving us access to scrollLeft.
         const node = (scrollViewRef.current as any)?.getScrollableNode?.()
         dragStartScrollLeft.current = node?.scrollLeft ?? 0
     }
 
-    const handleMouseMove = (e: any) => {
+    const handleMouseMove = (e: any): void => {
         if (!isDragging.current) return
         e.preventDefault()
         const node = (scrollViewRef.current as any)?.getScrollableNode?.()
         if (node) node.scrollLeft = dragStartScrollLeft.current - (e.clientX - dragStartX.current)
     }
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (): void => {
         isDragging.current = false
         setIsGrabbing(false)
     }

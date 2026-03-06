@@ -71,7 +71,7 @@ function getStylesForVariant(
     size: AppButtonSize,
     fullWidth?: boolean,
     disabled?: boolean,
-) {
+): { containerStyle: ViewStyle; textBaseStyle: TextStyle; spinnerColor: string } {
     const paddingVertical =
         size === 'sm' ? 8 : size === 'lg' ? 14 : 10
     const paddingHorizontal =

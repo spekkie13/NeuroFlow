@@ -50,7 +50,8 @@ export function useWorkspaces(): UseAccountsResult {
         }
     }, [])
 
-    const persist = async (next: Workspace[]) => {
+    // Optimistic update: apply state immediately, then persist to storage.
+    const persist = async (next: Workspace[]): Promise<void> => {
         setWorkspaces(next)
         await saveAccounts(next)
     }

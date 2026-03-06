@@ -67,6 +67,10 @@ export function doesTaskCoverDate(task: Task, date: Date): boolean {
     return target.getTime() === start.getTime()
 }
 
+/**
+ * Returns true if the task has a past due date and is not yet completed.
+ * Completed tasks are never considered overdue.
+ */
 export function isOverdue(task: Task): boolean {
     if (!task.date || task.completed) return false
     return startOfDay(new Date(task.date)) < startOfDay(new Date())

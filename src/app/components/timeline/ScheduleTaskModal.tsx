@@ -11,8 +11,8 @@ import {
     toIsoDateString,
 } from '@/app/utils/dateUtils'
 import { Priority } from '@/app/models/Priority'
-import { Task } from '@/app/models/Task'
 import { ScheduleTaskModalProps } from '@/app/props/ui/ScheduleTaskModalProps'
+import { createTask } from '@/app/services/domain/TaskService'
 import { getPriorityStyle } from '@/app/utils/priorityUtils'
 import { styles } from '@/app/styles/timeline'
 
@@ -43,23 +43,19 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
         setModalTab(selectableExistingTasks.length > 0 ? 'existing' : 'new')
     }, [visible])
 
-    const handleAddNewTask = () => {
+    const handleAddNewTask = (): void => {
         if (!newTaskName.trim() || !taskDate) return
         const start = parseLocalDate(taskDate)
         if (!start) return
-        const newTask: Task = {
-            id: Date.now().toString(),
+        onAddNewTask(createTask({
             name: newTaskName.trim(),
-            completed: false,
             priority: newTaskPriority,
             date: toIsoDateString(start)!,
-            notes: '',
-        }
-        onAddNewTask(newTask)
+        }))
         onClose()
     }
 
-    const handleAddExistingTask = () => {
+    const handleAddExistingTask = (): void => {
         if (!selectedExistingTaskId || !taskDate) return
         const start = parseLocalDate(taskDate)
         if (!start) return

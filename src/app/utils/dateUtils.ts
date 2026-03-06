@@ -29,7 +29,8 @@ export const inferDateSeparator = (template: string): string => {
     return '/' // fallback
 }
 
-export const pad2 = (n: number) => (n < 10 ? `0${n}` : `${n}`)
+/** Zero-pads a number to 2 digits. e.g. 5 → "05", 12 → "12" */
+export const pad2 = (n: number): string => (n < 10 ? `0${n}` : `${n}`)
 
 const toDate = (value: LocalDateInput): Date | null => {
     if (!value) return null
