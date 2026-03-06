@@ -27,6 +27,7 @@ export const Timeline = React.forwardRef<TimelineHandle, TimelineProps>(({
     const dragStartX = useRef(0)
     const dragStartScrollLeft = useRef(0)
     const [isGrabbing, setIsGrabbing] = useState(false)
+    const [isScrolled, setIsScrolled] = useState(false)
 
     const handleMouseDown = (e: any) => {
         isDragging.current = true
@@ -127,6 +128,8 @@ export const Timeline = React.forwardRef<TimelineHandle, TimelineProps>(({
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.columnsScroll}
+                onScroll={(e) => setIsScrolled(e.nativeEvent.contentOffset.x > 0)}
+                scrollEventThrottle={16}
             >
                 {dates.map((date, index) => {
                     const { tasks, completedCount } = tasksByDate[index]
@@ -279,6 +282,14 @@ export const Timeline = React.forwardRef<TimelineHandle, TimelineProps>(({
                     )
                 })}
             </ScrollView>
+            {isScrolled && (
+                <LinearGradient
+                    colors={['rgba(255,255,255,0.95)', 'transparent']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 48, pointerEvents: 'none' }}
+                />
+            )}
             <LinearGradient
                 colors={['transparent', 'rgba(255,255,255,0.95)']}
                 start={{ x: 0, y: 0 }}
