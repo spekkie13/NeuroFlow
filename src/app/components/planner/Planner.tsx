@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { SafeAreaView, View, ScrollView, Text, TouchableOpacity } from 'react-native'
-import { Plus, ChevronDown } from 'lucide-react-native'
+import { Plus, ChevronDown, List } from 'lucide-react-native'
 import { TaskView } from '@/app/components/tasks/TaskView'
 import { AppButton } from '@/app/components/ui/AppButton'
-import { Timeline } from '@/app/components/timeline/Timeline'
+import { Timeline, TimelineHandle } from '@/app/components/timeline/Timeline'
+import { startOfDay } from '../../utils/dateUtils'
 import { BottomNav } from '@/app/components/ui/BottomNav'
 import { SettingsView } from '@/app/components/account/SettingsView'
 import { CreateProjectModal } from '@/app/components/planner/CreateProjectModal'
@@ -68,6 +69,18 @@ export const Planner: React.FC = () => {
         await addProject(name)
         closeProjectModal()
     }
+
+    const timelineRefs = useRef<Record<string, React.RefObject<TimelineHandle>>>({})
+    const getTimelineRef = (projectId: string): React.RefObject<TimelineHandle> => {
+        if (!timelineRefs.current[projectId]) {
+            timelineRefs.current[projectId] = React.createRef<TimelineHandle>()
+        }
+        return timelineRefs.current[projectId]
+    }
+
+    const today = new Date()
+    const getUnscheduledCount = (tasks: { date?: string | null; completed: boolean }[]) =>
+        tasks.filter(t => !t.date || (!t.completed && new Date(t.date) < startOfDay(today))).length
 
     const activeProject =
         projects.length === 0
@@ -224,31 +237,59 @@ export const Planner: React.FC = () => {
         }
 
         return (
-            <ScrollView
-                style={styles.timelineScroll}
-                contentContainerStyle={styles.timelineContent}
-            >
-                {projects.map((project) => (
-                    <View key={project.id} style={styles.projectSection}>
-                        <View style={styles.projectHeader}>
-                            <View
-                                style={[
-                                    styles.projectColorDot,
-                                    { backgroundColor: project.color },
-                                ]}
-                            />
-                            <Text style={styles.projectTitle}>{project.name}</Text>
-                        </View>
-                        <Timeline
-                            project={project}
-                            onAddTask={(task) => addTask(project.id, task)}
-                            onUpdateTask={(taskId, updates) =>
-                                updateTask(project.id, taskId, updates)
-                            }
-                        />
+            <View style={{ flex: 1 }}>
+                {/* Shared header */}
+                <View style={styles.timelineHeader}>
+                    <View>
+                        <Text style={styles.timelineHeaderTitle}>Timeline View</Text>
+                        <Text style={styles.timelineHeaderSubtitle}>Next 14 days</Text>
                     </View>
-                ))}
-            </ScrollView>
+                </View>
+
+                <ScrollView
+                    style={styles.timelineScroll}
+                    contentContainerStyle={styles.timelineContent}
+                >
+                    {projects.map((project) => {
+                        const unscheduledCount = getUnscheduledCount(project.tasks)
+                        return (
+                            <View key={project.id} style={styles.projectSection}>
+                                <View style={styles.projectHeader}>
+                                    <View style={styles.projectHeaderLeft}>
+                                        <View style={[styles.projectColorDot, { backgroundColor: project.color }]} />
+                                        <Text style={styles.projectTitle}>{project.name}</Text>
+                                    </View>
+                                    <View style={styles.projectHeaderActions}>
+                                        {unscheduledCount > 0 && (
+                                            <View style={styles.projectUnscheduledBadge}>
+                                                <List size={13} color="#92400e" />
+                                                <Text style={styles.projectUnscheduledText}>
+                                                    {unscheduledCount} need scheduling
+                                                </Text>
+                                            </View>
+                                        )}
+                                        <TouchableOpacity
+                                            style={styles.projectTodayButton}
+                                            onPress={() => getTimelineRef(project.id).current?.scrollToToday()}
+                                            activeOpacity={0.7}
+                                        >
+                                            <Text style={styles.projectTodayButtonText}>Today</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                                <Timeline
+                                    ref={getTimelineRef(project.id)}
+                                    project={project}
+                                    onAddTask={(task) => addTask(project.id, task)}
+                                    onUpdateTask={(taskId, updates) =>
+                                        updateTask(project.id, taskId, updates)
+                                    }
+                                />
+                            </View>
+                        )
+                    })}
+                </ScrollView>
+            </View>
         )
     }
 

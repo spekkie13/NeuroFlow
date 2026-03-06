@@ -1,8 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 const WebView = View as React.ComponentType<any>
-import { Plus, List, CheckCircle2, Circle } from 'lucide-react-native'
+
+export type TimelineHandle = { scrollToToday: () => void }
+import { Plus, CheckCircle2, Circle } from 'lucide-react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { ScheduleTaskModal } from '@/app/components/timeline/ScheduleTaskModal'
 import { startOfDay, formatLocalDateRange } from '../../utils/dateUtils'
@@ -12,11 +14,11 @@ import { Task } from "@/app/models/Task";
 import { TimelineProps } from "@/app/props/timeline/TimelineProps";
 import { styles } from '@/app/styles/timeline'
 
-export const Timeline: React.FC<TimelineProps> = ({
+export const Timeline = React.forwardRef<TimelineHandle, TimelineProps>(({
                                                       project,
                                                       onAddTask,
                                                       onUpdateTask,
-                                                  }) => {
+                                                  }, ref) => {
     const [showModal, setShowModal] = useState(false)
     const [selectedDate, setSelectedDate] = useState<Date | null>(null)
 
@@ -45,6 +47,10 @@ export const Timeline: React.FC<TimelineProps> = ({
         isDragging.current = false
         setIsGrabbing(false)
     }
+
+    useImperativeHandle(ref, () => ({
+        scrollToToday: () => scrollViewRef.current?.scrollTo({ x: 0, animated: true }),
+    }))
 
     // #1 — scroll to today on mount
     useEffect(() => {
@@ -108,35 +114,6 @@ export const Timeline: React.FC<TimelineProps> = ({
 
     return (
         <View style={styles.container}>
-            {/* Header */}
-            <View style={styles.headerRow}>
-                <View>
-                    <Text style={styles.headerTitle}>Timeline View</Text>
-                    <Text style={styles.headerSubtitle}>Next 14 days</Text>
-                </View>
-
-                <View style={styles.headerRight}>
-                    {/* #2 — jump to today */}
-                    <TouchableOpacity
-                        style={styles.todayJumpButton}
-                        onPress={() => scrollViewRef.current?.scrollTo({ x: 0, animated: true })}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={styles.todayJumpButtonText}>Today</Text>
-                    </TouchableOpacity>
-
-                    {selectableExistingTasks.length > 0 && (
-                        <View style={styles.badge}>
-                            <List size={16} color="#92400e" />
-                            <Text style={styles.badgeText}>
-                                {selectableExistingTasks.length} task
-                                {selectableExistingTasks.length !== 1 ? 's' : ''} need scheduling
-                            </Text>
-                        </View>
-                    )}
-                </View>
-            </View>
-
             {/* Columns */}
             <WebView
                 style={{ position: 'relative', cursor: isGrabbing ? 'grabbing' : 'grab' }}
@@ -320,4 +297,4 @@ export const Timeline: React.FC<TimelineProps> = ({
             />
         </View>
     )
-}
+})
