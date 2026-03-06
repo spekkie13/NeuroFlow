@@ -4,7 +4,8 @@ import { ArrowDown, ArrowUp, CheckCircle2, Circle, Clock, Edit3, FileText, Flag,
 import { TextField } from '@/app/components/ui/TextField'
 import { IconButton } from '@/app/components/ui/IconButton'
 import { MenuItem } from '@/app/components/ui/MenuItem'
-import { formatLocalDateRange, startOfDay } from '@/app/utils/dateUtils'
+import { formatLocalDate } from '@/app/utils/dateUtils'
+import { isOverdue } from '@/app/services/domain/TaskService'
 import { getPriorityStyle } from '@/app/utils/priorityUtils'
 import { TaskItemProps } from '@/app/props/tasks/TaskItemProps'
 import { styles } from '@/app/styles/taskView'
@@ -30,8 +31,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     onDelete,
     onSaveNotes,
 }) => {
-    const rangeLabel = task.date ? formatLocalDateRange(task.date, task.date) : null
-    const overdue = !task.completed && !!task.date && startOfDay(new Date(task.date)) < startOfDay(new Date())
+    const rangeLabel = task.date ? formatLocalDate(task.date) : null
+    const overdue = isOverdue(task)
 
     const [notesExpanded, setNotesExpanded] = useState(false)
     const [localNotes, setLocalNotes] = useState(task.notes || '')

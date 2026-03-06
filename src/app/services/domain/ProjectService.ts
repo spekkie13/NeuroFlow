@@ -1,9 +1,6 @@
 import { Project } from "@/app/models/Project";
 import { Task } from "@/app/models/Task";
-
-function generateId(): string {
-    return Date.now().toString()
-}
+import { generateId } from '@/app/utils/idUtils'
 
 export function createProject(params: { name: string; color: string }): Project {
     const trimmed = params.name.trim()

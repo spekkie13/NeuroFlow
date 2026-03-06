@@ -1,9 +1,7 @@
 import { Priority } from "@/app/models/Priority";
 import { Task } from "@/app/models/Task";
-
-function generateId(): string {
-    return Date.now().toString()
-}
+import { startOfDay } from '@/app/utils/dateUtils'
+import { generateId } from '@/app/utils/idUtils'
 
 export function createTask(params: {
     name: string
@@ -67,4 +65,9 @@ export function doesTaskCoverDate(task: Task, date: Date): boolean {
     const start = new Date(new Date(task.date).toISOString().split('T')[0])
 
     return target.getTime() === start.getTime()
+}
+
+export function isOverdue(task: Task): boolean {
+    if (!task.date || task.completed) return false
+    return startOfDay(new Date(task.date)) < startOfDay(new Date())
 }

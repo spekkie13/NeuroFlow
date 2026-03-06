@@ -9,6 +9,7 @@ import { RescheduleModal } from '@/app/components/tasks/RescheduleModal'
 import { formatLocalDate, parseLocalDate, toIsoDateString } from '@/app/utils/dateUtils'
 import { Priority } from '@/app/models/Priority'
 import { Task } from '@/app/models/Task'
+import { createTask } from '@/app/services/domain/TaskService'
 import { TaskViewProps } from '@/app/props/tasks/TaskViewProps'
 import { styles } from '@/app/styles/taskView'
 
@@ -42,15 +43,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
     const handleAddTask = () => {
         const trimmed = newTaskName.trim()
         if (!trimmed) return
-        const task: Task = {
-            id: Date.now().toString(),
-            name: trimmed,
-            completed: false,
-            priority: 'medium',
-            date: null,
-            notes: '',
-        }
-        onAddTask(task)
+        onAddTask(createTask({ name: trimmed }))
         setNewTaskName('')
     }
 

@@ -6,7 +6,8 @@ import {
     saveAccounts,
     setCurrentWorkspaceId,
 } from '../services/storage/accountStorage'
-import {Workspace} from "@/app/models/Workspace";
+import { Workspace } from "@/app/models/Workspace";
+import { generateId } from '@/app/utils/idUtils'
 
 interface UseAccountsResult {
     workspaces: Workspace[]
@@ -56,7 +57,7 @@ export function useWorkspaces(): UseAccountsResult {
 
     const addWorkspace = async (name: string) => {
         const newWorkspace: Workspace = {
-            id: Date.now().toString(),
+            id: generateId(),
             name,
             createdAt: new Date().toISOString(),
         }

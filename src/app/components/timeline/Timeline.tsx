@@ -1,19 +1,22 @@
 import React, { useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
-
-const WebView = View as React.ComponentType<any>
-
-export type TimelineHandle = { scrollToToday: () => void }
 import { Plus, CheckCircle2, Circle } from 'lucide-react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { ScheduleTaskModal } from '@/app/components/timeline/ScheduleTaskModal'
-import { startOfDay, formatLocalDateRange, formatLocalDate, parseLocalDate, toIsoDateString } from '../../utils/dateUtils'
+import { formatLocalDateRange, formatLocalDate, parseLocalDate, toIsoDateString, isSameDay } from '../../utils/dateUtils'
+import { isOverdue } from '@/app/services/domain/TaskService'
 import { RescheduleModal } from '@/app/components/tasks/RescheduleModal'
 import { getPriorityStyle } from '@/app/utils/priorityUtils'
 import { Priority } from "@/app/models/Priority";
 import { Task } from "@/app/models/Task";
 import { TimelineProps } from "@/app/props/timeline/TimelineProps";
 import { styles } from '@/app/styles/timeline'
+
+const WebView = View as React.ComponentType<any>
+
+export type TimelineHandle = { scrollToToday: () => void }
+
+const PRIORITY_ORDER: Record<Priority, number> = { high: 0, medium: 1, low: 2 }
 
 export const Timeline = ({
     project,
@@ -78,10 +81,6 @@ export const Timeline = ({
 
     const today = useMemo(() => new Date(), [])
 
-    const isToday = (date: Date) => {
-        return startOfDay(date).getTime() === startOfDay(today).getTime()
-    }
-
     const dates = useMemo(() => {
         return Array.from({ length: 14 }, (_, i) => {
             const d = new Date(today)
@@ -90,39 +89,27 @@ export const Timeline = ({
         })
     }, [today])
 
-    const isOverdue = (task: Task) => {
-        if (!task.date || task.completed) return false
-        return startOfDay(new Date(task.date)) < startOfDay(today)
-    }
-
     const selectableExistingTasks = useMemo(
         () => project.tasks.filter((task) => !task.date || isOverdue(task)),
         [project.tasks],
     )
 
     const overdueTasks = useMemo(() => {
-        const priorityOrder: Record<Priority, number> = { high: 0, medium: 1, low: 2 }
         return project.tasks
             .filter(isOverdue)
-            .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
+            .sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority])
     }, [project.tasks])
 
     const tasksByDate = useMemo(() => {
         return dates.map((date) => {
-            const dateStr = date.toISOString().split('T')[0]
+            const dateStr = toIsoDateString(date)
             const tasksForDay = project.tasks.filter((task) => {
                 if (!task.date) return false
-                return new Date(task.date).toISOString().split('T')[0] === dateStr
+                return task.date === dateStr
             })
 
-            // sorteer op priority: high > medium > low
-            const priorityOrder: Record<Priority, number> = {
-                high: 0,
-                medium: 1,
-                low: 2,
-            }
             tasksForDay.sort(
-                (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority],
+                (a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority],
             )
 
             return { date, tasks: tasksForDay, completedCount: tasksForDay.filter(t => t.completed).length }
@@ -223,7 +210,7 @@ export const Timeline = ({
                             key={index}
                             style={[
                                 styles.column,
-                                isToday(date) && styles.columnToday,
+                                isSameDay(date, today) && styles.columnToday,
                             ]}
                         >
                             <View style={styles.columnHeader}>
@@ -234,7 +221,7 @@ export const Timeline = ({
                                     <Text
                                         style={[
                                             styles.todayBadgeInline,
-                                            !isToday(date) && styles.todayBadgeHidden,
+                                            !isSameDay(date, today) && styles.todayBadgeHidden,
                                         ]}
                                     >
                                         Today

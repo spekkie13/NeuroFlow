@@ -1,5 +1,6 @@
 import { Workspace } from "@/app/models/Workspace";
 import { getJsonItem, removeItem, setJsonItem } from './baseStorage'
+import { generateId } from '@/app/utils/idUtils'
 
 const ACCOUNTS_KEY = 'adhd-planner:accounts'
 const CURRENT_ACCOUNT_KEY = 'adhd-planner:accounts:current'
@@ -8,7 +9,7 @@ export async function loadWorkspaces(): Promise<Workspace[]> {
     const stored = await getJsonItem<Workspace[]>(ACCOUNTS_KEY)
     if (!stored || stored.length === 0) {
         const defaultAccount: Workspace = {
-            id: Date.now().toString(),
+            id: generateId(),
             name: 'My Workspace',
             createdAt: new Date().toISOString(),
         }

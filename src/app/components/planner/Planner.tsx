@@ -4,8 +4,9 @@ import { Plus, ChevronDown, List, Pencil } from 'lucide-react-native'
 import { TaskView } from '@/app/components/tasks/TaskView'
 import { AppButton } from '@/app/components/ui/AppButton'
 import { Timeline, TimelineHandle } from '@/app/components/timeline/Timeline'
-import { startOfDay } from '../../utils/dateUtils'
 import { getNextProjectColor } from '@/app/services/domain/ProjectColorService'
+import { isOverdue } from '@/app/services/domain/TaskService'
+import { Task } from '@/app/models/Task'
 import { BottomNav } from '@/app/components/ui/BottomNav'
 import { SettingsView } from '@/app/components/account/SettingsView'
 import { CreateProjectModal } from '@/app/components/planner/CreateProjectModal'
@@ -107,9 +108,8 @@ export const Planner: React.FC = () => {
         return timelineRefs.current[projectId]
     }
 
-    const today = new Date()
-    const getUnscheduledCount = (tasks: { date?: string | null; completed: boolean }[]) =>
-        tasks.filter(t => !t.date || (!t.completed && new Date(t.date) < startOfDay(today))).length
+    const getUnscheduledCount = (tasks: Task[]) =>
+        tasks.filter(t => !t.date || isOverdue(t)).length
 
     const activeProject =
         projects.length === 0
