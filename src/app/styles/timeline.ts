@@ -54,6 +54,27 @@ export const styles = StyleSheet.create({
         borderColor: '#2563eb',
         backgroundColor: '#f0f7ff',
     },
+    columnOverdue: {
+        borderColor: '#fca5a5',
+        backgroundColor: '#fff7f7',
+    },
+    columnOverdueHeader: {
+        backgroundColor: '#fef2f2',
+        borderBottomColor: '#fca5a5',
+    },
+    columnOverdueLabel: {
+        fontSize: 11,
+        textTransform: 'uppercase',
+        letterSpacing: 0.6,
+        fontWeight: '600',
+        color: '#dc2626',
+    },
+    columnOverdueCount: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: '#ef4444',
+        marginTop: 2,
+    },
     columnHeader: {
         paddingHorizontal: 10,
         paddingVertical: 8,

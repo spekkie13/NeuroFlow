@@ -82,6 +82,13 @@ export const Timeline = React.forwardRef<TimelineHandle, TimelineProps>(({
         [project.tasks],
     )
 
+    const overdueTasks = useMemo(() => {
+        const priorityOrder: Record<Priority, number> = { high: 0, medium: 1, low: 2 }
+        return project.tasks
+            .filter(isOverdue)
+            .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
+    }, [project.tasks])
+
     const tasksByDate = useMemo(() => {
         return dates.map((date) => {
             const dateStr = date.toISOString().split('T')[0]
@@ -131,6 +138,53 @@ export const Timeline = React.forwardRef<TimelineHandle, TimelineProps>(({
                 onScroll={(e) => setIsScrolled(e.nativeEvent.contentOffset.x > 0)}
                 scrollEventThrottle={16}
             >
+                {/* #6 — overdue column */}
+                {overdueTasks.length > 0 && (
+                    <View style={[styles.column, styles.columnOverdue]}>
+                        <View style={[styles.columnHeader, styles.columnOverdueHeader]}>
+                            <Text style={styles.columnOverdueLabel}>Overdue</Text>
+                            <Text style={styles.columnOverdueCount}>
+                                {overdueTasks.length} task{overdueTasks.length !== 1 ? 's' : ''}
+                            </Text>
+                        </View>
+                        <View style={styles.columnBody}>
+                            {overdueTasks.map((task) => {
+                                const dateRange = formatLocalDateRange(task.date, task.date)
+                                return (
+                                    <View
+                                        key={task.id}
+                                        style={[styles.taskCard, { borderLeftColor: '#ef4444' }]}
+                                    >
+                                        <View style={styles.taskRow}>
+                                            <TouchableOpacity
+                                                onPress={() => handleToggleComplete(task)}
+                                                style={styles.checkButton}
+                                                activeOpacity={0.7}
+                                                delayPressIn={50}
+                                            >
+                                                <Circle size={16} color="#9ca3af" />
+                                            </TouchableOpacity>
+                                            <View style={styles.taskContent}>
+                                                <Text style={styles.taskName} numberOfLines={2}>
+                                                    {task.name}
+                                                </Text>
+                                                {dateRange && (
+                                                    <Text style={[styles.taskDates, styles.taskDatesOverdue]}>
+                                                        {dateRange}
+                                                    </Text>
+                                                )}
+                                                <View style={[styles.priorityBadge, getPriorityStyle(task.priority, styles.priorityBadgeHigh, styles.priorityBadgeMedium, styles.priorityBadgeLow)]}>
+                                                    <Text style={styles.priorityBadgeText}>{task.priority}</Text>
+                                                </View>
+                                            </View>
+                                        </View>
+                                    </View>
+                                )
+                            })}
+                        </View>
+                    </View>
+                )}
+
                 {dates.map((date, index) => {
                     const { tasks, completedCount } = tasksByDate[index]
                     const weekday = date.toLocaleDateString(undefined, {
@@ -215,6 +269,7 @@ export const Timeline = React.forwardRef<TimelineHandle, TimelineProps>(({
                                                     onPress={() => handleToggleComplete(task)}
                                                     style={styles.checkButton}
                                                     activeOpacity={0.7}
+                                                    delayPressIn={50}
                                                 >
                                                     {task.completed ? (
                                                         <CheckCircle2
@@ -269,6 +324,7 @@ export const Timeline = React.forwardRef<TimelineHandle, TimelineProps>(({
                                     style={styles.addTaskButton}
                                     onPress={() => openAddModalForDate(date)}
                                     activeOpacity={0.8}
+                                    delayPressIn={50}
                                 >
                                     <Plus
                                         size={14}
