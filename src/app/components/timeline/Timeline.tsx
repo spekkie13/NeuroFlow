@@ -1,5 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
+
+const WebView = View as React.ComponentType<any>
 import { Plus, List, CheckCircle2, Circle } from 'lucide-react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { ScheduleTaskModal } from '@/app/components/timeline/ScheduleTaskModal'
@@ -120,8 +122,8 @@ export const Timeline: React.FC<TimelineProps> = ({
             </View>
 
             {/* Columns */}
-            <View
-                style={{ position: 'relative', cursor: isGrabbing ? 'grabbing' : 'grab' } as any}
+            <WebView
+                style={{ position: 'relative', cursor: isGrabbing ? 'grabbing' : 'grab' }}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
@@ -268,7 +270,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                 end={{ x: 1, y: 0 }}
                 style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 48, pointerEvents: 'none' }}
             />
-            </View>
+            </WebView>
 
             <ScheduleTaskModal
                 visible={showModal}
