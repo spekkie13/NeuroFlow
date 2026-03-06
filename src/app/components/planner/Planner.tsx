@@ -99,8 +99,8 @@ export const Planner: React.FC = () => {
         setIsEditProjectModalVisible(false)
     }
 
-    const timelineRefs = useRef<Record<string, React.RefObject<TimelineHandle>>>({})
-    const getTimelineRef = (projectId: string): React.RefObject<TimelineHandle> => {
+    const timelineRefs = useRef<Record<string, React.RefObject<TimelineHandle | null>>>({})
+    const getTimelineRef = (projectId: string): React.RefObject<TimelineHandle | null> => {
         if (!timelineRefs.current[projectId]) {
             timelineRefs.current[projectId] = React.createRef<TimelineHandle>()
         }

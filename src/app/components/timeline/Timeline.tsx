@@ -20,7 +20,7 @@ export const Timeline = ({
     onAddTask,
     onUpdateTask,
     ref,
-}: TimelineProps & { ref?: React.Ref<TimelineHandle> }) => {
+}: TimelineProps & { ref?: React.Ref<TimelineHandle | null> }) => {
     const [showModal, setShowModal] = useState(false)
     const [selectedDate, setSelectedDate] = useState<Date | null>(null)
     const [rescheduleTask, setRescheduleTask] = useState<Task | null>(null)

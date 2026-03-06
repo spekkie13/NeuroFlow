@@ -21,8 +21,8 @@ export const TextField: React.FC<TextFieldProps> = ({
                 <TextInput
                     style={[
                         styles.input,
-                        leftIcon && { paddingLeft: 36 },
-                        rightIcon && { paddingRight: 36 },
+                        leftIcon ? { paddingLeft: 36 } : undefined,
+                        rightIcon ? { paddingRight: 36 } : undefined,
                         inputStyle,
                     ]}
                     placeholderTextColor="#9ca3af"
