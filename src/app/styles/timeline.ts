@@ -349,4 +349,53 @@ export const styles = StyleSheet.create({
     todayBadgeHidden: {
         opacity: 0,
     },
+    headerRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    todayJumpButton: {
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 999,
+        borderWidth: 1,
+        borderColor: '#2563eb',
+    },
+    todayJumpButtonText: {
+        fontSize: 11,
+        fontWeight: '600',
+        color: '#2563eb',
+    },
+    columnStats: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        marginTop: 6,
+    },
+    progressTrack: {
+        flex: 1,
+        height: 3,
+        borderRadius: 999,
+        backgroundColor: '#e5e7eb',
+        overflow: 'hidden',
+    },
+    progressFill: {
+        height: 3,
+        borderRadius: 999,
+    },
+    progressText: {
+        fontSize: 10,
+        fontWeight: '500',
+        color: '#6b7280',
+    },
+    emptyColumn: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 16,
+    },
+    emptyColumnText: {
+        fontSize: 11,
+        color: '#d1d5db',
+    },
 })

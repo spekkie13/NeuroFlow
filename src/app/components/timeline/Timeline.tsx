@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 const WebView = View as React.ComponentType<any>
@@ -46,6 +46,11 @@ export const Timeline: React.FC<TimelineProps> = ({
         setIsGrabbing(false)
     }
 
+    // #1 — scroll to today on mount
+    useEffect(() => {
+        scrollViewRef.current?.scrollTo({ x: 0, animated: false })
+    }, [])
+
     const today = useMemo(() => new Date(), [])
 
     const isToday = (date: Date) => {
@@ -88,7 +93,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                 (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority],
             )
 
-            return { date, tasks: tasksForDay }
+            return { date, tasks: tasksForDay, completedCount: tasksForDay.filter(t => t.completed).length }
         })
     }, [dates, project.tasks])
 
@@ -110,15 +115,26 @@ export const Timeline: React.FC<TimelineProps> = ({
                     <Text style={styles.headerSubtitle}>Next 14 days</Text>
                 </View>
 
-                {selectableExistingTasks.length > 0 && (
-                    <View style={styles.badge}>
-                        <List size={16} color="#92400e" />
-                        <Text style={styles.badgeText}>
-                            {selectableExistingTasks.length} task
-                            {selectableExistingTasks.length !== 1 ? 's' : ''} need scheduling
-                        </Text>
-                    </View>
-                )}
+                <View style={styles.headerRight}>
+                    {/* #2 — jump to today */}
+                    <TouchableOpacity
+                        style={styles.todayJumpButton}
+                        onPress={() => scrollViewRef.current?.scrollTo({ x: 0, animated: true })}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={styles.todayJumpButtonText}>Today</Text>
+                    </TouchableOpacity>
+
+                    {selectableExistingTasks.length > 0 && (
+                        <View style={styles.badge}>
+                            <List size={16} color="#92400e" />
+                            <Text style={styles.badgeText}>
+                                {selectableExistingTasks.length} task
+                                {selectableExistingTasks.length !== 1 ? 's' : ''} need scheduling
+                            </Text>
+                        </View>
+                    )}
+                </View>
             </View>
 
             {/* Columns */}
@@ -136,7 +152,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                 contentContainerStyle={styles.columnsScroll}
             >
                 {dates.map((date, index) => {
-                    const { tasks } = tasksByDate[index]
+                    const { tasks, completedCount } = tasksByDate[index]
                     const weekday = date.toLocaleDateString(undefined, {
                         weekday: 'short',
                     })
@@ -169,9 +185,31 @@ export const Timeline: React.FC<TimelineProps> = ({
                                 </View>
 
                                 <Text style={styles.columnDate}>{dayMonth}</Text>
+
+                                {/* #4 & #5 — task count + progress */}
+                                {tasks.length > 0 && (
+                                    <View style={styles.columnStats}>
+                                        <View style={styles.progressTrack}>
+                                            <View style={[styles.progressFill, {
+                                                width: `${Math.round((completedCount / tasks.length) * 100)}%` as any,
+                                                backgroundColor: completedCount === tasks.length ? '#22c55e' : '#2563eb',
+                                            }]} />
+                                        </View>
+                                        <Text style={styles.progressText}>
+                                            {completedCount}/{tasks.length}
+                                        </Text>
+                                    </View>
+                                )}
                             </View>
 
                             <View style={styles.columnBody}>
+                                {/* #3 — empty state */}
+                                {tasks.length === 0 && (
+                                    <View style={styles.emptyColumn}>
+                                        <Text style={styles.emptyColumnText}>No tasks</Text>
+                                    </View>
+                                )}
+
                                 {tasks.map((task) => {
                                     const dateRange = formatLocalDateRange(
                                         task.date,
