@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Plus, List, CheckCircle2, Circle } from 'lucide-react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import { ScheduleTaskModal } from '@/app/components/timeline/ScheduleTaskModal'
 import { startOfDay, formatLocalDateRange } from '../../utils/dateUtils'
 import { getPriorityStyle } from '@/app/utils/priorityUtils'
@@ -16,6 +17,32 @@ export const Timeline: React.FC<TimelineProps> = ({
                                                   }) => {
     const [showModal, setShowModal] = useState(false)
     const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+
+    const scrollViewRef = useRef<ScrollView>(null)
+    const isDragging = useRef(false)
+    const dragStartX = useRef(0)
+    const dragStartScrollLeft = useRef(0)
+    const [isGrabbing, setIsGrabbing] = useState(false)
+
+    const handleMouseDown = (e: any) => {
+        isDragging.current = true
+        setIsGrabbing(true)
+        dragStartX.current = e.clientX
+        const node = (scrollViewRef.current as any)?.getScrollableNode?.()
+        dragStartScrollLeft.current = node?.scrollLeft ?? 0
+    }
+
+    const handleMouseMove = (e: any) => {
+        if (!isDragging.current) return
+        e.preventDefault()
+        const node = (scrollViewRef.current as any)?.getScrollableNode?.()
+        if (node) node.scrollLeft = dragStartScrollLeft.current - (e.clientX - dragStartX.current)
+    }
+
+    const handleMouseUp = () => {
+        isDragging.current = false
+        setIsGrabbing(false)
+    }
 
     const today = useMemo(() => new Date(), [])
 
@@ -93,7 +120,15 @@ export const Timeline: React.FC<TimelineProps> = ({
             </View>
 
             {/* Columns */}
+            <View
+                style={{ position: 'relative', cursor: isGrabbing ? 'grabbing' : 'grab' } as any}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+            >
             <ScrollView
+                ref={scrollViewRef}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.columnsScroll}
@@ -227,6 +262,13 @@ export const Timeline: React.FC<TimelineProps> = ({
                     )
                 })}
             </ScrollView>
+            <LinearGradient
+                colors={['transparent', 'rgba(255,255,255,0.95)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 48, pointerEvents: 'none' }}
+            />
+            </View>
 
             <ScheduleTaskModal
                 visible={showModal}
