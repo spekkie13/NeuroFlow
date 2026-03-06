@@ -15,11 +15,12 @@ import { Task } from "@/app/models/Task";
 import { TimelineProps } from "@/app/props/timeline/TimelineProps";
 import { styles } from '@/app/styles/timeline'
 
-export const Timeline = React.forwardRef<TimelineHandle, TimelineProps>(({
-                                                      project,
-                                                      onAddTask,
-                                                      onUpdateTask,
-                                                  }, ref) => {
+export const Timeline = ({
+    project,
+    onAddTask,
+    onUpdateTask,
+    ref,
+}: TimelineProps & { ref?: React.Ref<TimelineHandle> }) => {
     const [showModal, setShowModal] = useState(false)
     const [selectedDate, setSelectedDate] = useState<Date | null>(null)
     const [rescheduleTask, setRescheduleTask] = useState<Task | null>(null)
@@ -400,4 +401,4 @@ export const Timeline = React.forwardRef<TimelineHandle, TimelineProps>(({
             />
         </View>
     )
-})
+}
