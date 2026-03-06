@@ -244,6 +244,13 @@ export const Planner: React.FC = () => {
                         <Text style={styles.timelineHeaderTitle}>Timeline View</Text>
                         <Text style={styles.timelineHeaderSubtitle}>Next 14 days</Text>
                     </View>
+                    <TouchableOpacity
+                        style={styles.projectTodayButton}
+                        onPress={() => Object.values(timelineRefs.current).forEach(r => r.current?.scrollToToday())}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={styles.projectTodayButtonText}>Today</Text>
+                    </TouchableOpacity>
                 </View>
 
                 <ScrollView
@@ -259,23 +266,14 @@ export const Planner: React.FC = () => {
                                         <View style={[styles.projectColorDot, { backgroundColor: project.color }]} />
                                         <Text style={styles.projectTitle}>{project.name}</Text>
                                     </View>
-                                    <View style={styles.projectHeaderActions}>
-                                        {unscheduledCount > 0 && (
-                                            <View style={styles.projectUnscheduledBadge}>
-                                                <List size={13} color="#92400e" />
-                                                <Text style={styles.projectUnscheduledText}>
-                                                    {unscheduledCount} need scheduling
-                                                </Text>
-                                            </View>
-                                        )}
-                                        <TouchableOpacity
-                                            style={styles.projectTodayButton}
-                                            onPress={() => getTimelineRef(project.id).current?.scrollToToday()}
-                                            activeOpacity={0.7}
-                                        >
-                                            <Text style={styles.projectTodayButtonText}>Today</Text>
-                                        </TouchableOpacity>
-                                    </View>
+                                    {unscheduledCount > 0 && (
+                                        <View style={styles.projectUnscheduledBadge}>
+                                            <List size={13} color="#92400e" />
+                                            <Text style={styles.projectUnscheduledText}>
+                                                {unscheduledCount} need scheduling
+                                            </Text>
+                                        </View>
+                                    )}
                                 </View>
                                 <Timeline
                                     ref={getTimelineRef(project.id)}
