@@ -31,15 +31,20 @@ export const ProjectPickerModal: React.FC<ProjectPickerModalProps> = ({
                             <View
                                 style={[styles.projectDot, { backgroundColor: project.color }]}
                             />
-                            <Text
-                                style={[
-                                    styles.pickerItemText,
-                                    isActive && styles.pickerItemTextActive,
-                                ]}
-                                numberOfLines={1}
-                            >
-                                {project.name}
-                            </Text>
+                            <View style={{ flex: 1 }}>
+                                <Text
+                                    style={[
+                                        styles.pickerItemText,
+                                        isActive && styles.pickerItemTextActive,
+                                    ]}
+                                    numberOfLines={1}
+                                >
+                                    {project.name}
+                                </Text>
+                                <Text style={styles.pickerItemMeta}>
+                                    {project.tasks.length} task{project.tasks.length !== 1 ? 's' : ''} · {project.tasks.filter(t => t.completed).length} done
+                                </Text>
+                            </View>
                         </TouchableOpacity>
                     )
                 })}

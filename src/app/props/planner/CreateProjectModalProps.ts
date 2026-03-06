@@ -4,4 +4,8 @@ export interface CreateProjectModalProps {
     onChangeProjectName: (name: string) => void
     onCreate: () => void
     onCancel: () => void
+    selectedColor: string
+    onSelectColor: (color: string) => void
+    editMode?: boolean
+    onDelete?: () => void
 }

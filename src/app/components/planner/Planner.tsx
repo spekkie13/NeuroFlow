@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { SafeAreaView, View, ScrollView, Text, TouchableOpacity } from 'react-native'
-import { Plus, ChevronDown, List } from 'lucide-react-native'
+import { Plus, ChevronDown, List, Pencil } from 'lucide-react-native'
 import { TaskView } from '@/app/components/tasks/TaskView'
 import { AppButton } from '@/app/components/ui/AppButton'
 import { Timeline, TimelineHandle } from '@/app/components/timeline/Timeline'
 import { startOfDay } from '../../utils/dateUtils'
+import { getNextProjectColor } from '@/app/services/domain/ProjectColorService'
 import { BottomNav } from '@/app/components/ui/BottomNav'
 import { SettingsView } from '@/app/components/account/SettingsView'
 import { CreateProjectModal } from '@/app/components/planner/CreateProjectModal'
@@ -17,9 +18,14 @@ import { styles } from "@/app/styles/planner";
 export const Planner: React.FC = () => {
     const [currentView, setCurrentView] = useState<PlannerView>('tasks')
     const [newProjectName, setNewProjectName] = useState('')
+    const [newProjectColor, setNewProjectColor] = useState('#2563eb')
     const [isProjectModalVisible, setIsProjectModalVisible] = useState(false)
     const [isProjectPickerVisible, setIsProjectPickerVisible] = useState(false)
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
+
+    const [isEditProjectModalVisible, setIsEditProjectModalVisible] = useState(false)
+    const [editProjectName, setEditProjectName] = useState('')
+    const [editProjectColor, setEditProjectColor] = useState('#2563eb')
 
     const {
         workspaces,
@@ -35,8 +41,8 @@ export const Planner: React.FC = () => {
         projects,
         isLoading: projectsLoading,
         addProject,
-        // updateProject,
-        // deleteProject,
+        updateProject,
+        deleteProject,
         addTask,
         updateTask,
         deleteTask,
@@ -55,6 +61,7 @@ export const Planner: React.FC = () => {
 
     const openProjectModal = () => {
         setNewProjectName('')
+        setNewProjectColor(getNextProjectColor(projects))
         setIsProjectModalVisible(true)
     }
 
@@ -66,8 +73,30 @@ export const Planner: React.FC = () => {
     const handleCreateProject = async () => {
         const name = newProjectName.trim()
         if (!name) return
-        await addProject(name)
+        await addProject(name, newProjectColor)
         closeProjectModal()
+    }
+
+    const openEditProjectModal = () => {
+        if (!activeProject) return
+        setEditProjectName(activeProject.name)
+        setEditProjectColor(activeProject.color)
+        setIsEditProjectModalVisible(true)
+    }
+
+    const handleSaveEditProject = async () => {
+        if (!activeProject) return
+        await updateProject(activeProject.id, {
+            name: editProjectName.trim() || activeProject.name,
+            color: editProjectColor,
+        })
+        setIsEditProjectModalVisible(false)
+    }
+
+    const handleDeleteProject = async () => {
+        if (!activeProject) return
+        await deleteProject(activeProject.id)
+        setIsEditProjectModalVisible(false)
     }
 
     const timelineRefs = useRef<Record<string, React.RefObject<TimelineHandle>>>({})
@@ -129,6 +158,19 @@ export const Planner: React.FC = () => {
                     onChangeProjectName={setNewProjectName}
                     onCreate={handleCreateProject}
                     onCancel={closeProjectModal}
+                    selectedColor={newProjectColor}
+                    onSelectColor={setNewProjectColor}
+                />
+                <CreateProjectModal
+                    visible={isEditProjectModalVisible}
+                    projectName={editProjectName}
+                    onChangeProjectName={setEditProjectName}
+                    onCreate={handleSaveEditProject}
+                    onCancel={() => setIsEditProjectModalVisible(false)}
+                    selectedColor={editProjectColor}
+                    onSelectColor={setEditProjectColor}
+                    editMode
+                    onDelete={handleDeleteProject}
                 />
                 <ProjectPickerModal
                     visible={isProjectPickerVisible}
@@ -181,24 +223,33 @@ export const Planner: React.FC = () => {
                 {/* Project dropdown */}
                 <View style={styles.projectDropdownWrapper}>
                     <Text style={styles.dropdownLabel}>Current project</Text>
-                    <TouchableOpacity
-                        style={styles.dropdownButton}
-                        activeOpacity={0.8}
-                        onPress={openProjectPicker}
-                    >
-                        <View style={styles.dropdownLeft}>
-                            <View
-                                style={[
-                                    styles.projectDot,
-                                    { backgroundColor: activeProject.color },
-                                ]}
-                            />
-                            <Text style={styles.dropdownText} numberOfLines={1}>
-                                {activeProject.name}
-                            </Text>
-                        </View>
-                        <ChevronDown size={16} color="#6b7280" />
-                    </TouchableOpacity>
+                    <View style={styles.projectDropdownRow}>
+                        <TouchableOpacity
+                            style={[styles.dropdownButton, { flex: 1 }]}
+                            activeOpacity={0.8}
+                            onPress={openProjectPicker}
+                        >
+                            <View style={styles.dropdownLeft}>
+                                <View
+                                    style={[
+                                        styles.projectDot,
+                                        { backgroundColor: activeProject.color },
+                                    ]}
+                                />
+                                <Text style={styles.dropdownText} numberOfLines={1}>
+                                    {activeProject.name}
+                                </Text>
+                            </View>
+                            <ChevronDown size={16} color="#6b7280" />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.projectEditButton}
+                            onPress={openEditProjectModal}
+                            activeOpacity={0.7}
+                        >
+                            <Pencil size={15} color="#6b7280" />
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 {/* Active project tasks */}

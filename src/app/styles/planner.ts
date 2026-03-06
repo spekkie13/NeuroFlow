@@ -246,4 +246,54 @@ export const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#1d4ed8',
     },
+    pickerItemMeta: {
+        marginLeft: 8,
+        fontSize: 11,
+        color: '#9ca3af',
+        marginTop: 1,
+    },
+    colorPickerLabel: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: '#374151',
+        marginTop: 12,
+        marginBottom: 8,
+    },
+    colorDotsRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 10,
+        marginBottom: 4,
+    },
+    colorDot: {
+        width: 28,
+        height: 28,
+        borderRadius: 999,
+    },
+    colorDotSelected: {
+        borderWidth: 3,
+        borderColor: '#111827',
+    },
+    projectDropdownRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    projectEditButton: {
+        padding: 8,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+        backgroundColor: '#ffffff',
+    },
+    deleteProjectButton: {
+        marginTop: 12,
+        alignItems: 'center',
+        paddingVertical: 8,
+    },
+    deleteProjectButtonText: {
+        fontSize: 13,
+        color: '#ef4444',
+        fontWeight: '500',
+    },
 })

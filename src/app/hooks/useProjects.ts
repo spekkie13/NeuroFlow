@@ -70,15 +70,11 @@ export function useProjects(): UseProjectsResult {
     const updateProject = async (projectId: string, updates: Partial<Project>) => {
         const next = projects.map((p) => {
             if (p.id !== projectId) return p
-
+            const merged = { ...p, ...updates }
             if (typeof updates.name === 'string') {
-                return withUpdatedProjectName(p, updates.name)
+                return withUpdatedProjectName(merged, updates.name)
             }
-
-            return {
-                ...p,
-                ...updates,
-            }
+            return merged
         })
 
         await persist(next)

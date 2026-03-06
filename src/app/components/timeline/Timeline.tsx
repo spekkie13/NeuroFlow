@@ -7,7 +7,8 @@ export type TimelineHandle = { scrollToToday: () => void }
 import { Plus, CheckCircle2, Circle } from 'lucide-react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { ScheduleTaskModal } from '@/app/components/timeline/ScheduleTaskModal'
-import { startOfDay, formatLocalDateRange } from '../../utils/dateUtils'
+import { startOfDay, formatLocalDateRange, formatLocalDate, parseLocalDate, toIsoDateString } from '../../utils/dateUtils'
+import { RescheduleModal } from '@/app/components/tasks/RescheduleModal'
 import { getPriorityStyle } from '@/app/utils/priorityUtils'
 import { Priority } from "@/app/models/Priority";
 import { Task } from "@/app/models/Task";
@@ -21,6 +22,22 @@ export const Timeline = React.forwardRef<TimelineHandle, TimelineProps>(({
                                                   }, ref) => {
     const [showModal, setShowModal] = useState(false)
     const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+    const [rescheduleTask, setRescheduleTask] = useState<Task | null>(null)
+    const [rescheduleDate, setRescheduleDate] = useState('')
+
+    const openReschedule = (task: Task) => {
+        setRescheduleTask(task)
+        setRescheduleDate(task.date ? formatLocalDate(task.date) : '')
+    }
+
+    const handleSaveReschedule = () => {
+        if (!rescheduleTask || !rescheduleDate) return
+        const parsed = parseLocalDate(rescheduleDate)
+        if (!parsed) return
+        onUpdateTask(rescheduleTask.id, { date: toIsoDateString(parsed)! })
+        setRescheduleTask(null)
+        setRescheduleDate('')
+    }
 
     const scrollViewRef = useRef<ScrollView>(null)
     const isDragging = useRef(false)
@@ -164,7 +181,12 @@ export const Timeline = React.forwardRef<TimelineHandle, TimelineProps>(({
                                             >
                                                 <Circle size={16} color="#9ca3af" />
                                             </TouchableOpacity>
-                                            <View style={styles.taskContent}>
+                                            <TouchableOpacity
+                                                style={styles.taskContent}
+                                                onPress={() => openReschedule(task)}
+                                                activeOpacity={0.7}
+                                                delayPressIn={50}
+                                            >
                                                 <Text style={styles.taskName} numberOfLines={2}>
                                                     {task.name}
                                                 </Text>
@@ -176,7 +198,7 @@ export const Timeline = React.forwardRef<TimelineHandle, TimelineProps>(({
                                                 <View style={[styles.priorityBadge, getPriorityStyle(task.priority, styles.priorityBadgeHigh, styles.priorityBadgeMedium, styles.priorityBadgeLow)]}>
                                                     <Text style={styles.priorityBadgeText}>{task.priority}</Text>
                                                 </View>
-                                            </View>
+                                            </TouchableOpacity>
                                         </View>
                                     </View>
                                 )
@@ -281,7 +303,12 @@ export const Timeline = React.forwardRef<TimelineHandle, TimelineProps>(({
                                                     )}
                                                 </TouchableOpacity>
 
-                                                <View style={styles.taskContent}>
+                                                <TouchableOpacity
+                                                    style={styles.taskContent}
+                                                    onPress={() => openReschedule(task)}
+                                                    activeOpacity={0.7}
+                                                    delayPressIn={50}
+                                                >
                                                     <Text
                                                         style={[
                                                             styles.taskName,
@@ -314,7 +341,7 @@ export const Timeline = React.forwardRef<TimelineHandle, TimelineProps>(({
                                                             {task.priority}
                                                         </Text>
                                                     </View>
-                                                </View>
+                                                </TouchableOpacity>
                                             </View>
                                         </View>
                                     )
@@ -361,6 +388,15 @@ export const Timeline = React.forwardRef<TimelineHandle, TimelineProps>(({
                 onAddNewTask={onAddTask}
                 onUpdateTask={onUpdateTask}
                 onClose={() => setShowModal(false)}
+            />
+
+            <RescheduleModal
+                visible={!!rescheduleTask}
+                taskName={rescheduleTask?.name}
+                date={rescheduleDate}
+                onChangeDate={setRescheduleDate}
+                onSave={handleSaveReschedule}
+                onCancel={() => { setRescheduleTask(null); setRescheduleDate('') }}
             />
         </View>
     )

@@ -1,6 +1,6 @@
 import { Project } from "@/app/models/Project";
 
-const PROJECT_COLOR_PALETTE = [
+export const PROJECT_COLOR_PALETTE = [
     '#2563eb', // blue
     '#10b981', // green
     '#f97316', // orange

@@ -19,4 +19,5 @@ export interface TaskItemProps {
     onMoveUp: () => void
     onMoveDown: () => void
     onDelete: () => void
+    onSaveNotes: (notes: string) => void
 }

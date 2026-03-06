@@ -265,4 +265,90 @@ export const styles = StyleSheet.create({
     inlineMenuLabelDisabled: {
         color: '#6b7280',
     },
+
+    // Filter bar
+    filterBar: {
+        flexDirection: 'row',
+        gap: 6,
+        marginBottom: 12,
+    },
+    filterChip: {
+        paddingHorizontal: 12,
+        paddingVertical: 5,
+        borderRadius: 999,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+        backgroundColor: '#ffffff',
+    },
+    filterChipActive: {
+        backgroundColor: '#2563eb',
+        borderColor: '#2563eb',
+    },
+    filterChipText: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: '#6b7280',
+    },
+    filterChipTextActive: {
+        color: '#ffffff',
+    },
+
+    // Completed section
+    completedSectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 8,
+        paddingHorizontal: 2,
+        marginTop: 4,
+        marginBottom: 4,
+    },
+    completedSectionTitle: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#9ca3af',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+
+    // Notes
+    notesArea: {
+        marginTop: 8,
+        borderTopWidth: 1,
+        borderTopColor: '#f3f4f6',
+        paddingTop: 8,
+    },
+    notesInput: {
+        fontSize: 13,
+        color: '#374151',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+        padding: 8,
+        minHeight: 60,
+        backgroundColor: '#f9fafb',
+        textAlignVertical: 'top' as any,
+    },
+
+    // Swipe background
+    swipeBgComplete: {
+        backgroundColor: '#22c55e',
+    },
+    swipeBgUndo: {
+        backgroundColor: '#6b7280',
+    },
+    swipeBgContent: {
+        position: 'absolute',
+        left: 16,
+        top: 0,
+        bottom: 0,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    swipeBgLabel: {
+        color: '#ffffff',
+        fontWeight: '600',
+        fontSize: 13,
+    },
 })
