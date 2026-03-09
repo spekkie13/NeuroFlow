@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native'
 
+// Settings screen styles
 export const styles = StyleSheet.create({
     screen: {
         flex: 1,
@@ -259,6 +260,40 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         marginLeft: 8,
         gap: 4,
+    },
+
+    // Daily budget
+    budgetSubtitle: {
+        fontSize: 12,
+        color: '#6b7280',
+        marginBottom: 10,
+        lineHeight: 16,
+    },
+    budgetRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    },
+    budgetChip: {
+        paddingHorizontal: 14,
+        paddingVertical: 7,
+        borderRadius: 999,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+        backgroundColor: '#f9fafb',
+    },
+    budgetChipActive: {
+        backgroundColor: '#eff6ff',
+        borderColor: '#2563eb',
+    },
+    budgetChipText: {
+        fontSize: 13,
+        fontWeight: '500',
+        color: '#374151',
+    },
+    budgetChipTextActive: {
+        color: '#2563eb',
+        fontWeight: '600',
     },
 
     // Inline editing

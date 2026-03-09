@@ -1,5 +1,11 @@
 import {Priority} from "@/app/models/Priority";
 
+export interface Step {
+    id: string
+    text: string
+    done: boolean
+}
+
 export interface Task {
     id: string
     name: string
@@ -7,4 +13,6 @@ export interface Task {
     priority: Priority
     date: string | null
     notes: string
+    steps?: Step[]
+    estimatedMinutes?: number
 }

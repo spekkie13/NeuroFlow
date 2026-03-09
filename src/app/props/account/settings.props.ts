@@ -7,4 +7,5 @@ export interface SettingsViewProps {
     onUpdateWorkspace: (accountId: string, name: string) => void
     onDeleteWorkspace: (accountId: string) => void
     onSwitchWorkspace: (accountId: string) => void
+    onSetDailyBudget: (workspaceId: string, minutes: number | null) => void
 }

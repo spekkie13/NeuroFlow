@@ -1,13 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Animated, PanResponder, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import { ArrowDown, ArrowUp, CheckCircle2, Circle, Clock, Edit3, FileText, Flag, MoreHorizontal, Trash2, X } from 'lucide-react-native'
+import { ArrowDown, ArrowUp, CheckCircle2, Circle, Clock, Edit3, FileText, Flag, ListChecks, MoreHorizontal, Plus, Timer, Trash2, X } from 'lucide-react-native'
 import { TextField } from '@/app/components/ui/TextField'
 import { IconButton } from '@/app/components/ui/IconButton'
 import { MenuItem } from '@/app/components/ui/MenuItem'
-import { formatLocalDate } from '@/app/utils/dateUtils'
+import { formatLocalDate, formatMinutes } from '@/app/utils/dateUtils'
 import { isOverdue } from '@/app/services/domain/TaskService'
 import { getPriorityStyle } from '@/app/utils/priorityUtils'
+import { Step } from '@/app/models/Task'
 import { TaskItemProps } from '@/app/props/tasks/TaskItemProps'
+import { generateId } from '@/app/utils/idUtils'
 import { styles } from '@/app/styles/taskView'
 
 export const TaskItem: React.FC<TaskItemProps> = ({
@@ -30,12 +32,36 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     onMoveDown,
     onDelete,
     onSaveNotes,
+    onSaveSteps,
+    onOpenEstimateModal,
 }) => {
     const rangeLabel = task.date ? formatLocalDate(task.date) : null
     const overdue = isOverdue(task)
 
     const [notesExpanded, setNotesExpanded] = useState(false)
     const [localNotes, setLocalNotes] = useState(task.notes || '')
+
+    const steps = task.steps ?? []
+    const [stepsExpanded, setStepsExpanded] = useState(false)
+    const [newStepText, setNewStepText] = useState('')
+
+    const handleToggleStep = (id: string) => {
+        onSaveSteps(steps.map(s => s.id === id ? { ...s, done: !s.done } : s))
+    }
+
+    const handleDeleteStep = (id: string) => {
+        onSaveSteps(steps.filter(s => s.id !== id))
+    }
+
+    const handleAddStep = () => {
+        const trimmed = newStepText.trim()
+        if (!trimmed) return
+        const newStep: Step = { id: generateId(), text: trimmed, done: false }
+        onSaveSteps([...steps, newStep])
+        setNewStepText('')
+    }
+
+    const doneCount = steps.filter(s => s.done).length
 
     useEffect(() => {
         setLocalNotes(task.notes || '')
@@ -154,7 +180,17 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                                                         {overdue ? 'Overdue · ' : ''}
                                                         {rangeLabel}
                                                     </Text>
+                                                    {task.estimatedMinutes ? (
+                                                        <TouchableOpacity onPress={onOpenEstimateModal} activeOpacity={0.7} style={{ marginLeft: 6 }}>
+                                                            <Text style={styles.estimateBadge}>~{formatMinutes(task.estimatedMinutes)}</Text>
+                                                        </TouchableOpacity>
+                                                    ) : null}
                                                 </>
+                                            ) : task.estimatedMinutes ? (
+                                                <TouchableOpacity onPress={onOpenEstimateModal} activeOpacity={0.7} style={styles.estimateBadgeRow}>
+                                                    <Timer size={12} color="#6b7280" style={{ marginRight: 3 }} />
+                                                    <Text style={styles.estimateBadge}>~{formatMinutes(task.estimatedMinutes)}</Text>
+                                                </TouchableOpacity>
                                             ) : (
                                                 <View style={styles.dateRowPlaceholder} />
                                             )}
@@ -177,6 +213,17 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                                     </TouchableOpacity>
 
                                     <View style={styles.actionsRow}>
+                                        <TouchableOpacity
+                                            style={styles.stepsToggleBtn}
+                                            onPress={() => setStepsExpanded(e => !e)}
+                                            activeOpacity={0.7}
+                                            accessibilityLabel="Toggle steps"
+                                        >
+                                            <ListChecks size={18} color={steps.length > 0 ? '#2563eb' : '#6b7280'} />
+                                            {steps.length > 0 && (
+                                                <Text style={styles.stepsCountText}>{doneCount}/{steps.length}</Text>
+                                            )}
+                                        </TouchableOpacity>
                                         <IconButton
                                             icon={<FileText size={18} color={task.notes ? '#2563eb' : '#6b7280'} />}
                                             variant="neutral"
@@ -199,6 +246,48 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                                 </View>
                             )}
                         </View>
+
+                        {/* Steps area */}
+                        {stepsExpanded && !isEditing && (
+                            <View style={styles.stepsArea}>
+                                {steps.map((step) => (
+                                    <View key={step.id} style={styles.stepRow}>
+                                        <TouchableOpacity
+                                            style={styles.stepCheckbox}
+                                            onPress={() => handleToggleStep(step.id)}
+                                            activeOpacity={0.7}
+                                        >
+                                            {step.done
+                                                ? <CheckCircle2 size={16} color="#22c55e" />
+                                                : <Circle size={16} color="#9ca3af" />
+                                            }
+                                        </TouchableOpacity>
+                                        <Text style={[styles.stepText, step.done && styles.stepTextDone]} numberOfLines={2}>
+                                            {step.text}
+                                        </Text>
+                                        <TouchableOpacity
+                                            style={styles.stepDelete}
+                                            onPress={() => handleDeleteStep(step.id)}
+                                            activeOpacity={0.7}
+                                        >
+                                            <X size={14} color="#d1d5db" />
+                                        </TouchableOpacity>
+                                    </View>
+                                ))}
+                                <View style={styles.addStepRow}>
+                                    <Plus size={14} color="#9ca3af" style={{ marginRight: 6 }} />
+                                    <TextInput
+                                        style={styles.addStepInput}
+                                        value={newStepText}
+                                        onChangeText={setNewStepText}
+                                        placeholder="Add a step..."
+                                        placeholderTextColor="#9ca3af"
+                                        returnKeyType="done"
+                                        onSubmitEditing={handleAddStep}
+                                    />
+                                </View>
+                            </View>
+                        )}
 
                         {/* Notes area */}
                         {notesExpanded && !isEditing && (
@@ -230,6 +319,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                                     icon={<Clock size={16} color="#374151" />}
                                     label={task.date ? 'Reschedule' : 'Schedule'}
                                     onPress={onOpenRescheduleModal}
+                                />
+                                <MenuItem
+                                    icon={<Timer size={16} color="#374151" />}
+                                    label={task.estimatedMinutes ? `~${formatMinutes(task.estimatedMinutes)} · Change` : 'Set estimate'}
+                                    onPress={onOpenEstimateModal}
                                 />
 
                                 {showMoveActions && (

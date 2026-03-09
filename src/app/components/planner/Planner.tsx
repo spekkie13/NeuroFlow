@@ -36,7 +36,11 @@ export const Planner: React.FC = () => {
         updateWorkspace,
         deleteWorkspace,
         switchWorkspace,
+        setDailyBudget,
     } = useWorkspaces()
+
+    const currentWorkspace = workspaces.find(w => w.id === currentWorkspaceId) ?? null
+    const dailyMinutes = currentWorkspace?.dailyMinutes ?? null
 
     const {
         projects,
@@ -329,6 +333,7 @@ export const Planner: React.FC = () => {
                                 <Timeline
                                     ref={getTimelineRef(project.id)}
                                     project={project}
+                                    dailyMinutes={dailyMinutes}
                                     onAddTask={(task) => addTask(project.id, task)}
                                     onUpdateTask={(taskId, updates) =>
                                         updateTask(project.id, taskId, updates)
@@ -350,6 +355,7 @@ export const Planner: React.FC = () => {
             onUpdateWorkspace={updateWorkspace}
             onDeleteWorkspace={deleteWorkspace}
             onSwitchWorkspace={switchWorkspace}
+            onSetDailyBudget={setDailyBudget}
         />
     )
 

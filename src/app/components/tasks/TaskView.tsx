@@ -6,6 +6,7 @@ import { TextField } from '@/app/components/ui/TextField'
 import { TaskItem } from '@/app/components/tasks/TaskItem'
 import { PriorityModal } from '@/app/components/tasks/PriorityModal'
 import { RescheduleModal } from '@/app/components/tasks/RescheduleModal'
+import { EstimateModal } from '@/app/components/tasks/EstimateModal'
 import { formatLocalDate, parseLocalDate, toIsoDateString } from '@/app/utils/dateUtils'
 import { Priority } from '@/app/models/Priority'
 import { Task } from '@/app/models/Task'
@@ -32,6 +33,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
     const [rescheduleTask, setRescheduleTask] = useState<Task | null>(null)
     const [rescheduleStart, setRescheduleStart] = useState('')
     const [openMenuTaskId, setOpenMenuTaskId] = useState<string | null>(null)
+    const [estimateModalTask, setEstimateModalTask] = useState<Task | null>(null)
 
     const activeTasks = useMemo(() => project.tasks.filter(t => !t.completed), [project.tasks])
     const completedTasks = useMemo(() => project.tasks.filter(t => t.completed), [project.tasks])
@@ -73,6 +75,17 @@ export const TaskView: React.FC<TaskViewProps> = ({
         if (!priorityModalTask) return
         onUpdateTask(priorityModalTask.id, { priority })
         setPriorityModalTask(null)
+    }
+
+    const openEstimateModal = (task: Task) => {
+        setOpenMenuTaskId(null)
+        setEstimateModalTask(task)
+    }
+
+    const handleSetEstimate = (minutes: number | null) => {
+        if (!estimateModalTask) return
+        onUpdateTask(estimateModalTask.id, { estimatedMinutes: minutes ?? undefined })
+        setEstimateModalTask(null)
     }
 
     const openRescheduleModal = (task: Task) => {
@@ -117,6 +130,8 @@ export const TaskView: React.FC<TaskViewProps> = ({
             onMoveDown={() => { setOpenMenuTaskId(null); onMoveTask?.(task.id, 'down') }}
             onDelete={() => { setOpenMenuTaskId(null); onDeleteTask(task.id) }}
             onSaveNotes={(notes) => onUpdateTask(task.id, { notes })}
+            onSaveSteps={(steps) => onUpdateTask(task.id, { steps })}
+            onOpenEstimateModal={() => openEstimateModal(task)}
         />
     )
 
@@ -232,6 +247,14 @@ export const TaskView: React.FC<TaskViewProps> = ({
                 onChangeDate={setRescheduleStart}
                 onSave={handleSaveReschedule}
                 onCancel={closeRescheduleModal}
+            />
+
+            <EstimateModal
+                visible={!!estimateModalTask}
+                taskName={estimateModalTask?.name}
+                currentMinutes={estimateModalTask?.estimatedMinutes}
+                onSetEstimate={handleSetEstimate}
+                onClose={() => setEstimateModalTask(null)}
             />
         </View>
     )

@@ -7,6 +7,16 @@ import { IconButton } from '@/app/components/ui/IconButton'
 import { SettingsViewProps } from '@/app/props/account/settings.props'
 import { styles } from '@/app/styles/settingsStyles'
 
+const BUDGET_PRESETS: { label: string; minutes: number | null }[] = [
+    { label: 'No limit', minutes: null },
+    { label: '1h', minutes: 60 },
+    { label: '2h', minutes: 120 },
+    { label: '3h', minutes: 180 },
+    { label: '4h', minutes: 240 },
+    { label: '6h', minutes: 360 },
+    { label: '8h', minutes: 480 },
+]
+
 export const SettingsView: React.FC<SettingsViewProps> = ({
                                                             workspaces,
                                                             currentWorkspaceId,
@@ -14,7 +24,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                                                             onUpdateWorkspace,
                                                             onDeleteWorkspace,
                                                             onSwitchWorkspace,
+                                                            onSetDailyBudget,
                                                         } : SettingsViewProps) => {
+    const currentWorkspace = workspaces.find(w => w.id === currentWorkspaceId) ?? null
     const [isAdding, setIsAdding] = useState(false)
     const [newWorkspaceName, setNewWorkspaceName] = useState('')
     const [editingId, setEditingId] = useState<string | null>(null)
@@ -105,6 +117,35 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     </TouchableOpacity>
                 )}
             </View>
+
+            {/* DAILY TIME BUDGET */}
+            {currentWorkspace && (
+                <View style={styles.addCard}>
+                    <View style={styles.addTitleRow}>
+                        <Text style={styles.addTitle}>Daily time budget</Text>
+                    </View>
+                    <Text style={styles.budgetSubtitle}>
+                        How much time do you have available today? The timeline will warn you when you exceed it.
+                    </Text>
+                    <View style={styles.budgetRow}>
+                        {BUDGET_PRESETS.map(({ label, minutes }) => {
+                            const isActive = (currentWorkspace.dailyMinutes ?? null) === minutes
+                            return (
+                                <TouchableOpacity
+                                    key={label}
+                                    style={[styles.budgetChip, isActive && styles.budgetChipActive]}
+                                    onPress={() => onSetDailyBudget(currentWorkspace.id, minutes)}
+                                    activeOpacity={0.7}
+                                >
+                                    <Text style={[styles.budgetChipText, isActive && styles.budgetChipTextActive]}>
+                                        {label}
+                                    </Text>
+                                </TouchableOpacity>
+                            )
+                        })}
+                    </View>
+                </View>
+            )}
 
             {/* WORKSPACES LIST */}
             <View style={styles.listCard}>

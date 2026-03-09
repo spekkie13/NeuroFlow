@@ -1,4 +1,3 @@
-// hooks/useAccounts.ts
 import { useEffect, useState } from 'react'
 import {
     getCurrentWorkspaceId,
@@ -17,6 +16,7 @@ interface UseAccountsResult {
     updateWorkspace: (id: string, name: string) => Promise<void>
     deleteWorkspace: (id: string) => Promise<void>
     switchWorkspace: (id: string) => Promise<void>
+    setDailyBudget: (id: string, minutes: number | null) => Promise<void>
 }
 
 export function useWorkspaces(): UseAccountsResult {
@@ -97,6 +97,13 @@ export function useWorkspaces(): UseAccountsResult {
         await setCurrentWorkspaceId(id)
     }
 
+    const setDailyBudget = async (id: string, minutes: number | null) => {
+        const next = workspaces.map((a) =>
+            a.id === id ? { ...a, dailyMinutes: minutes ?? undefined } : a
+        )
+        await persist(next)
+    }
+
     return {
         workspaces: workspaces,
         currentWorkspaceId: currentWorkspaceId,
@@ -105,5 +112,6 @@ export function useWorkspaces(): UseAccountsResult {
         updateWorkspace,
         deleteWorkspace,
         switchWorkspace,
+        setDailyBudget,
     }
 }

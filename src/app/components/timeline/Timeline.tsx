@@ -3,7 +3,7 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Plus, CheckCircle2, Circle } from 'lucide-react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { ScheduleTaskModal } from '@/app/components/timeline/ScheduleTaskModal'
-import { formatLocalDateRange, formatLocalDate, parseLocalDate, toIsoDateString, isSameDay } from '../../utils/dateUtils'
+import { formatLocalDateRange, formatLocalDate, formatMinutes, parseLocalDate, toIsoDateString, isSameDay } from '../../utils/dateUtils'
 import { isOverdue } from '@/app/services/domain/TaskService'
 import { RescheduleModal } from '@/app/components/tasks/RescheduleModal'
 import { getPriorityStyle } from '@/app/utils/priorityUtils'
@@ -22,6 +22,7 @@ const PRIORITY_ORDER: Record<Priority, number> = { high: 0, medium: 1, low: 2 }
 
 export const Timeline = ({
     project,
+    dailyMinutes,
     onAddTask,
     onUpdateTask,
     ref,
@@ -119,7 +120,8 @@ export const Timeline = ({
                 (a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority],
             )
 
-            return { date, tasks: tasksForDay, completedCount: tasksForDay.filter(t => t.completed).length }
+            const estimatedTotal = tasksForDay.reduce((sum, t) => sum + (t.estimatedMinutes ?? 0), 0)
+            return { date, tasks: tasksForDay, completedCount: tasksForDay.filter(t => t.completed).length, estimatedTotal }
         })
     }, [dates, project.tasks])
 
@@ -203,7 +205,6 @@ export const Timeline = ({
                 )}
 
                 {dates.map((date, index) => {
-                    const { tasks, completedCount } = tasksByDate[index]
                     const weekday = date.toLocaleDateString(undefined, {
                         weekday: 'short',
                     })
@@ -211,6 +212,17 @@ export const Timeline = ({
                         day: 'numeric',
                         month: 'short',
                     })
+
+                    const { tasks, completedCount, estimatedTotal } = tasksByDate[index]
+
+                    // Color the time total based on budget usage
+                    const timeColor = !dailyMinutes || estimatedTotal === 0
+                        ? '#6b7280'
+                        : estimatedTotal > dailyMinutes
+                            ? '#dc2626'
+                            : estimatedTotal > dailyMinutes * 0.75
+                                ? '#d97706'
+                                : '#16a34a'
 
                     return (
                         <View
@@ -237,7 +249,7 @@ export const Timeline = ({
 
                                 <Text style={styles.columnDate}>{dayMonth}</Text>
 
-                                {/* #4 & #5 — task count + progress */}
+                                {/* task count + completion progress */}
                                 {tasks.length > 0 && (
                                     <View style={styles.columnStats}>
                                         <View style={styles.progressTrack}>
@@ -250,6 +262,13 @@ export const Timeline = ({
                                             {completedCount}/{tasks.length}
                                         </Text>
                                     </View>
+                                )}
+
+                                {/* time estimate total */}
+                                {estimatedTotal > 0 && (
+                                    <Text style={[styles.timeEstimateText, { color: timeColor }]}>
+                                        ~{formatMinutes(estimatedTotal)}{dailyMinutes ? ` / ${formatMinutes(dailyMinutes)}` : ''}
+                                    </Text>
                                 )}
                             </View>
 

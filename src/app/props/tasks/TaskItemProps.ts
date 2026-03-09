@@ -1,4 +1,4 @@
-import { Task } from '@/app/models/Task'
+import { Step, Task } from '@/app/models/Task'
 
 export interface TaskItemProps {
     task: Task
@@ -20,4 +20,6 @@ export interface TaskItemProps {
     onMoveDown: () => void
     onDelete: () => void
     onSaveNotes: (notes: string) => void
+    onSaveSteps: (steps: Step[]) => void
+    onOpenEstimateModal: () => void
 }

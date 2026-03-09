@@ -1,5 +1,6 @@
 import {StyleSheet} from "react-native";
 
+// Timeline screen styles
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -408,6 +409,11 @@ export const styles = StyleSheet.create({
         fontSize: 10,
         fontWeight: '500',
         color: '#6b7280',
+    },
+    timeEstimateText: {
+        fontSize: 10,
+        fontWeight: '500',
+        marginTop: 4,
     },
     emptyColumn: {
         flex: 1,

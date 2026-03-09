@@ -162,3 +162,11 @@ export const startOfDay = (date: Date) => {
 export const isSameDay = (a: Date, b: Date) => {
     return startOfDay(a).getTime() === startOfDay(b).getTime()
 }
+
+/** Formats a number of minutes as a human-readable string, e.g. 90 → "1h 30m" */
+export const formatMinutes = (mins: number): string => {
+    if (mins < 60) return `${mins}m`
+    const h = Math.floor(mins / 60)
+    const m = mins % 60
+    return m > 0 ? `${h}h ${m}m` : `${h}h`
+}

@@ -330,6 +330,76 @@ export const styles = StyleSheet.create({
         textAlignVertical: 'top' as any,
     },
 
+    // Estimate badge shown in the date row
+    estimateBadgeRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    estimateBadge: {
+        fontSize: 11,
+        fontWeight: '500',
+        color: '#6b7280',
+    },
+
+    // Steps toggle button (icon + count label side by side)
+    stepsToggleBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 28,
+        paddingHorizontal: 4,
+        gap: 3,
+    },
+    stepsCountText: {
+        fontSize: 11,
+        fontWeight: '600',
+        color: '#2563eb',
+    },
+
+    // Expanded steps section
+    stepsArea: {
+        marginTop: 8,
+        borderTopWidth: 1,
+        borderTopColor: '#f3f4f6',
+        paddingTop: 8,
+        gap: 4,
+    },
+    stepRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        paddingVertical: 3,
+    },
+    stepCheckbox: {
+        flexShrink: 0,
+    },
+    stepText: {
+        flex: 1,
+        fontSize: 13,
+        color: '#374151',
+        lineHeight: 18,
+    },
+    stepTextDone: {
+        color: '#9ca3af',
+        textDecorationLine: 'line-through',
+    },
+    stepDelete: {
+        padding: 4,
+        flexShrink: 0,
+    },
+    addStepRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 2,
+        paddingLeft: 2,
+    },
+    addStepInput: {
+        flex: 1,
+        fontSize: 13,
+        color: '#374151',
+        paddingVertical: 4,
+        paddingHorizontal: 0,
+    },
+
     // Swipe background
     swipeBgComplete: {
         backgroundColor: '#22c55e',
