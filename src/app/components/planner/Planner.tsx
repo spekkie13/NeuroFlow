@@ -15,6 +15,8 @@ import { useWorkspaces } from "@/app/hooks/useWorkspaces";
 import { useProjects } from '@/app/hooks/useProjects'
 import { PlannerView } from "@/app/props/planner/PlannerProps";
 import { styles } from "@/app/styles/planner";
+import { WorkspaceSwitcherBar } from '@/app/components/workspace/WorkspaceSwitcherBar'
+import { WorkspaceSwitcherModal } from '@/app/components/workspace/WorkspaceSwitcherModal'
 
 export const Planner: React.FC = () => {
     const [currentView, setCurrentView] = useState<PlannerView>('tasks')
@@ -27,6 +29,7 @@ export const Planner: React.FC = () => {
     const [isEditProjectModalVisible, setIsEditProjectModalVisible] = useState(false)
     const [editProjectName, setEditProjectName] = useState('')
     const [editProjectColor, setEditProjectColor] = useState('#2563eb')
+    const [isWorkspaceSwitcherVisible, setIsWorkspaceSwitcherVisible] = useState(false)
 
     const {
         workspaces,
@@ -52,7 +55,7 @@ export const Planner: React.FC = () => {
         updateTask,
         deleteTask,
         moveTask,
-    } = useProjects()
+    } = useProjects(currentWorkspaceId)
 
     useEffect(() => {
         if (!projects.length) {
@@ -382,8 +385,22 @@ export const Planner: React.FC = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            {currentWorkspace && (
+                <WorkspaceSwitcherBar
+                    workspaceName={currentWorkspace.name}
+                    onPress={() => setIsWorkspaceSwitcherVisible(true)}
+                />
+            )}
             <View style={styles.container}>{renderContent()}</View>
             <BottomNav currentView={currentView} onViewChange={setCurrentView} />
+            <WorkspaceSwitcherModal
+                visible={isWorkspaceSwitcherVisible}
+                workspaces={workspaces}
+                currentWorkspaceId={currentWorkspaceId}
+                onSwitch={switchWorkspace}
+                onAdd={addWorkspace}
+                onClose={() => setIsWorkspaceSwitcherVisible(false)}
+            />
         </SafeAreaView>
     )
 }

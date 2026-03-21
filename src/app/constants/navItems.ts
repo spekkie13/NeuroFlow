@@ -21,7 +21,7 @@ export const navItems: NavItem[] = [
     },
     {
         id: 'settings' as ViewType,
-        label: 'Settings',
+        label: 'Workspaces',
         icon: UserIcon,
     },
 ]

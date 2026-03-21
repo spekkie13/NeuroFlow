@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { loadProjectsForAccount, saveProjectsForAccount } from '../services/storage/projectStorage'
+import { loadProjectsForWorkspace, saveProjectsForWorkspace } from '../services/storage/projectStorage'
 import {
     createProject,
     withTaskAdded,
@@ -33,16 +33,21 @@ interface UseProjectsResult {
     ) => Promise<void>
 }
 
-export function useProjects(): UseProjectsResult {
+export function useProjects(workspaceId: string | null): UseProjectsResult {
     const [projects, setProjects] = useState<Project[]>([])
     const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
+        if (!workspaceId) {
+            setProjects([])
+            return
+        }
+
         let mounted = true
 
         const init = async () => {
             setIsLoading(true)
-            const loaded = await loadProjectsForAccount()
+            const loaded = await loadProjectsForWorkspace(workspaceId)
             if (!mounted) return
             setProjects(loaded)
             setIsLoading(false)
@@ -53,12 +58,13 @@ export function useProjects(): UseProjectsResult {
         return () => {
             mounted = false
         }
-    }, [])
+    }, [workspaceId])
 
     // Optimistic update: apply state immediately, then persist to storage.
     const persist = async (next: Project[]): Promise<void> => {
+        if (!workspaceId) return
         setProjects(next)
-        await saveProjectsForAccount(next)
+        await saveProjectsForWorkspace(workspaceId, next)
     }
 
     const addProject = async (name: string, color?: string) => {
