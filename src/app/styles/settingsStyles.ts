@@ -311,6 +311,21 @@ export const styles = StyleSheet.create({
         flex: 1,
     },
 
+    signOutButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 10,
+        backgroundColor: '#fef2f2',
+    },
+    signOutText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#b91c1c',
+    },
+
     localInfoCard: {
         marginTop: 8,
         marginBottom: 16,

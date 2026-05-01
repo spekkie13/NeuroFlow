@@ -7,6 +7,8 @@ export interface TaskItemProps {
     menuOpen: boolean
     canMoveUp: boolean
     canMoveDown: boolean
+    canMoveToTop: boolean
+    canMoveToBottom: boolean
     showMoveActions: boolean
     onEditNameChange: (name: string) => void
     onSaveEdit: () => void
@@ -18,6 +20,8 @@ export interface TaskItemProps {
     onStartEditing: () => void
     onMoveUp: () => void
     onMoveDown: () => void
+    onMoveToTop: () => void
+    onMoveToBottom: () => void
     onDelete: () => void
     onSaveNotes: (notes: string) => void
     onSaveSteps: (steps: Step[]) => void

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
-import { Edit3, Trash2, Check, X, UserIcon, User } from 'lucide-react-native'
+import { Edit3, Trash2, Check, X, UserIcon, User, LogOut, Mail } from 'lucide-react-native'
 import { AppButton } from '@/app/components/ui/AppButton'
 import { TextField } from '@/app/components/ui/TextField'
 import { IconButton } from '@/app/components/ui/IconButton'
@@ -18,6 +18,7 @@ const BUDGET_PRESETS: { label: string; minutes: number | null }[] = [
 ]
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
+                                                            user,
                                                             workspaces,
                                                             currentWorkspaceId,
                                                             onAddWorkspace,
@@ -25,6 +26,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                                                             onDeleteWorkspace,
                                                             onSwitchWorkspace,
                                                             onSetDailyBudget,
+                                                            onSignOut,
                                                         } : SettingsViewProps) => {
     const currentWorkspace = workspaces.find(w => w.id === currentWorkspaceId) ?? null
     const [isAdding, setIsAdding] = useState(false)
@@ -66,13 +68,35 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     Manage your workspaces and switch between them
                 </Text>
             </View>
-            {/* LOCAL MODE INFO */}
-            <View style={styles.localInfoCard}>
-                <Text style={styles.localInfoTitle}>Local mode only</Text>
-                <Text style={styles.localInfoText}>
-                    All your workspaces and tasks are stored on this device only.
-                    There is currently no account or cloud sync.
-                </Text>
+            {/* ACCOUNT CARD */}
+            <View style={styles.profileCard}>
+                <View style={styles.profileRow}>
+                    <View style={styles.profileLeft}>
+                        <View style={[styles.avatar, { backgroundColor: '#2563eb' }]}>
+                            <Text style={styles.avatarText}>
+                                {user.name.charAt(0).toUpperCase()}
+                            </Text>
+                        </View>
+                        <View style={styles.profileInfo}>
+                            <Text style={styles.profileName} numberOfLines={1}>{user.name}</Text>
+                            <View style={styles.profileEmailRow}>
+                                <Mail size={12} color="#9ca3af" style={styles.profileEmailIcon} />
+                                <Text style={styles.profileEmail} numberOfLines={1}>{user.email}</Text>
+                            </View>
+                            <View style={styles.providerBadgeRow}>
+                                <View style={styles.providerBadge}>
+                                    <Text style={styles.providerBadgeText}>
+                                        {user.provider === 'google' ? 'Google' : 'Email'}
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                    <TouchableOpacity style={styles.signOutButton} onPress={onSignOut} activeOpacity={0.8}>
+                        <LogOut size={14} color="#b91c1c" />
+                        <Text style={styles.signOutText}>Sign out</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
             {/* ADD WORKSPACE */}
             <View style={styles.addCard}>

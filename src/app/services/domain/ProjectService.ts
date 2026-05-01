@@ -53,7 +53,7 @@ export function withTaskDeleted(project: Project, taskId: string): Project {
     }
 }
 
-export type TaskMoveDirection = 'up' | 'down'
+export type TaskMoveDirection = 'up' | 'down' | 'top' | 'bottom'
 
 export function withTaskMoved(
     project: Project,
@@ -75,8 +75,22 @@ export function withTaskMoved(
                 break
             }
         }
-    } else {
+    } else if (direction === 'down') {
         for (let i = idx + 1; i < project.tasks.length; i++) {
+            if (project.tasks[i].priority === priority) {
+                targetIndex = i
+                break
+            }
+        }
+    } else if (direction === 'top') {
+        for (let i = 0; i < idx; i++) {
+            if (project.tasks[i].priority === priority) {
+                targetIndex = i
+                break
+            }
+        }
+    } else if (direction === 'bottom') {
+        for (let i = project.tasks.length - 1; i > idx; i--) {
             if (project.tasks[i].priority === priority) {
                 targetIndex = i
                 break

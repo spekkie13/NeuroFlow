@@ -117,6 +117,8 @@ export const TaskView: React.FC<TaskViewProps> = ({
             menuOpen={openMenuTaskId === task.id}
             canMoveUp={!!onMoveTask && index > 0}
             canMoveDown={!!onMoveTask && index < list.length - 1}
+            canMoveToTop={!!onMoveTask && index > 0}
+            canMoveToBottom={!!onMoveTask && index < list.length - 1}
             showMoveActions={!!onMoveTask}
             onEditNameChange={setEditTaskName}
             onSaveEdit={() => saveEdit(task.id)}
@@ -128,6 +130,8 @@ export const TaskView: React.FC<TaskViewProps> = ({
             onStartEditing={() => startEditing(task)}
             onMoveUp={() => { setOpenMenuTaskId(null); onMoveTask?.(task.id, 'up') }}
             onMoveDown={() => { setOpenMenuTaskId(null); onMoveTask?.(task.id, 'down') }}
+            onMoveToTop={() => { setOpenMenuTaskId(null); onMoveTask?.(task.id, 'top') }}
+            onMoveToBottom={() => { setOpenMenuTaskId(null); onMoveTask?.(task.id, 'bottom') }}
             onDelete={() => { setOpenMenuTaskId(null); onDeleteTask(task.id) }}
             onSaveNotes={(notes) => onUpdateTask(task.id, { notes })}
             onSaveSteps={(steps) => onUpdateTask(task.id, { steps })}

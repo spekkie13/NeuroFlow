@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Animated, PanResponder, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import { ArrowDown, ArrowUp, CheckCircle2, Circle, Clock, Edit3, FileText, Flag, ListChecks, MoreHorizontal, Plus, Timer, Trash2, X } from 'lucide-react-native'
+import { Animated, Modal, PanResponder, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native'
+import { ArrowDown, ArrowUp, CheckCircle2, ChevronsDown, ChevronsUp, Circle, Clock, Edit3, FileText, Flag, ListChecks, MoreHorizontal, Plus, Timer, Trash2, X } from 'lucide-react-native'
 import { TextField } from '@/app/components/ui/TextField'
 import { IconButton } from '@/app/components/ui/IconButton'
 import { MenuItem } from '@/app/components/ui/MenuItem'
@@ -19,6 +19,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     menuOpen,
     canMoveUp,
     canMoveDown,
+    canMoveToTop,
+    canMoveToBottom,
     showMoveActions,
     onEditNameChange,
     onSaveEdit,
@@ -30,6 +32,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     onStartEditing,
     onMoveUp,
     onMoveDown,
+    onMoveToTop,
+    onMoveToBottom,
     onDelete,
     onSaveNotes,
     onSaveSteps,
@@ -66,6 +70,20 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     useEffect(() => {
         setLocalNotes(task.notes || '')
     }, [task.notes])
+
+    const cardRef = useRef<View>(null)
+    const [menuAnchor, setMenuAnchor] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
+    const { width: screenWidth, height: screenHeight } = useWindowDimensions()
+
+    useEffect(() => {
+        if (menuOpen) {
+            cardRef.current?.measureInWindow((x, y, width, height) => {
+                setMenuAnchor({ x, y, width, height })
+            })
+        } else {
+            setMenuAnchor(null)
+        }
+    }, [menuOpen])
 
     // Swipe-to-complete
     const swipeAnim = useRef(new Animated.Value(0)).current
@@ -116,7 +134,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                 style={[{ transform: [{ translateX: swipeAnim }] }, menuOpen && styles.taskItemInnerMenuOpen]}
                 {...panResponder.panHandlers}
             >
-                <View style={styles.taskItemInner}>
+                <View ref={cardRef} style={styles.taskItemInner}>
                     <View style={styles.card}>
                         <View style={styles.mainRow}>
                             {/* LEFT: title + date */}
@@ -306,55 +324,85 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                         )}
                     </View>
 
-                    {/* Inline menu */}
-                    {!isEditing && menuOpen && (
-                        <View style={styles.inlineMenuOverlay} pointerEvents="box-none">
-                            <View style={styles.inlineMenu}>
-                                <MenuItem
-                                    icon={<Edit3 size={16} color="#374151" />}
-                                    label="Edit"
-                                    onPress={onStartEditing}
-                                />
-                                <MenuItem
-                                    icon={<Clock size={16} color="#374151" />}
-                                    label={task.date ? 'Reschedule' : 'Schedule'}
-                                    onPress={onOpenRescheduleModal}
-                                />
-                                <MenuItem
-                                    icon={<Timer size={16} color="#374151" />}
-                                    label={task.estimatedMinutes ? `~${formatMinutes(task.estimatedMinutes)} · Change` : 'Set estimate'}
-                                    onPress={onOpenEstimateModal}
-                                />
+                    {/* Inline menu — rendered in a Modal to escape ScrollView clipping */}
+                    <Modal
+                        visible={!isEditing && menuOpen && !!menuAnchor}
+                        transparent
+                        animationType="none"
+                        onRequestClose={onToggleMenu}
+                        statusBarTranslucent
+                    >
+                        <TouchableOpacity
+                            style={StyleSheet.absoluteFillObject}
+                            onPress={onToggleMenu}
+                            activeOpacity={1}
+                        />
+                        {menuAnchor && (() => {
+                            const showAbove = menuAnchor.y + menuAnchor.height > screenHeight * 0.6
+                            const right = screenWidth - (menuAnchor.x + menuAnchor.width)
+                            const verticalPos = showAbove
+                                ? { bottom: screenHeight - menuAnchor.y + 6 }
+                                : { top: menuAnchor.y + menuAnchor.height + 6 }
+                            return (
+                                <View style={[styles.inlineMenu, { position: 'absolute', right, ...verticalPos }]}>
+                                    <MenuItem
+                                        icon={<Edit3 size={16} color="#374151" />}
+                                        label="Edit"
+                                        onPress={onStartEditing}
+                                    />
+                                    <MenuItem
+                                        icon={<Clock size={16} color="#374151" />}
+                                        label={task.date ? 'Reschedule' : 'Schedule'}
+                                        onPress={onOpenRescheduleModal}
+                                    />
+                                    <MenuItem
+                                        icon={<Timer size={16} color="#374151" />}
+                                        label={task.estimatedMinutes ? `~${formatMinutes(task.estimatedMinutes)} · Change` : 'Set estimate'}
+                                        onPress={onOpenEstimateModal}
+                                    />
 
-                                {showMoveActions && (
-                                    <>
-                                        <View style={styles.inlineMenuDivider} />
-                                        <MenuItem
-                                            icon={<ArrowUp size={16} color={canMoveUp ? '#374151' : '#d1d5db'} />}
-                                            label="Move up"
-                                            disabled={!canMoveUp}
-                                            onPress={onMoveUp}
-                                        />
-                                        <MenuItem
-                                            icon={<ArrowDown size={16} color={canMoveDown ? '#374151' : '#d1d5db'} />}
-                                            label="Move down"
-                                            disabled={!canMoveDown}
-                                            onPress={onMoveDown}
-                                        />
-                                    </>
-                                )}
+                                    {showMoveActions && (
+                                        <>
+                                            <View style={styles.inlineMenuDivider} />
+                                            <MenuItem
+                                                icon={<ChevronsUp size={16} color={canMoveToTop ? '#374151' : '#d1d5db'} />}
+                                                label="Move to top"
+                                                disabled={!canMoveToTop}
+                                                onPress={onMoveToTop}
+                                            />
+                                            <MenuItem
+                                                icon={<ArrowUp size={16} color={canMoveUp ? '#374151' : '#d1d5db'} />}
+                                                label="Move up"
+                                                disabled={!canMoveUp}
+                                                onPress={onMoveUp}
+                                            />
+                                            <MenuItem
+                                                icon={<ArrowDown size={16} color={canMoveDown ? '#374151' : '#d1d5db'} />}
+                                                label="Move down"
+                                                disabled={!canMoveDown}
+                                                onPress={onMoveDown}
+                                            />
+                                            <MenuItem
+                                                icon={<ChevronsDown size={16} color={canMoveToBottom ? '#374151' : '#d1d5db'} />}
+                                                label="Move to bottom"
+                                                disabled={!canMoveToBottom}
+                                                onPress={onMoveToBottom}
+                                            />
+                                        </>
+                                    )}
 
-                                <View style={styles.inlineMenuDivider} />
+                                    <View style={styles.inlineMenuDivider} />
 
-                                <MenuItem
-                                    icon={<Trash2 size={16} color="#ef4444" />}
-                                    label="Delete"
-                                    danger
-                                    onPress={onDelete}
-                                />
-                            </View>
-                        </View>
-                    )}
+                                    <MenuItem
+                                        icon={<Trash2 size={16} color="#ef4444" />}
+                                        label="Delete"
+                                        danger
+                                        onPress={onDelete}
+                                    />
+                                </View>
+                            )
+                        })()}
+                    </Modal>
                 </View>
             </Animated.View>
         </View>

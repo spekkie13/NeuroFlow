@@ -1,14 +1,48 @@
 import React from 'react'
+import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { Planner } from '@/app/components/planner/Planner'
+import { AuthScreen } from '@/app/components/auth/AuthScreen'
+import { useAuth } from '@/app/hooks/useAuth'
 
-const Root: React.FC = () => {
-    return <Planner />
+const App: React.FC = () => {
+    const { user, isLoading, error, signInWithGoogle, signIn, signUp, signOut, clearError } = useAuth()
+
+    if (isLoading) {
+        return (
+            <View style={styles.loading}>
+                <ActivityIndicator size="large" color="#2563eb" />
+            </View>
+        )
+    }
+
+    if (!user) {
+        return (
+            <AuthScreen
+                onSignInWithGoogle={signInWithGoogle}
+                onSubmitEmail={({ mode, email, password, name }) => {
+                    clearError()
+                    if (mode === 'login') {
+                        signIn(email, password)
+                    } else {
+                        signUp(email, password, name ?? '')
+                    }
+                }}
+                error={error}
+                isLoading={isLoading}
+            />
+        )
+    }
+
+    return <Planner user={user} onSignOut={signOut} />
 }
 
-export const App: React.FC = () => {
-    return (
-        <Root />
-    )
-}
+const styles = StyleSheet.create({
+    loading: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f9fafb',
+    },
+})
 
-export default App;
+export { App }

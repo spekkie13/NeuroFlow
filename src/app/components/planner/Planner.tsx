@@ -13,12 +13,12 @@ import { CreateProjectModal } from '@/app/components/planner/CreateProjectModal'
 import { ProjectPickerModal } from '@/app/components/planner/ProjectPickerModal'
 import { useWorkspaces } from "@/app/hooks/useWorkspaces";
 import { useProjects } from '@/app/hooks/useProjects'
-import { PlannerView } from "@/app/props/planner/PlannerProps";
+import { PlannerProps, PlannerView } from "@/app/props/planner/PlannerProps";
 import { styles } from "@/app/styles/planner";
 import { WorkspaceSwitcherBar } from '@/app/components/workspace/WorkspaceSwitcherBar'
 import { WorkspaceSwitcherModal } from '@/app/components/workspace/WorkspaceSwitcherModal'
 
-export const Planner: React.FC = () => {
+export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
     const [currentView, setCurrentView] = useState<PlannerView>('tasks')
     const [newProjectName, setNewProjectName] = useState('')
     const [newProjectColor, setNewProjectColor] = useState('#2563eb')
@@ -352,6 +352,7 @@ export const Planner: React.FC = () => {
 
     const renderSettingsView = () => (
         <SettingsView
+            user={user}
             workspaces={workspaces}
             currentWorkspaceId={currentWorkspaceId}
             onAddWorkspace={addWorkspace}
@@ -359,6 +360,7 @@ export const Planner: React.FC = () => {
             onDeleteWorkspace={deleteWorkspace}
             onSwitchWorkspace={switchWorkspace}
             onSetDailyBudget={setDailyBudget}
+            onSignOut={onSignOut}
         />
     )
 

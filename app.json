@@ -7,19 +7,33 @@
     "updates": {
       "enabled": false
     },
+    "name": "NeuroFlow",
+    "slug": "neuroflow",
+    "icon": "./assets/icon.png",
+    "scheme": "neuroflow",
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
     "extra": {
       "eas": {
         "projectId": "35f96657-1f62-4166-a775-8b418ffae12a"
       }
     },
     "android": {
-      "package": "com.spekkie13.neuroflow"
+      "package": "com.spekkie13.neuroflow",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon-foreground.png",
+        "backgroundImage": "./assets/adaptive-icon-background.png"
+      }
     },
     "ios": {
       "bundleIdentifier": "com.spekkie13.neuroflow",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
-    }
+    },
+    "plugins": [
+      "expo-web-browser"
+    ]
   }
 }
