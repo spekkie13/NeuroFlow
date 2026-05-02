@@ -1,6 +1,6 @@
 import * as Linking from 'expo-linking'
 import * as WebBrowser from 'expo-web-browser'
-import { Platform } from 'react-native'
+import { Alert, Platform } from 'react-native'
 import { supabase } from '@/app/lib/supabase'
 import { User } from '@/app/models/User'
 import { User as SupabaseUser } from '@supabase/supabase-js'
@@ -28,6 +28,8 @@ export async function signInWithGoogle(): Promise<{ error: string | null }> {
 
     const redirectTo = 'neuroflow://'
 
+    Alert.alert('DEBUG', `redirectTo: ${redirectTo}`)
+
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -39,6 +41,8 @@ export async function signInWithGoogle(): Promise<{ error: string | null }> {
     if (error || !data.url) {
         return { error: error?.message ?? 'Could not start Google sign in' }
     }
+
+    Alert.alert('DEBUG', `OAuth URL contains redirect_to: ${data.url.includes('redirect_to')}`)
 
     const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo)
 
