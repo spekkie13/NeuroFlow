@@ -3,4 +3,5 @@ export interface Workspace {
     name: string
     createdAt: string
     dailyMinutes?: number
+    updatedAt?: string
 }

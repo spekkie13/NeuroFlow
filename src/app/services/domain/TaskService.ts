@@ -25,6 +25,8 @@ export function createTask(params: {
         priority,
         date,
         notes,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
     }
 }
 

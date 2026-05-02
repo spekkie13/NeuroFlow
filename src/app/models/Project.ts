@@ -5,4 +5,6 @@ export interface Project {
     name: string
     tasks: Task[]
     color: string
+    createdAt?: string
+    updatedAt?: string
 }

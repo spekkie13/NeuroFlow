@@ -1,9 +1,12 @@
-import * as Linking from 'expo-linking'
-import * as WebBrowser from 'expo-web-browser'
-import { Alert, Platform } from 'react-native'
+import { Platform } from 'react-native'
+import { GoogleSignin } from '@react-native-google-signin/google-signin'
 import { supabase } from '@/app/lib/supabase'
 import { User } from '@/app/models/User'
 import { User as SupabaseUser } from '@supabase/supabase-js'
+
+GoogleSignin.configure({
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+})
 
 function toAppUser(u: SupabaseUser): User {
     return {
@@ -19,54 +22,26 @@ export async function signInWithGoogle(): Promise<{ error: string | null }> {
     if (Platform.OS === 'web') {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
-            options: {
-                redirectTo: window.location.origin,
-            },
+            options: { redirectTo: window.location.origin },
         })
         return { error: error?.message ?? null }
     }
 
-    const redirectTo = 'neuroflow://'
+    try {
+        await GoogleSignin.hasPlayServices()
+        const response = await GoogleSignin.signIn()
+        const idToken = response.data?.idToken
+        if (!idToken) return { error: 'No ID token returned from Google' }
 
-    Alert.alert('DEBUG', `redirectTo: ${redirectTo}`)
-
-    const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-            redirectTo,
-            skipBrowserRedirect: true,
-        },
-    })
-
-    if (error || !data.url) {
-        return { error: error?.message ?? 'Could not start Google sign in' }
+        const { error } = await supabase.auth.signInWithIdToken({
+            provider: 'google',
+            token: idToken,
+        })
+        return { error: error?.message ?? null }
+    } catch (e: any) {
+        if (e.code === 'SIGN_IN_CANCELLED') return { error: null }
+        return { error: e.message ?? 'Google sign in failed' }
     }
-
-    Alert.alert('DEBUG', `OAuth URL contains redirect_to: ${data.url.includes('redirect_to')}`)
-
-    const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo)
-
-    if (result.type === 'success') {
-        // Tokens may be in the fragment (#) or query string (?)
-        const raw = result.url
-        const fragment = raw.split('#')[1] ?? ''
-        const query = raw.split('?')[1]?.split('#')[0] ?? ''
-        const params = new URLSearchParams(fragment || query)
-
-        const accessToken = params.get('access_token')
-        const refreshToken = params.get('refresh_token')
-
-        if (accessToken && refreshToken) {
-            const { error: sessionError } = await supabase.auth.setSession({
-                access_token: accessToken,
-                refresh_token: refreshToken,
-            })
-            if (sessionError) return { error: sessionError.message }
-        }
-    }
-
-    // Cancelled or dismissed — not an error
-    return { error: null }
 }
 
 export async function signInWithEmail(

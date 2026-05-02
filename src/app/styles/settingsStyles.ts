@@ -30,6 +30,8 @@ export const styles = StyleSheet.create({
     profileLeft: {
         flexDirection: 'row',
         alignItems: 'center',
+        flex: 1,
+        marginRight: 12,
     },
     avatar: {
         width: 56,

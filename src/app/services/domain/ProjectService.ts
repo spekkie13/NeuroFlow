@@ -10,6 +10,8 @@ export function createProject(params: { name: string; color: string }): Project 
         name: trimmed || 'Untitled Project',
         color: params.color,
         tasks: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
     }
 }
 

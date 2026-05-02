@@ -40,7 +40,7 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
         deleteWorkspace,
         switchWorkspace,
         setDailyBudget,
-    } = useWorkspaces()
+    } = useWorkspaces(user.id)
 
     const currentWorkspace = workspaces.find(w => w.id === currentWorkspaceId) ?? null
     const dailyMinutes = currentWorkspace?.dailyMinutes ?? null
@@ -55,7 +55,7 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
         updateTask,
         deleteTask,
         moveTask,
-    } = useProjects(currentWorkspaceId)
+    } = useProjects(currentWorkspaceId, user.id)
 
     useEffect(() => {
         if (!projects.length) {
