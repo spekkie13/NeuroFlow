@@ -116,7 +116,7 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
     }
 
     const getUnscheduledCount = (tasks: Task[]) =>
-        tasks.filter(t => !t.date || isOverdue(t)).length
+        tasks.filter(t => !t.completed && (!t.date || isOverdue(t))).length
 
     const activeProject =
         projects.length === 0
