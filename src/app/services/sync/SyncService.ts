@@ -15,7 +15,9 @@ export function pushWorkspace(userId: string, workspace: Workspace): void {
         daily_minutes: workspace.dailyMinutes ?? null,
         created_at: workspace.createdAt,
         updated_at: workspace.updatedAt ?? workspace.createdAt,
-    }).then(() => {})
+    }).then(({ error }) => {
+        if (error) console.error('[SyncService] pushWorkspace failed:', error.message)
+    })
 }
 
 export function pushProject(userId: string, workspaceId: string, project: Project): void {
@@ -74,6 +76,7 @@ export async function syncWorkspaces(userId: string): Promise<Workspace[] | null
 
         const local = await loadWorkspaces()
         const localMap = new Map(local.map(w => [w.id, w]))
+        const remoteIds = new Set(data.map(row => row.id))
         const merged = [...local]
 
         for (const row of data) {
@@ -89,6 +92,13 @@ export async function syncWorkspaces(userId: string): Promise<Workspace[] | null
                 const idx = merged.findIndex(w => w.id === row.id)
                 if (idx >= 0) merged[idx] = remote
                 else merged.push(remote)
+            }
+        }
+
+        // Push any local workspaces that never made it to the DB
+        for (const w of local) {
+            if (!remoteIds.has(w.id)) {
+                pushWorkspace(userId, w)
             }
         }
 
