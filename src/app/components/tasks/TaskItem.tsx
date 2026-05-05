@@ -79,8 +79,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
     useEffect(() => {
         if (menuOpen) {
-            cardRef.current?.measureInWindow((x, y, width, height) => {
-                setMenuAnchor({ x, y, width, height })
+            requestAnimationFrame(() => {
+                cardRef.current?.measureInWindow((x, y, width, height) => {
+                    setMenuAnchor({ x, y, width, height })
+                })
             })
         } else {
             setMenuAnchor(null)
