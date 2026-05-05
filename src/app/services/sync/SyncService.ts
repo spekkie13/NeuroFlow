@@ -122,6 +122,7 @@ export async function syncProjects(userId: string, workspaceId: string): Promise
         const remoteTasks = taskRes.data ?? []
         const local = await loadProjectsForWorkspace(workspaceId)
         const localMap = new Map(local.map(p => [p.id, p]))
+        const remoteProjectIds = new Set(remoteProjects.map(row => row.id))
         const merged = [...local]
 
         for (const row of remoteProjects) {
@@ -154,6 +155,13 @@ export async function syncProjects(userId: string, workspaceId: string): Promise
                 const idx = merged.findIndex(p => p.id === row.id)
                 if (idx >= 0) merged[idx] = remote
                 else merged.push(remote)
+            }
+        }
+
+        // Push any local projects (and their tasks) that never made it to the DB
+        for (const p of local) {
+            if (!remoteProjectIds.has(p.id)) {
+                pushProject(userId, workspaceId, p)
             }
         }
 
