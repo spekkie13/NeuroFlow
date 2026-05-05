@@ -158,10 +158,15 @@ export async function syncProjects(userId: string, workspaceId: string): Promise
             }
         }
 
-        // Push any local projects (and their tasks) that never made it to the DB
+        // Push local projects that are missing from DB, or whose local version is newer
         for (const p of local) {
             if (!remoteProjectIds.has(p.id)) {
                 pushProject(userId, workspaceId, p)
+            } else {
+                const remoteRow = remoteProjects.find(r => r.id === p.id)
+                if (remoteRow && (p.updatedAt ?? '') > (remoteRow.updated_at ?? '')) {
+                    pushProject(userId, workspaceId, p)
+                }
             }
         }
 
