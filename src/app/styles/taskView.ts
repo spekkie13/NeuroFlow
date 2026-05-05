@@ -329,6 +329,12 @@ export const styles = StyleSheet.create({
         backgroundColor: '#f9fafb',
         textAlignVertical: 'top' as any,
     },
+    notesActions: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        marginTop: 4,
+        gap: 4,
+    },
 
     // Estimate badge shown in the date row
     estimateBadgeRow: {

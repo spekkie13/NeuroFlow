@@ -44,6 +44,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
     const [notesExpanded, setNotesExpanded] = useState(false)
     const [localNotes, setLocalNotes] = useState(task.notes || '')
+    const [notesDirty, setNotesDirty] = useState(false)
 
     const steps = task.steps ?? []
     const [stepsExpanded, setStepsExpanded] = useState(false)
@@ -69,6 +70,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
     useEffect(() => {
         setLocalNotes(task.notes || '')
+        setNotesDirty(false)
     }, [task.notes])
 
     const cardRef = useRef<View>(null)
@@ -303,6 +305,22 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                                         returnKeyType="done"
                                         onSubmitEditing={handleAddStep}
                                     />
+                                    {newStepText.trim().length > 0 && (
+                                        <>
+                                            <IconButton
+                                                icon={<CheckCircle2 size={18} color="#16a34a" />}
+                                                variant="success"
+                                                onPress={handleAddStep}
+                                                accessibilityLabel="Add step"
+                                            />
+                                            <IconButton
+                                                icon={<X size={18} color="#6b7280" />}
+                                                variant="subtle"
+                                                onPress={() => setNewStepText('')}
+                                                accessibilityLabel="Cancel step"
+                                            />
+                                        </>
+                                    )}
                                 </View>
                             </View>
                         )}
@@ -313,13 +331,31 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                                 <TextInput
                                     style={styles.notesInput}
                                     value={localNotes}
-                                    onChangeText={setLocalNotes}
-                                    onBlur={() => onSaveNotes(localNotes)}
+                                    onChangeText={(text) => {
+                                        setLocalNotes(text)
+                                        setNotesDirty(true)
+                                    }}
                                     placeholder="Add notes..."
                                     multiline
                                     numberOfLines={3}
                                     placeholderTextColor="#9ca3af"
                                 />
+                                {notesDirty && (
+                                    <View style={styles.notesActions}>
+                                        <IconButton
+                                            icon={<CheckCircle2 size={18} color="#16a34a" />}
+                                            variant="success"
+                                            onPress={() => { onSaveNotes(localNotes); setNotesDirty(false) }}
+                                            accessibilityLabel="Save notes"
+                                        />
+                                        <IconButton
+                                            icon={<X size={18} color="#6b7280" />}
+                                            variant="subtle"
+                                            onPress={() => { setLocalNotes(task.notes || ''); setNotesDirty(false) }}
+                                            accessibilityLabel="Cancel notes"
+                                        />
+                                    </View>
+                                )}
                             </View>
                         )}
                     </View>
