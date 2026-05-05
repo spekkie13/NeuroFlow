@@ -408,8 +408,15 @@ export const Timeline = ({
                 visible={!!rescheduleTask}
                 taskName={rescheduleTask?.name}
                 date={rescheduleDate}
+                hasDate={!!rescheduleTask?.date}
                 onChangeDate={setRescheduleDate}
                 onSave={handleSaveReschedule}
+                onClear={() => {
+                    if (!rescheduleTask) return
+                    onUpdateTask(rescheduleTask.id, { date: null })
+                    setRescheduleTask(null)
+                    setRescheduleDate('')
+                }}
                 onCancel={() => { setRescheduleTask(null); setRescheduleDate('') }}
             />
         </View>

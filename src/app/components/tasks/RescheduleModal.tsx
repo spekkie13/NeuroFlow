@@ -10,8 +10,10 @@ export const RescheduleModal: React.FC<RescheduleModalProps> = ({
                                                                     visible,
                                                                     taskName,
                                                                     date,
+                                                                    hasDate,
                                                                     onChangeDate,
                                                                     onSave,
+                                                                    onClear,
                                                                     onCancel,
                                                                 }: RescheduleModalProps) => {
     if (!visible) return null
@@ -70,6 +72,14 @@ export const RescheduleModal: React.FC<RescheduleModalProps> = ({
                             disabled={disabled}
                         />
                     </View>
+                    {hasDate && onClear && (
+                        <AppButton
+                            title="Remove scheduled date"
+                            variant="ghost"
+                            onPress={onClear}
+                            fullWidth
+                        />
+                    )}
                 </View>
             </View>
         </Modal>

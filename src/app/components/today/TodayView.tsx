@@ -192,8 +192,15 @@ export const TodayView: React.FC<TodayViewProps> = ({ projects, onUpdateTask }) 
                 visible={!!rescheduleTarget}
                 taskName={rescheduleTarget?.task.name}
                 date={rescheduleDate}
+                hasDate={!!rescheduleTarget?.task.date}
                 onChangeDate={setRescheduleDate}
                 onSave={handleSaveReschedule}
+                onClear={() => {
+                    if (!rescheduleTarget) return
+                    onUpdateTask(rescheduleTarget.projectId, rescheduleTarget.task.id, { date: null })
+                    setRescheduleTarget(null)
+                    setRescheduleDate('')
+                }}
                 onCancel={() => { setRescheduleTarget(null); setRescheduleDate('') }}
             />
         </View>

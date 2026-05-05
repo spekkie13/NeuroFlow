@@ -248,8 +248,14 @@ export const TaskView: React.FC<TaskViewProps> = ({
                 visible={!!rescheduleTask}
                 taskName={rescheduleTask?.name}
                 date={rescheduleStart}
+                hasDate={!!rescheduleTask?.date}
                 onChangeDate={setRescheduleStart}
                 onSave={handleSaveReschedule}
+                onClear={() => {
+                    if (!rescheduleTask) return
+                    onUpdateTask(rescheduleTask.id, { date: null })
+                    closeRescheduleModal()
+                }}
                 onCancel={closeRescheduleModal}
             />
 
