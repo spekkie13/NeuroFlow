@@ -4,6 +4,7 @@ import { Plus, ChevronDown, List, Pencil } from 'lucide-react-native'
 import { TaskView } from '@/app/components/tasks/TaskView'
 import { AppButton } from '@/app/components/ui/AppButton'
 import { Timeline, TimelineHandle } from '@/app/components/timeline/Timeline'
+import { TodayView } from '@/app/components/today/TodayView'
 import { getNextProjectColor } from '@/app/services/domain/ProjectColorService'
 import { isOverdue } from '@/app/services/domain/TaskService'
 import { Task } from '@/app/models/Task'
@@ -282,6 +283,13 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
         )
     }
 
+    const renderTodayView = () => (
+        <TodayView
+            projects={projects}
+            onUpdateTask={(projectId, taskId, updates) => updateTask(projectId, taskId, updates)}
+        />
+    )
+
     const renderTimelineView = () => {
         if (projects.length === 0) {
             return (
@@ -376,6 +384,8 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
         switch (currentView) {
             case 'tasks':
                 return renderTasksView()
+            case 'today':
+                return renderTodayView()
             case 'timeline':
                 return renderTimelineView()
             case 'settings':

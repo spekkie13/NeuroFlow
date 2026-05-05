@@ -1,6 +1,6 @@
 import { ComponentType } from 'react'
 import { ViewType } from "@/app/props/ui/BottomNavProps";
-import { Calendar, ListTodo, User as UserIcon } from "lucide-react-native";
+import { Calendar, ListTodo, Sun, User as UserIcon } from "lucide-react-native";
 
 type NavItem = {
     id: ViewType
@@ -13,6 +13,11 @@ export const navItems: NavItem[] = [
         id: 'tasks' as ViewType,
         label: 'Tasks',
         icon: ListTodo,
+    },
+    {
+        id: 'today' as ViewType,
+        label: 'Today',
+        icon: Sun,
     },
     {
         id: 'timeline' as ViewType,
