@@ -4,6 +4,11 @@ import { Project } from '@/app/models/Project'
 import { Task } from '@/app/models/Task'
 import { loadWorkspaces, saveAccounts } from '@/app/services/storage/accountStorage'
 import { loadProjectsForWorkspace, saveProjectsForWorkspace } from '@/app/services/storage/projectStorage'
+import {
+    getGlobalReminderTime,
+    getGlobalReminderUpdatedAt,
+    setGlobalReminderTime,
+} from '@/app/services/storage/globalSettingsStorage'
 
 // ── Fire-and-forget push helpers ─────────────────────────────────────────────
 
@@ -20,6 +25,16 @@ export function pushWorkspace(userId: string, workspace: Workspace): void {
     })
 }
 
+export function pushGlobalSettings(userId: string, reminderTime: string | null): void {
+    supabase.from('user_settings').upsert({
+        user_id: userId,
+        global_reminder_time: reminderTime,
+        updated_at: new Date().toISOString(),
+    }).then(({ error }) => {
+        if (error) console.error('[SyncService] pushGlobalSettings failed:', error.message)
+    })
+}
+
 export function pushProject(userId: string, workspaceId: string, project: Project): void {
     supabase.from('projects').upsert({
         id: project.id,
@@ -27,6 +42,7 @@ export function pushProject(userId: string, workspaceId: string, project: Projec
         user_id: userId,
         name: project.name,
         color: project.color,
+        reminder_time: project.reminderTime ?? null,
         created_at: project.createdAt ?? new Date().toISOString(),
         updated_at: project.updatedAt ?? new Date().toISOString(),
     }).then(() => {})
@@ -64,6 +80,31 @@ export function deleteRemoteWorkspace(workspaceId: string): void {
 }
 
 // ── Startup sync (returns merged data, or null on failure) ───────────────────
+
+export async function syncGlobalSettings(userId: string): Promise<string | null | undefined> {
+    try {
+        const { data, error } = await supabase
+            .from('user_settings')
+            .select('global_reminder_time, updated_at')
+            .eq('user_id', userId)
+            .maybeSingle()
+
+        if (error || !data) return undefined
+
+        const localUpdatedAt = await getGlobalReminderUpdatedAt()
+        const remoteUpdatedAt = data.updated_at ?? ''
+
+        if (!localUpdatedAt || remoteUpdatedAt > localUpdatedAt) {
+            const remoteTime: string | null = data.global_reminder_time ?? null
+            await setGlobalReminderTime(remoteTime)
+            return remoteTime
+        }
+
+        return await getGlobalReminderTime()
+    } catch {
+        return undefined
+    }
+}
 
 export async function syncWorkspaces(userId: string): Promise<Workspace[] | null> {
     try {
@@ -145,6 +186,7 @@ export async function syncProjects(userId: string, workspaceId: string): Promise
                 id: row.id,
                 name: row.name,
                 color: row.color,
+                reminderTime: row.reminder_time ?? undefined,
                 tasks,
                 createdAt: row.created_at,
                 updatedAt: row.updated_at,

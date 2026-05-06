@@ -22,7 +22,7 @@ import {
 interface UseProjectsResult {
     projects: Project[]
     isLoading: boolean
-    addProject: (name: string, color?: string) => Promise<void>
+    addProject: (name: string, color?: string, reminderTime?: string | null) => Promise<void>
     updateProject: (projectId: string, updates: Partial<Project>) => Promise<void>
     deleteProject: (projectId: string) => Promise<void>
     addTask: (projectId: string, task: Task) => Promise<void>
@@ -81,9 +81,9 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
         await saveProjectsForWorkspace(workspaceId, next)
     }
 
-    const addProject = async (name: string, color?: string) => {
+    const addProject = async (name: string, color?: string, reminderTime?: string | null) => {
         const projectColor = color ?? getNextProjectColor(projects)
-        const newProject = createProject({ name, color: projectColor })
+        const newProject = createProject({ name, color: projectColor, reminderTime })
         const next = [...projects, newProject]
         await persist(next)
         if (userId && workspaceId) pushProject(userId, workspaceId, newProject)

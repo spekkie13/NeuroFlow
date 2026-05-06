@@ -328,6 +328,66 @@ export const styles = StyleSheet.create({
         color: '#b91c1c',
     },
 
+    // Notification reminder
+    reminderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginTop: 4,
+    },
+    reminderTimeButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        borderRadius: 999,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+        backgroundColor: '#f9fafb',
+    },
+    reminderTimeButtonActive: {
+        backgroundColor: '#eff6ff',
+        borderColor: '#2563eb',
+    },
+    reminderTimeText: {
+        fontSize: 13,
+        fontWeight: '500',
+        color: '#374151',
+    },
+    reminderTimeTextActive: {
+        color: '#2563eb',
+        fontWeight: '600',
+    },
+    reminderOffButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 999,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+        backgroundColor: '#f9fafb',
+    },
+    reminderOffText: {
+        fontSize: 13,
+        color: '#6b7280',
+    },
+    reminderDoneButton: {
+        alignSelf: 'flex-end',
+        marginTop: 8,
+        paddingHorizontal: 16,
+        paddingVertical: 6,
+        borderRadius: 8,
+        backgroundColor: '#2563eb',
+    },
+    reminderDoneText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#ffffff',
+    },
+
     localInfoCard: {
         marginTop: 8,
         marginBottom: 16,

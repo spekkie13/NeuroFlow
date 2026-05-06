@@ -5,6 +5,7 @@ export interface Project {
     name: string
     tasks: Task[]
     color: string
+    reminderTime?: string | null
     createdAt?: string
     updatedAt?: string
 }

@@ -8,4 +8,8 @@ export interface CreateProjectModalProps {
     onSelectColor: (color: string) => void
     editMode?: boolean
     onDelete?: () => void
+    // undefined = inherit global, null = off, "HH:MM" = specific override
+    reminderTime?: string | null
+    globalReminderTime?: string | null
+    onSetReminderTime?: (time: string | null | undefined) => void
 }

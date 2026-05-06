@@ -1,0 +1,43 @@
+import { useEffect, useState } from 'react'
+import {
+    getGlobalReminderTime,
+    setGlobalReminderTime,
+} from '@/app/services/storage/globalSettingsStorage'
+import { pushGlobalSettings, syncGlobalSettings } from '@/app/services/sync/SyncService'
+
+interface UseGlobalSettingsResult {
+    globalReminderTime: string | null
+    isLoading: boolean
+    setGlobalReminder: (time: string | null) => Promise<void>
+}
+
+export function useGlobalSettings(userId: string | null): UseGlobalSettingsResult {
+    const [globalReminderTime, setTime] = useState<string | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+
+    useEffect(() => {
+        let mounted = true
+        const init = async () => {
+            const local = await getGlobalReminderTime()
+            if (!mounted) return
+            setTime(local)
+            setIsLoading(false)
+
+            if (userId) {
+                const synced = await syncGlobalSettings(userId)
+                if (!mounted || synced === undefined) return
+                setTime(synced)
+            }
+        }
+        init()
+        return () => { mounted = false }
+    }, [userId])
+
+    const setGlobalReminder = async (time: string | null) => {
+        setTime(time)
+        await setGlobalReminderTime(time)
+        if (userId) pushGlobalSettings(userId, time)
+    }
+
+    return { globalReminderTime, isLoading, setGlobalReminder }
+}

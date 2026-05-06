@@ -14,10 +14,12 @@ import { CreateProjectModal } from '@/app/components/planner/CreateProjectModal'
 import { ProjectPickerModal } from '@/app/components/planner/ProjectPickerModal'
 import { useWorkspaces } from "@/app/hooks/useWorkspaces";
 import { useProjects } from '@/app/hooks/useProjects'
+import { useGlobalSettings } from '@/app/hooks/useGlobalSettings'
 import { PlannerProps, PlannerView } from "@/app/props/planner/PlannerProps";
 import { styles } from "@/app/styles/planner";
 import { WorkspaceSwitcherBar } from '@/app/components/workspace/WorkspaceSwitcherBar'
 import { WorkspaceSwitcherModal } from '@/app/components/workspace/WorkspaceSwitcherModal'
+import { requestPermissions, scheduleAllReminders } from '@/app/services/notifications/NotificationService'
 
 export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
     const [currentView, setCurrentView] = useState<PlannerView>('tasks')
@@ -30,6 +32,8 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
     const [isEditProjectModalVisible, setIsEditProjectModalVisible] = useState(false)
     const [editProjectName, setEditProjectName] = useState('')
     const [editProjectColor, setEditProjectColor] = useState('#2563eb')
+    const [editProjectReminderTime, setEditProjectReminderTime] = useState<string | null | undefined>(undefined)
+    const [newProjectReminderTime, setNewProjectReminderTime] = useState<string | null | undefined>(undefined)
     const [isWorkspaceSwitcherVisible, setIsWorkspaceSwitcherVisible] = useState(false)
 
     const {
@@ -58,6 +62,8 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
         moveTask,
     } = useProjects(currentWorkspaceId, user.id)
 
+    const { globalReminderTime, setGlobalReminder } = useGlobalSettings(user.id)
+
     useEffect(() => {
         if (!projects.length) {
             setSelectedProjectId(null)
@@ -68,21 +74,40 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
         }
     }, [projects, selectedProjectId])
 
+    // Reschedule all notifications whenever projects or global reminder time changes
+    useEffect(() => {
+        scheduleAllReminders(projects, globalReminderTime)
+    }, [projects, globalReminderTime])
+
+    const handleSetGlobalReminder = async (time: string | null) => {
+        if (time !== null) {
+            const granted = await requestPermissions()
+            if (!granted) return
+        }
+        await setGlobalReminder(time)
+    }
+
     const openProjectModal = () => {
         setNewProjectName('')
         setNewProjectColor(getNextProjectColor(projects))
+        setNewProjectReminderTime(undefined)
         setIsProjectModalVisible(true)
     }
 
     const closeProjectModal = () => {
         setIsProjectModalVisible(false)
         setNewProjectName('')
+        setNewProjectReminderTime(undefined)
     }
 
     const handleCreateProject = async () => {
         const name = newProjectName.trim()
         if (!name) return
-        await addProject(name, newProjectColor)
+        if (typeof newProjectReminderTime === 'string') {
+            const granted = await requestPermissions()
+            if (!granted) return
+        }
+        await addProject(name, newProjectColor, newProjectReminderTime)
         closeProjectModal()
     }
 
@@ -90,14 +115,20 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
         if (!activeProject) return
         setEditProjectName(activeProject.name)
         setEditProjectColor(activeProject.color)
+        setEditProjectReminderTime(activeProject.reminderTime)
         setIsEditProjectModalVisible(true)
     }
 
     const handleSaveEditProject = async () => {
         if (!activeProject) return
+        if (typeof editProjectReminderTime === 'string') {
+            const granted = await requestPermissions()
+            if (!granted) return
+        }
         await updateProject(activeProject.id, {
             name: editProjectName.trim() || activeProject.name,
             color: editProjectColor,
+            reminderTime: editProjectReminderTime,
         })
         setIsEditProjectModalVisible(false)
     }
@@ -168,6 +199,9 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
                     onCancel={closeProjectModal}
                     selectedColor={newProjectColor}
                     onSelectColor={setNewProjectColor}
+                    reminderTime={newProjectReminderTime}
+                    globalReminderTime={globalReminderTime}
+                    onSetReminderTime={setNewProjectReminderTime}
                 />
                 <CreateProjectModal
                     visible={isEditProjectModalVisible}
@@ -179,6 +213,9 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
                     onSelectColor={setEditProjectColor}
                     editMode
                     onDelete={handleDeleteProject}
+                    reminderTime={editProjectReminderTime}
+                    globalReminderTime={globalReminderTime}
+                    onSetReminderTime={setEditProjectReminderTime}
                 />
                 <ProjectPickerModal
                     visible={isProjectPickerVisible}
@@ -363,11 +400,13 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
             user={user}
             workspaces={workspaces}
             currentWorkspaceId={currentWorkspaceId}
+            globalReminderTime={globalReminderTime}
             onAddWorkspace={addWorkspace}
             onUpdateWorkspace={updateWorkspace}
             onDeleteWorkspace={deleteWorkspace}
             onSwitchWorkspace={switchWorkspace}
             onSetDailyBudget={setDailyBudget}
+            onSetGlobalReminder={handleSetGlobalReminder}
             onSignOut={onSignOut}
         />
     )

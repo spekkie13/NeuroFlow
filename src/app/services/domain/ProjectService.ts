@@ -2,13 +2,14 @@ import { Project } from "@/app/models/Project";
 import { Task } from "@/app/models/Task";
 import { generateId } from '@/app/utils/idUtils'
 
-export function createProject(params: { name: string; color: string }): Project {
+export function createProject(params: { name: string; color: string; reminderTime?: string | null }): Project {
     const trimmed = params.name.trim()
 
     return {
         id: generateId(),
         name: trimmed || 'Untitled Project',
         color: params.color,
+        reminderTime: params.reminderTime,
         tasks: [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

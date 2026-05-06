@@ -296,4 +296,60 @@ export const styles = StyleSheet.create({
         color: '#ef4444',
         fontWeight: '500',
     },
+
+    // Project modal reminder row
+    reminderLabel: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#374151',
+        marginTop: 16,
+        marginBottom: 8,
+    },
+    modalReminderRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    },
+    reminderChip: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 999,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+        backgroundColor: '#f9fafb',
+    },
+    reminderChipActive: {
+        backgroundColor: '#eff6ff',
+        borderColor: '#2563eb',
+    },
+    reminderChipText: {
+        fontSize: 13,
+        fontWeight: '500',
+        color: '#374151',
+    },
+    reminderChipTextActive: {
+        color: '#2563eb',
+        fontWeight: '600',
+    },
+    reminderChipDanger: {
+        backgroundColor: '#fef2f2',
+        borderColor: '#fca5a5',
+    },
+    reminderChipTextDanger: {
+        color: '#dc2626',
+        fontWeight: '500',
+    },
+    reminderDoneButton: {
+        alignSelf: 'flex-end',
+        marginTop: 8,
+        paddingHorizontal: 16,
+        paddingVertical: 6,
+        borderRadius: 8,
+        backgroundColor: '#2563eb',
+    },
+    reminderDoneText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#ffffff',
+    },
 })

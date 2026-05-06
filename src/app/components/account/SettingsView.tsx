@@ -1,11 +1,33 @@
 import React, { useState } from 'react'
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
-import { Edit3, Trash2, Check, X, UserIcon, User, LogOut, Mail } from 'lucide-react-native'
+import { Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker'
+import { Edit3, Trash2, Check, X, UserIcon, User, LogOut, Mail, Bell, BellOff } from 'lucide-react-native'
 import { AppButton } from '@/app/components/ui/AppButton'
 import { TextField } from '@/app/components/ui/TextField'
 import { IconButton } from '@/app/components/ui/IconButton'
 import { SettingsViewProps } from '@/app/props/account/settings.props'
 import { styles } from '@/app/styles/settingsStyles'
+
+function formatTime(timeHHMM: string): string {
+    const [h, m] = timeHHMM.split(':').map(Number)
+    const period = h >= 12 ? 'PM' : 'AM'
+    const hour = h % 12 || 12
+    const minute = m.toString().padStart(2, '0')
+    return `${hour}:${minute} ${period}`
+}
+
+function timeToDate(timeHHMM: string): Date {
+    const [h, m] = timeHHMM.split(':').map(Number)
+    const d = new Date()
+    d.setHours(h, m, 0, 0)
+    return d
+}
+
+function dateToHHMM(date: Date): string {
+    const h = date.getHours().toString().padStart(2, '0')
+    const m = date.getMinutes().toString().padStart(2, '0')
+    return `${h}:${m}`
+}
 
 const BUDGET_PRESETS: { label: string; minutes: number | null }[] = [
     { label: 'No limit', minutes: null },
@@ -21,11 +43,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                                                             user,
                                                             workspaces,
                                                             currentWorkspaceId,
+                                                            globalReminderTime,
                                                             onAddWorkspace,
                                                             onUpdateWorkspace,
                                                             onDeleteWorkspace,
                                                             onSwitchWorkspace,
                                                             onSetDailyBudget,
+                                                            onSetGlobalReminder,
                                                             onSignOut,
                                                         } : SettingsViewProps) => {
     const currentWorkspace = workspaces.find(w => w.id === currentWorkspaceId) ?? null
@@ -33,6 +57,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     const [newWorkspaceName, setNewWorkspaceName] = useState('')
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editName, setEditName] = useState('')
+    const [showReminderPicker, setShowReminderPicker] = useState(false)
+    const reminderPickerDate = globalReminderTime ? timeToDate(globalReminderTime) : (() => { const d = new Date(); d.setHours(9, 0, 0, 0); return d })()
 
     const handleAdd = () => {
         const trimmed = newWorkspaceName.trim()
@@ -170,6 +196,60 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     </View>
                 </View>
             )}
+
+            {/* NOTIFICATION REMINDER */}
+            <View style={styles.addCard}>
+                <View style={styles.addTitleRow}>
+                    <Bell size={14} color="#111827" style={styles.addTitleIcon} />
+                    <Text style={styles.addTitle}>Daily notification reminder</Text>
+                </View>
+                <Text style={styles.budgetSubtitle}>
+                    Get a daily reminder to work on your tasks. Projects can override this time individually.
+                </Text>
+                <View style={styles.reminderRow}>
+                    <TouchableOpacity
+                        style={[styles.reminderTimeButton, globalReminderTime && styles.reminderTimeButtonActive]}
+                        onPress={() => setShowReminderPicker(true)}
+                        activeOpacity={0.7}
+                    >
+                        <Bell size={14} color={globalReminderTime ? '#2563eb' : '#6b7280'} />
+                        <Text style={[styles.reminderTimeText, globalReminderTime && styles.reminderTimeTextActive]}>
+                            {globalReminderTime ? formatTime(globalReminderTime) : 'Set time'}
+                        </Text>
+                    </TouchableOpacity>
+                    {globalReminderTime && (
+                        <TouchableOpacity
+                            style={styles.reminderOffButton}
+                            onPress={() => onSetGlobalReminder(null)}
+                            activeOpacity={0.7}
+                        >
+                            <BellOff size={14} color="#6b7280" />
+                            <Text style={styles.reminderOffText}>Turn off</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
+                {showReminderPicker && (
+                    <DateTimePicker
+                        mode="time"
+                        value={reminderPickerDate}
+                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                        onChange={(event: DateTimePickerEvent, date?: Date) => {
+                            if (Platform.OS !== 'ios') setShowReminderPicker(false)
+                            if (event.type === 'dismissed') { setShowReminderPicker(false); return }
+                            if (date) onSetGlobalReminder(dateToHHMM(date))
+                        }}
+                    />
+                )}
+                {Platform.OS === 'ios' && showReminderPicker && (
+                    <TouchableOpacity
+                        style={styles.reminderDoneButton}
+                        onPress={() => setShowReminderPicker(false)}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={styles.reminderDoneText}>Done</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
 
             {/* WORKSPACES LIST */}
             <View style={styles.listCard}>
