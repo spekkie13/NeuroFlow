@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { SafeAreaView, View, ScrollView, Text, TouchableOpacity } from 'react-native'
+import {SafeAreaView, View, ScrollView, Text, TouchableOpacity, Alert} from 'react-native'
 import { Plus, ChevronDown, List, Pencil } from 'lucide-react-native'
 import { TaskView } from '@/app/components/tasks/TaskView'
 import { AppButton } from '@/app/components/ui/AppButton'
@@ -19,7 +19,7 @@ import { PlannerProps, PlannerView } from "@/app/props/planner/PlannerProps";
 import { styles } from "@/app/styles/planner";
 import { WorkspaceSwitcherBar } from '@/app/components/workspace/WorkspaceSwitcherBar'
 import { WorkspaceSwitcherModal } from '@/app/components/workspace/WorkspaceSwitcherModal'
-import { requestPermissions, scheduleAllReminders } from '@/app/services/notifications/NotificationService'
+import { initNotificationHandler, requestPermissions, scheduleAllReminders } from '@/app/services/notifications/NotificationService'
 
 export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
     const [currentView, setCurrentView] = useState<PlannerView>('tasks')
@@ -74,15 +74,22 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
         }
     }, [projects, selectedProjectId])
 
+    useEffect(() => { initNotificationHandler() }, [])
+
     // Reschedule all notifications whenever projects or global reminder time changes
     useEffect(() => {
         scheduleAllReminders(projects, globalReminderTime)
     }, [projects, globalReminderTime])
 
+    const alertPermissionDenied = () => Alert.alert(
+        'Notifications disabled',
+        'Enable notifications for NeuroFlow in your device Settings to use reminders.',
+    )
+
     const handleSetGlobalReminder = async (time: string | null) => {
         if (time !== null) {
             const granted = await requestPermissions()
-            if (!granted) return
+            if (!granted) { alertPermissionDenied(); return }
         }
         await setGlobalReminder(time)
     }
@@ -102,10 +109,13 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
 
     const handleCreateProject = async () => {
         const name = newProjectName.trim()
-        if (!name) return
+        if (!name) {
+            Alert.alert('No name provided')
+            return
+        }
         if (typeof newProjectReminderTime === 'string') {
             const granted = await requestPermissions()
-            if (!granted) return
+            if (!granted) { alertPermissionDenied(); return }
         }
         await addProject(name, newProjectColor, newProjectReminderTime)
         closeProjectModal()
@@ -120,10 +130,13 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }) => {
     }
 
     const handleSaveEditProject = async () => {
-        if (!activeProject) return
+        if (!activeProject) {
+            Alert.alert('No active project')
+            return
+        }
         if (typeof editProjectReminderTime === 'string') {
             const granted = await requestPermissions()
-            if (!granted) return
+            if (!granted) { alertPermissionDenied(); return }
         }
         await updateProject(activeProject.id, {
             name: editProjectName.trim() || activeProject.name,

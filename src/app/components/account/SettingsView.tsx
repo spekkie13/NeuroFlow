@@ -7,27 +7,7 @@ import { TextField } from '@/app/components/ui/TextField'
 import { IconButton } from '@/app/components/ui/IconButton'
 import { SettingsViewProps } from '@/app/props/account/settings.props'
 import { styles } from '@/app/styles/settingsStyles'
-
-function formatTime(timeHHMM: string): string {
-    const [h, m] = timeHHMM.split(':').map(Number)
-    const period = h >= 12 ? 'PM' : 'AM'
-    const hour = h % 12 || 12
-    const minute = m.toString().padStart(2, '0')
-    return `${hour}:${minute} ${period}`
-}
-
-function timeToDate(timeHHMM: string): Date {
-    const [h, m] = timeHHMM.split(':').map(Number)
-    const d = new Date()
-    d.setHours(h, m, 0, 0)
-    return d
-}
-
-function dateToHHMM(date: Date): string {
-    const h = date.getHours().toString().padStart(2, '0')
-    const m = date.getMinutes().toString().padStart(2, '0')
-    return `${h}:${m}`
-}
+import {dateToHHMM, formatTime, timeToDate} from "@/app/utils/dateUtils";
 
 const BUDGET_PRESETS: { label: string; minutes: number | null }[] = [
     { label: 'No limit', minutes: null },
@@ -58,7 +38,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editName, setEditName] = useState('')
     const [showReminderPicker, setShowReminderPicker] = useState(false)
-    const reminderPickerDate = globalReminderTime ? timeToDate(globalReminderTime) : (() => { const d = new Date(); d.setHours(9, 0, 0, 0); return d })()
+    const reminderPickerDate = timeToDate(globalReminderTime ?? '09:00');
 
     const handleAdd = () => {
         const trimmed = newWorkspaceName.trim()

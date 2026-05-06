@@ -1,29 +1,24 @@
 import * as Notifications from 'expo-notifications'
 import { Platform } from 'react-native'
 import { Project } from '@/app/models/Project'
-
-Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: false,
-        shouldSetBadge: false,
-        shouldShowBanner: true,
-        shouldShowList: true,
-    }),
-})
+import {formatTime} from "@/app/utils/dateUtils";
 
 const REMINDER_ID_PREFIX = 'reminder-'
 
-function toIdentifier(timeHHMM: string): string {
-    return `${REMINDER_ID_PREFIX}${timeHHMM.replace(':', '-')}`
+export function initNotificationHandler(): void {
+    Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+            shouldShowAlert: true,
+            shouldPlaySound: false,
+            shouldSetBadge: false,
+            shouldShowBanner: true,
+            shouldShowList: true,
+        }),
+    })
 }
 
-function formatTime(timeHHMM: string): string {
-    const [h, m] = timeHHMM.split(':').map(Number)
-    const period = h >= 12 ? 'PM' : 'AM'
-    const hour = h % 12 || 12
-    const minute = m.toString().padStart(2, '0')
-    return `${hour}:${minute} ${period}`
+function toIdentifier(timeHHMM: string): string {
+    return `${REMINDER_ID_PREFIX}${timeHHMM.replace(':', '-')}`
 }
 
 function buildBody(projectNames: string[]): string {
@@ -47,32 +42,40 @@ export async function scheduleAllReminders(
 ): Promise<void> {
     if (Platform.OS === 'web') return
 
-    // Cancel all existing reminder notifications
+    await cancelExistingReminders()
+    const groups = groupProjectsByTime(projects, globalReminderTime)
+    await scheduleReminderGroup(groups);
+}
+
+async function cancelExistingReminders(): Promise<void> {
     const scheduled = await Notifications.getAllScheduledNotificationsAsync()
     await Promise.all(
         scheduled
             .filter(n => n.identifier.startsWith(REMINDER_ID_PREFIX))
             .map(n => Notifications.cancelScheduledNotificationAsync(n.identifier)),
     )
+}
 
-    // Group projects by effective reminder time
+function groupProjectsByTime(projects: Project[], globalReminderTime: string | null): Map<string, string[]> {
     const groups = new Map<string, string[]>()
     for (const project of projects) {
         let effectiveTime: string | null | undefined
         if (project.reminderTime === null) {
-            effectiveTime = null // explicitly silenced
+            effectiveTime = null
         } else if (typeof project.reminderTime === 'string') {
             effectiveTime = project.reminderTime
         } else {
-            effectiveTime = globalReminderTime // inherit
+            effectiveTime = globalReminderTime
         }
 
         if (!effectiveTime) continue
         const existing = groups.get(effectiveTime) ?? []
         groups.set(effectiveTime, [...existing, project.name])
     }
+    return groups;
+}
 
-    // Schedule one notification per distinct time
+async function scheduleReminderGroup(groups: Map<string, string[]>): Promise<void> {
     for (const [timeHHMM, names] of groups.entries()) {
         const [hour, minute] = timeHHMM.split(':').map(Number)
         await Notifications.scheduleNotificationAsync({

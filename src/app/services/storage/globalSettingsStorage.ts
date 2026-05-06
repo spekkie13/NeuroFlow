@@ -6,7 +6,8 @@ const GLOBAL_REMINDER_UPDATED_AT_KEY = 'adhd-planner:global-reminder-updated-at'
 export async function getGlobalReminderTime(): Promise<string | null> {
     try {
         return await AsyncStorage.getItem(GLOBAL_REMINDER_KEY)
-    } catch {
+    } catch (error) {
+        console.error('[globalSettingsStorage] getGlobalReminderTime failed:', error)
         return null
     }
 }
@@ -27,7 +28,8 @@ export async function setGlobalReminderTime(time: string | null): Promise<void> 
 export async function getGlobalReminderUpdatedAt(): Promise<string | null> {
     try {
         return await AsyncStorage.getItem(GLOBAL_REMINDER_UPDATED_AT_KEY)
-    } catch {
+    } catch (error) {
+        console.error('[globalSettingsStorage] getGlobalReminderUpdatedAt failed:', error)
         return null
     }
 }

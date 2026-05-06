@@ -6,27 +6,7 @@ import { TextField } from '@/app/components/ui/TextField'
 import { CreateProjectModalProps } from '@/app/props/planner/CreateProjectModalProps'
 import { PROJECT_COLOR_PALETTE } from '@/app/services/domain/ProjectColorService'
 import { styles } from '@/app/styles/planner'
-
-function formatTime(timeHHMM: string): string {
-    const [h, m] = timeHHMM.split(':').map(Number)
-    const period = h >= 12 ? 'PM' : 'AM'
-    const hour = h % 12 || 12
-    const minute = m.toString().padStart(2, '0')
-    return `${hour}:${minute} ${period}`
-}
-
-function timeToDate(timeHHMM: string): Date {
-    const [h, m] = timeHHMM.split(':').map(Number)
-    const d = new Date()
-    d.setHours(h, m, 0, 0)
-    return d
-}
-
-function dateToHHMM(date: Date): string {
-    const h = date.getHours().toString().padStart(2, '0')
-    const m = date.getMinutes().toString().padStart(2, '0')
-    return `${h}:${m}`
-}
+import {dateToHHMM, formatTime, timeToDate} from "@/app/utils/dateUtils";
 
 export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     visible,
@@ -44,7 +24,6 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 }) => {
     const [showTimePicker, setShowTimePicker] = useState(false)
 
-    // The time to seed the picker with when opening
     const pickerSeedTime = typeof reminderTime === 'string'
         ? reminderTime
         : typeof globalReminderTime === 'string'
@@ -54,7 +33,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
     const isDefault = reminderTime === undefined
     const isOff = reminderTime === null
-    const isCustom = typeof reminderTime === 'string'
+    const customTime = typeof reminderTime === 'string' ? reminderTime : null
 
     const handleDelete = () => {
         Alert.alert(
@@ -136,12 +115,12 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                                     </Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
-                                    style={[styles.reminderChip, isCustom && styles.reminderChipActive]}
+                                    style={[styles.reminderChip, !!customTime && styles.reminderChipActive]}
                                     onPress={() => setShowTimePicker(true)}
                                     activeOpacity={0.7}
                                 >
-                                    <Text style={[styles.reminderChipText, isCustom && styles.reminderChipTextActive]}>
-                                        {isCustom ? formatTime(reminderTime as string) : 'Custom time…'}
+                                    <Text style={[styles.reminderChipText, !!customTime && styles.reminderChipTextActive]}>
+                                        {customTime ? formatTime(customTime) : 'Custom time…'}
                                     </Text>
                                 </TouchableOpacity>
                             </View>

@@ -1,4 +1,3 @@
-// utils/dateUtils.ts
 import * as Localization from 'expo-localization'
 
 export type LocalDateInput = string | Date | null | undefined
@@ -169,4 +168,25 @@ export const formatMinutes = (mins: number): string => {
     const h = Math.floor(mins / 60)
     const m = mins % 60
     return m > 0 ? `${h}h ${m}m` : `${h}h`
+}
+
+export function formatTime(timeHHMM: string): string {
+    const [h, m] = timeHHMM.split(':').map(Number)
+    const period = h >= 12 ? 'PM' : 'AM'
+    const hour = h % 12 || 12
+    const minute = m.toString().padStart(2, '0')
+    return `${hour}:${minute} ${period}`
+}
+
+export function timeToDate(timeHHMM: string): Date {
+    const [h, m] = timeHHMM.split(':').map(Number)
+    const d = new Date()
+    d.setHours(h, m, 0, 0)
+    return d
+}
+
+export function dateToHHMM(date: Date): string {
+    const h = date.getHours().toString().padStart(2, '0')
+    const m = date.getMinutes().toString().padStart(2, '0')
+    return `${h}:${m}`
 }

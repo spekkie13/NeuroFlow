@@ -101,7 +101,8 @@ export async function syncGlobalSettings(userId: string): Promise<string | null 
         }
 
         return await getGlobalReminderTime()
-    } catch {
+    } catch (error) {
+        console.error('[SyncService] syncGlobalSettings failed:', error)
         return undefined
     }
 }
