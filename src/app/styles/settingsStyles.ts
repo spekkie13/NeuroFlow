@@ -4,8 +4,11 @@ import { StyleSheet } from 'react-native'
 export const styles = StyleSheet.create({
     screen: {
         flex: 1,
+    },
+    screenContent: {
         paddingHorizontal: 24,
         paddingVertical: 16,
+        paddingBottom: 32,
     },
 
     // Profile card
@@ -162,7 +165,6 @@ export const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#e5e7eb',
         overflow: 'hidden',
-        flex: 1,
     },
     listHeader: {
         paddingHorizontal: 16,

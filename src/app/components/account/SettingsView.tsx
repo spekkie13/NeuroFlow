@@ -86,7 +86,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     }
 
     return (
-        <View style={styles.screen}>
+        <ScrollView style={styles.screen} contentContainerStyle={styles.screenContent}>
             {/* SECTION HEADER */}
             <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Workspace Management</Text>
@@ -270,7 +270,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                         </Text>
                     </View>
                 ) : (
-                    <ScrollView>
+                    <View>
                         {workspaces.map((workspace) => {
                             const isActive = currentWorkspaceId === workspace.id
                             const isEditing = editingId === workspace.id
@@ -392,9 +392,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                                 </View>
                             )
                         })}
-                    </ScrollView>
+                    </View>
                 )}
             </View>
-        </View>
+        </ScrollView>
     )
 }
