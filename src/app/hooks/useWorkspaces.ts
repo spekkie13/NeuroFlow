@@ -51,9 +51,15 @@ export function useWorkspaces(userId: string | null): UseAccountsResult {
 
             // Background sync: fetch from Supabase and merge if we have a user
             if (userId) {
-                syncWorkspaces(userId).then((merged) => {
+                syncWorkspaces(userId).then(async (merged) => {
                     if (!mounted || !merged) return
                     setWorkspaces(merged)
+                    // On a fresh device validId is null — auto-select the first synced workspace
+                    if (!validId && merged.length > 0) {
+                        const firstId = merged[0].id
+                        setCurrentId(firstId)
+                        await setCurrentWorkspaceId(firstId)
+                    }
                 })
             }
         }

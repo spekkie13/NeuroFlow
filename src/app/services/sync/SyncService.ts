@@ -45,7 +45,9 @@ export function pushProject(userId: string, workspaceId: string, project: Projec
         reminder_time: project.reminderTime ?? null,
         created_at: project.createdAt ?? new Date().toISOString(),
         updated_at: project.updatedAt ?? new Date().toISOString(),
-    }).then(() => {})
+    }).then(({ error }) => {
+        if (error) console.error('[SyncService] pushProject failed:', error.message)
+    })
 
     if (project.tasks.length > 0) {
         supabase.from('tasks').upsert(
@@ -63,20 +65,28 @@ export function pushProject(userId: string, workspaceId: string, project: Projec
                 created_at: t.createdAt ?? new Date().toISOString(),
                 updated_at: t.updatedAt ?? new Date().toISOString(),
             }))
-        ).then(() => {})
+        ).then(({ error }) => {
+            if (error) console.error('[SyncService] pushProject tasks failed:', error.message)
+        })
     }
 }
 
 export function deleteRemoteTask(taskId: string): void {
-    supabase.from('tasks').delete().eq('id', taskId).then(() => {})
+    supabase.from('tasks').delete().eq('id', taskId).then(({ error }) => {
+        if (error) console.error('[SyncService] deleteRemoteTask failed:', error.message)
+    })
 }
 
 export function deleteRemoteProject(projectId: string): void {
-    supabase.from('projects').delete().eq('id', projectId).then(() => {})
+    supabase.from('projects').delete().eq('id', projectId).then(({ error }) => {
+        if (error) console.error('[SyncService] deleteRemoteProject failed:', error.message)
+    })
 }
 
 export function deleteRemoteWorkspace(workspaceId: string): void {
-    supabase.from('workspaces').delete().eq('id', workspaceId).then(() => {})
+    supabase.from('workspaces').delete().eq('id', workspaceId).then(({ error }) => {
+        if (error) console.error('[SyncService] deleteRemoteWorkspace failed:', error.message)
+    })
 }
 
 // ── Startup sync (returns merged data, or null on failure) ───────────────────
