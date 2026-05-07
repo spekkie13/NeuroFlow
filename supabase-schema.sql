@@ -16,7 +16,8 @@ create table if not exists public.projects (
   name text not null,
   color text not null,
   created_at timestamptz not null,
-  updated_at timestamptz not null
+  updated_at timestamptz not null,
+  reminder_time text,
 );
 
 create table if not exists public.tasks (
