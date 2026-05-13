@@ -11,7 +11,9 @@ export async function requireAuth(request: FastifyRequest, reply: FastifyReply) 
     const token: string = authHeader.split(' ')[1]
 
     try {
-        const decoded = jwt.verify(token, process.env.SUPABASE_JWT_SECRET!) as jwt.JwtPayload
+        const decoded = jwt.verify(token, process.env.SUPABASE_JWT_SECRET!, {
+            algorithms: ['HS256']
+        }) as jwt.JwtPayload
         request.user = { id: decoded.sub! }
     } catch (err) {
         console.error('[Auth] JWT verify failed:', err)
