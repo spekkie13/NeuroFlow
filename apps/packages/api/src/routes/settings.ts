@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { requireAuth } from '../middleware/auth.js'
-import { db } from '../db'
+import { db } from '../db/index.js'
 import { userSettings } from '../db/schema.js'
 import { eq } from 'drizzle-orm'
 
