@@ -13,7 +13,8 @@ export async function requireAuth(request: FastifyRequest, reply: FastifyReply) 
     try {
         const decoded = jwt.verify(token, process.env.SUPABASE_JWT_SECRET!) as jwt.JwtPayload
         request.user = { id: decoded.sub! }
-    } catch {
+    } catch (err) {
+        console.error('[Auth] JWT verify failed:', err)
         return reply.status(401).send({ error: 'Invalid token' })
     }
 }
