@@ -1,65 +1,22 @@
 {
   "name": "neuroflow",
-  "version": "0.1.8",
-  "main": "expo-router/entry",
-  "expo-router": {
-    "root": "./src/app"
-  },
+  "version": "1.0.0",
   "private": true,
-  "scripts": {
-    "start": "expo start",
-    "web": "expo start --web",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "build": "expo export --platform web --output-dir dist",
-    "build:apk": "eas build --platform android --profile apk"
-  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "engines": {
     "node": ">=20.19.4"
   },
   "dependencies": {
-    "@expo/metro-runtime": "~5.0.4",
-    "@expo/ngrok": "^4.1.0",
-    "@react-native-async-storage/async-storage": "2.1.2",
-    "@react-native-community/datetimepicker": "8.4.1",
-    "@react-native-community/slider": "4.5.6",
-    "@react-native-google-signin/google-signin": "^16.1.2",
-    "@react-native-picker/picker": "2.11.1",
-    "@supabase/supabase-js": "^2.55.0",
-    "date-fns": "^4.1.0",
-    "expo": "53.0.23",
-    "expo-constants": "~17.1.7",
-    "expo-dev-client": "^5.2.4",
-    "expo-linear-gradient": "~14.1.5",
-    "expo-linking": "7.1.7",
-    "expo-localization": "^17.0.7",
-    "expo-notifications": "~0.31.5",
-    "expo-router": "^5.1.4",
-    "expo-updates": "~0.28.17",
-    "expo-web-browser": "~14.2.0",
-    "lucide-react": "^0.555.0",
-    "lucide-react-native": "^0.553.0",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
-    "react-native": "0.79.6",
-    "react-native-draggable-flatlist": "^4.0.3",
-    "react-native-gesture-handler": "~2.24.0",
-    "react-native-gifted-charts": "^1.4.64",
-    "react-native-reanimated": "~3.17.4",
-    "react-native-safe-area-context": "5.4.0",
-    "react-native-screens": "4.11.1",
-    "react-native-svg": "15.11.2",
-    "react-native-web": "^0.20.0"
+    "@fastify/cors": "^11.2.0",
+    "drizzle-orm": "^0.45.2",
+    "fastify": "^5.8.5",
+    "jsonwebtoken": "^9.0.3",
+    "postgres": "^3.4.9"
   },
   "devDependencies": {
-    "@types/nodemailer": "^6.4.17",
-    "@types/react": "~19.0.10",
-    "autoprefixer": "^10.4.21",
-    "babel-plugin-module-resolver": "^5.0.2",
-    "babel-plugin-transform-import-meta": "^2.3.3",
-    "postcss": "^8.5.6",
-    "react-refresh": "^0.18.0",
-    "tailwindcss": "^3.4.17",
-    "typescript": "5.8.3"
+    "@types/jsonwebtoken": "^9.0.10"
   }
 }

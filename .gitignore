@@ -1,27 +1,18 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# OS
+.DS_Store
 
-node_modules
-dist
-dist-ssr
-*.local
+# IDE
+.idea/
+
+# Expo
 .expo/
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-.env*
-*.md
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Package locks (alleen root lock bijhouden)
+apps/*/package-lock.json
+packages/*/package-lock.json

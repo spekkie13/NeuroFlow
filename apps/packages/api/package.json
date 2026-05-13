@@ -1,0 +1,27 @@
+{
+  "name": "@neuroflow/api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "fastify": "^5.3.2",
+    "@fastify/cors": "^10.0.2",
+    "drizzle-orm": "^0.43.1",
+    "postgres": "^3.4.5",
+    "dotenv": "^16.5.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3",
+    "drizzle-kit": "^0.31.1",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^22.15.3"
+  }
+}
