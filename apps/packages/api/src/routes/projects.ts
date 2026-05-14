@@ -57,7 +57,12 @@ export async function projectRoutes(app: FastifyInstance) {
             reminderTime: reminderTime ?? null,
         }
 
-        await db.insert(projects).values(project)
+        await db.insert(projects)
+            .values(project)
+            .onConflictDoUpdate({
+                target: projects.id,
+                set: { name: project.name, color: project.color, reminderTime: project.reminderTime, updatedAt: new Date() }
+            })
         return reply.status(201).send(project)
     })
 

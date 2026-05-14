@@ -52,7 +52,12 @@ export async function taskRoutes(app: FastifyInstance) {
             estimatedMinutes: estimatedMinutes ?? null,
         }
 
-        await db.insert(tasks).values(task)
+        await db.insert(tasks)
+            .values(task)
+            .onConflictDoUpdate({
+                target: tasks.id,
+                set: { name: task.name, completed: task.completed, priority: task.priority, date: task.date, notes: task.notes, estimatedMinutes: task.estimatedMinutes, updatedAt: new Date() }
+            })
 
         const createdSteps = []
         if (stepsInput?.length) {
@@ -64,7 +69,13 @@ export async function taskRoutes(app: FastifyInstance) {
                     text: step.text,
                     done: false,
                 }
-                await db.insert(steps).values(newStep)
+                await db.insert(steps)
+                    .values(newStep)
+                    .onConflictDoUpdate({
+                        target: steps.id,
+                        set: { text: newStep.text, done: newStep.done }
+                    })
+
                 createdSteps.push(newStep)
             }
         }

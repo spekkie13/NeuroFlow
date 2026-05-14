@@ -25,7 +25,13 @@ export async function workspaceRoutes(app: FastifyInstance) {
             dailyMinutes: dailyMinutes ?? null,
         }
 
-        await db.insert(workspaces).values(workspace)
+        await db.insert(workspaces)
+            .values(workspace)
+            .onConflictDoUpdate({
+                target: workspaces.id,
+                set: { name: workspace.name, dailyMinutes: workspace.dailyMinutes, updatedAt: new Date() }
+            })
+
         return reply.status(201).send(workspace)
     })
 
