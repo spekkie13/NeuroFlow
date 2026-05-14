@@ -11,7 +11,13 @@ import {
 } from '../services/domain/ProjectService'
 import { getNextProjectColor } from '../services/domain/ProjectColorService'
 import {Project, Task} from "../models";
-import {deleteRemoteProject, deleteRemoteTask, pushProject, syncProjects} from "../services/sync/SyncService";
+import {
+    deleteRemoteProject,
+    deleteRemoteTask,
+    pushProject,
+    syncProjects,
+    syncWorkspaces
+} from "../services/sync/SyncService";
 
 interface UseProjectsResult {
     projects: Project[]
@@ -52,8 +58,9 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
             setProjects(loaded)
             setIsLoading(false)
 
-            // Background sync: fetch from Supabase and merge if we have a user
             if (userId) {
+                await syncWorkspaces()
+
                 syncProjects(workspaceId).then((merged: Project[]) => {
                     if (!mounted || !merged) return
                     setProjects(merged)

@@ -89,8 +89,8 @@ function mapApiProject(p: ApiProject): Project {
 
 // ── Push helpers ──────────────────────────────────────────────────────────────
 
-export function pushWorkspace(workspace: Workspace): void {
-    apiClient.post('/workspaces', {
+export async function pushWorkspace(workspace: Workspace): Promise<void> {
+    await apiClient.post('/workspaces', {
         id: workspace.id,
         name: workspace.name,
         dailyMinutes: workspace.dailyMinutes ?? null,
@@ -185,7 +185,7 @@ export async function syncWorkspaces(): Promise<Workspace[] | null> {
 
         for (const w of local) {
             if (!remoteIds.has(w.id)) {
-                pushWorkspace(w)
+                await pushWorkspace(w)
             }
         }
 
