@@ -1,36 +1,21 @@
 import { FastifyInstance } from 'fastify'
 import { requireAuth } from '../middleware/auth.js'
-import { db } from '../db/index.js'
-import { workspaces } from '../db/schema.js'
-import { eq } from 'drizzle-orm'
-import { randomUUID } from 'crypto'
+import { workspaceService } from "../services/workspaceService";
+import { Workspace, WorkspaceInsert } from "../types/db.types";
 
 export async function workspaceRoutes(app: FastifyInstance) {
     app.get('/workspaces', { preHandler: requireAuth }, async (request, reply) => {
-        const result = await db
-            .select()
-            .from(workspaces)
-            .where(eq(workspaces.userId, request.user!.id))
+        const userId: string = request.user!.id
+        const result: Workspace[] = await workspaceService.selectWorkspace(userId);
 
-        return reply.send(result)
+        return reply.status(200).send(result)
     })
 
     app.post('/workspaces', { preHandler: requireAuth }, async (request, reply) => {
         const { id, name, dailyMinutes } = request.body as { id?: string; name: string; dailyMinutes?: number }
 
-        const workspace = {
-            id: id ?? randomUUID(),
-            userId: request.user!.id,
-            name,
-            dailyMinutes: dailyMinutes ?? null,
-        }
-
-        await db.insert(workspaces)
-            .values(workspace)
-            .onConflictDoUpdate({
-                target: workspaces.id,
-                set: { name: workspace.name, dailyMinutes: workspace.dailyMinutes, updatedAt: new Date() }
-            })
+        const userId: string = request.user!.id
+        const workspace: WorkspaceInsert = await workspaceService.upsertWorkspace(userId, name, id, dailyMinutes);
 
         return reply.status(201).send(workspace)
     })
@@ -38,20 +23,18 @@ export async function workspaceRoutes(app: FastifyInstance) {
     app.patch('/workspaces/:id', { preHandler: requireAuth }, async (request, reply) => {
         const { id } = request.params as { id: string }
         const { name, dailyMinutes } = request.body as { name?: string; dailyMinutes?: number }
+        const userId: string = request.user!.id;
 
-        await db
-            .update(workspaces)
-            .set({ name, dailyMinutes, updatedAt: new Date() })
-            .where(eq(workspaces.id, id))
+        await workspaceService.updateWorkspace(userId, id, name, dailyMinutes)
 
-        return reply.send({ success: true })
+        return reply.status(201).send({ success: true })
     })
 
     app.delete('/workspaces/:id', { preHandler: requireAuth }, async (request, reply) => {
         const { id } = request.params as { id: string }
+        const userId: string = request.user!.id;
 
-        await db.delete(workspaces).where(eq(workspaces.id, id))
-
+        await workspaceService.deleteWorkspace(userId, id);
         return reply.status(204).send()
     })
 }
