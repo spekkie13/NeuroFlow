@@ -103,20 +103,20 @@ export function pushProject(workspaceId: string, project: Project): void {
         name: project.name,
         color: project.color,
         reminderTime: project.reminderTime ?? null,
+    }).then(async () => {
+        for (const task of project.tasks) {
+            await apiClient.post(`/projects/${project.id}/tasks`, {
+                id: task.id,
+                name: task.name,
+                completed: task.completed,
+                priority: task.priority,
+                date: task.date ?? null,
+                notes: task.notes,
+                estimatedMinutes: task.estimatedMinutes ?? null,
+                steps: task.steps ?? [],
+            }).catch(err => console.error('[SyncService] pushProject task failed:', err))
+        }
     }).catch(err => console.error('[SyncService] pushProject failed:', err))
-
-    for (const task of project.tasks) {
-        apiClient.post(`/projects/${project.id}/tasks`, {
-            id: task.id,
-            name: task.name,
-            completed: task.completed,
-            priority: task.priority,
-            date: task.date ?? null,
-            notes: task.notes,
-            estimatedMinutes: task.estimatedMinutes ?? null,
-            steps: task.steps ?? [],
-        }).catch(err => console.error('[SyncService] pushProject task failed:', err))
-    }
 }
 
 export function deleteRemoteTask(taskId: string): void {
