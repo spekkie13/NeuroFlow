@@ -4,7 +4,7 @@ const API_URL: string = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:300
 
 async function getToken(): Promise<string | null> {
     const { data } = await supabase.auth.getSession()
-    return data.session?.access_token ?? null
+    return data.session?.user.id ?? null
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
