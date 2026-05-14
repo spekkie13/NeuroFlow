@@ -10,10 +10,12 @@ async function getToken(): Promise<string | null> {
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     const token: string = await getToken()
 
+    const isDelete: boolean = options.method === 'DELETE'
+
     const response: Response = await fetch(`${API_URL}${path}`, {
         ...options,
         headers: {
-            'Content-Type': 'application/json',
+            ...(isDelete ? {} : { 'Content-Type': 'application/json' }),
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
             ...options.headers,
         },
