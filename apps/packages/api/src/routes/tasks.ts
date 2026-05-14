@@ -30,7 +30,8 @@ export async function taskRoutes(app: FastifyInstance) {
 
     app.post('/projects/:projectId/tasks', { preHandler: requireAuth }, async (request, reply) => {
         const { projectId } = request.params as { projectId: string }
-        const { name, priority, date, notes, estimatedMinutes, steps: stepsInput } = request.body as {
+        const { id, name, priority, date, notes, estimatedMinutes, steps: stepsInput } = request.body as {
+            id?: string
             name: string
             priority?: 'high' | 'medium' | 'low'
             date?: string
@@ -40,7 +41,7 @@ export async function taskRoutes(app: FastifyInstance) {
         }
 
         const task = {
-            id: randomUUID(),
+            id: id ?? randomUUID(),
             userId: request.user!.id,
             projectId,
             name,

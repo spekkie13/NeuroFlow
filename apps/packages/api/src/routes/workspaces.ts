@@ -16,10 +16,10 @@ export async function workspaceRoutes(app: FastifyInstance) {
     })
 
     app.post('/workspaces', { preHandler: requireAuth }, async (request, reply) => {
-        const { name, dailyMinutes } = request.body as { name: string; dailyMinutes?: number }
+        const { id, name, dailyMinutes } = request.body as { id?: string; name: string; dailyMinutes?: number }
 
         const workspace = {
-            id: randomUUID(),
+            id: id ?? randomUUID(),
             userId: request.user!.id,
             name,
             dailyMinutes: dailyMinutes ?? null,

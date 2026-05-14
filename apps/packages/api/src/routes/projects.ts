@@ -41,14 +41,15 @@ export async function projectRoutes(app: FastifyInstance) {
 
     app.post('/workspaces/:workspaceId/projects', { preHandler: requireAuth }, async (request, reply) => {
         const { workspaceId } = request.params as { workspaceId: string }
-        const { name, color, reminderTime } = request.body as {
+        const { id, name, color, reminderTime } = request.body as {
+            id?: string
             name: string
             color: string
             reminderTime?: string
         }
 
         const project = {
-            id: randomUUID(),
+            id: id ?? randomUUID(),
             userId: request.user!.id,
             workspaceId,
             name,
