@@ -8,7 +8,7 @@ function keyForWorkspace(workspaceId: string): string {
 }
 
 export async function loadProjectsForWorkspace(workspaceId: string): Promise<Project[]> {
-    const stored = await getJsonItem<Project[]>(keyForWorkspace(workspaceId))
+    const stored: Project[] = await getJsonItem<Project[]>(keyForWorkspace(workspaceId))
     return stored ?? []
 }
 

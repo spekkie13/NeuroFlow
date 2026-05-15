@@ -1,5 +1,5 @@
 import { Platform } from 'react-native'
-import { GoogleSignin } from '@react-native-google-signin/google-signin'
+import {GoogleSignin, SignInResponse} from '@react-native-google-signin/google-signin'
 import { User as SupabaseUser } from '@supabase/supabase-js'
 import {User} from "../../models";
 import {supabase} from "../../lib/supabase";
@@ -8,13 +8,13 @@ GoogleSignin.configure({
     webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
 })
 
-function toAppUser(u: SupabaseUser): User {
+function toAppUser(user: SupabaseUser): User {
     return {
-        id: u.id,
-        email: u.email ?? '',
-        name: u.user_metadata?.name ?? u.user_metadata?.full_name ?? u.email?.split('@')[0] ?? 'User',
-        provider: u.app_metadata?.provider === 'google' ? 'google' : 'email',
-        createdAt: u.created_at,
+        id: user.id,
+        email: user.email ?? '',
+        name: user.user_metadata?.name ?? user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? 'User',
+        provider: user.app_metadata?.provider === 'google' ? 'google' : 'email',
+        createdAt: user.created_at,
     }
 }
 
@@ -29,9 +29,10 @@ export async function signInWithGoogle(): Promise<{ error: string | null }> {
 
     try {
         await GoogleSignin.hasPlayServices()
-        const response = await GoogleSignin.signIn()
-        const idToken = response.data?.idToken
-        if (!idToken) return { error: 'No ID token returned from Google' }
+        const response: SignInResponse = await GoogleSignin.signIn()
+        const idToken: string = response.data?.idToken
+        if (!idToken)
+            return { error: 'No ID token returned from Google' }
 
         const { error } = await supabase.auth.signInWithIdToken({
             provider: 'google',
@@ -49,8 +50,11 @@ export async function signInWithEmail(
     password: string,
 ): Promise<{ user: User | null; error: string | null }> {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) return { user: null, error: error.message }
-    if (!data.user) return { user: null, error: 'Sign in failed' }
+    if (error)
+        return { user: null, error: error.message }
+    if (!data.user)
+        return { user: null, error: 'Sign in failed' }
+
     return { user: toAppUser(data.user), error: null }
 }
 
@@ -64,8 +68,11 @@ export async function signUpWithEmail(
         password,
         options: { data: { name } },
     })
-    if (error) return { user: null, error: error.message }
-    if (!data.user) return { user: null, error: 'Sign up failed' }
+    if (error)
+        return { user: null, error: error.message }
+    if (!data.user)
+        return { user: null, error: 'Sign up failed' }
+
     return { user: toAppUser(data.user), error: null }
 }
 

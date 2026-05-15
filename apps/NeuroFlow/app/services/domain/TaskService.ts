@@ -29,38 +29,13 @@ export function createTask(params: {
     }
 }
 
-export function createTaskFromName(name: string): Task {
-    return createTask({ name })
-}
-
-export function toggleTaskCompleted(task: Task): Task {
-    return {
-        ...task,
-        completed: !task.completed,
-    }
-}
-
-export function withUpdatedName(task: Task, name: string): Task {
-    const trimmed = name.trim()
-    return {
-        ...task,
-        name: trimmed || 'Untitled Task',
-    }
-}
-
-export function withPriority(task: Task, priority: Priority): Task {
-    return {
-        ...task,
-        priority,
-    }
-}
-
 export function isTaskScheduled(task: Task): boolean {
     return Boolean(task.date)
 }
 
 export function doesTaskCoverDate(task: Task, date: Date): boolean {
-    if (!task.date) return false
+    if (!task.date)
+        return false
 
     const target = new Date(date.toISOString().split('T')[0])
     const start = new Date(new Date(task.date).toISOString().split('T')[0])
@@ -73,6 +48,8 @@ export function doesTaskCoverDate(task: Task, date: Date): boolean {
  * Completed tasks are never considered overdue.
  */
 export function isOverdue(task: Task): boolean {
-    if (!task.date || task.completed) return false
+    if (!task.date || task.completed)
+        return false
+    
     return startOfDay(new Date(task.date)) < startOfDay(new Date())
 }

@@ -1,12 +1,7 @@
 import { useEffect, useState } from 'react'
 import {getGlobalReminderTime, setGlobalReminderTime} from "../services/storage/globalSettingsStorage";
 import {pushGlobalSettings, syncGlobalSettings} from "../services/sync/SyncService";
-
-interface UseGlobalSettingsResult {
-    globalReminderTime: string | null
-    isLoading: boolean
-    setGlobalReminder: (time: string | null) => Promise<void>
-}
+import {UseGlobalSettingsResult} from "../models/hooks/UseGlobalSettingsResult";
 
 export function useGlobalSettings(userId: string | null): UseGlobalSettingsResult {
     const [globalReminderTime, setTime] = useState<string | null>(null)

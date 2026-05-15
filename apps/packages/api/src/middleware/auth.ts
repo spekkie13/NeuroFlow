@@ -7,12 +7,12 @@ const supabaseAdmin = createClient(
 )
 
 export async function requireAuth(request: FastifyRequest, reply: FastifyReply) {
-    const authHeader = request.headers.authorization
+    const authHeader: string | undefined = request.headers.authorization
     if (!authHeader?.startsWith('Bearer ')) {
         return reply.status(401).send({ error: 'Unauthorized' })
     }
 
-    const uid = authHeader.split(' ')[1]
+    const uid: string = authHeader.split(' ')[1]
 
     const { data, error } = await supabaseAdmin.auth.admin.getUserById(uid)
     if (error || !data.user) {

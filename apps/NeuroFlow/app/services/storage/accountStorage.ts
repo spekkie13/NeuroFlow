@@ -1,4 +1,4 @@
-import { getJsonItem, removeItem, setJsonItem } from './baseStorage'
+import { getJsonItem, setJsonItem } from './baseStorage'
 import {Workspace} from "../../models/Workspace";
 import {generateId} from "../../utils/idUtils";
 
@@ -29,10 +29,6 @@ export async function setCurrentWorkspaceId(id: string): Promise<void> {
 }
 
 export async function getCurrentWorkspaceId(): Promise<string | null> {
-    const id = await getJsonItem<string>(CURRENT_ACCOUNT_KEY)
+    const id: string = await getJsonItem<string>(CURRENT_ACCOUNT_KEY)
     return id ?? null
-}
-
-export async function clearCurrentAccount(): Promise<void> {
-    await removeItem(CURRENT_ACCOUNT_KEY)
 }

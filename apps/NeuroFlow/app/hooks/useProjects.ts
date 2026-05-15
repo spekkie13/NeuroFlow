@@ -7,7 +7,6 @@ import {
     withTaskUpdated,
     withUpdatedProjectName,
     withTaskMoved,
-    TaskMoveDirection,
 } from '../services/domain/ProjectService'
 import { getNextProjectColor } from '../services/domain/ProjectColorService'
 import {Project, Task} from "../models";
@@ -18,26 +17,8 @@ import {
     syncProjects,
     syncWorkspaces
 } from "../services/sync/SyncService";
-
-interface UseProjectsResult {
-    projects: Project[]
-    isLoading: boolean
-    addProject: (name: string, color?: string, reminderTime?: string | null) => Promise<void>
-    updateProject: (projectId: string, updates: Partial<Project>) => Promise<void>
-    deleteProject: (projectId: string) => Promise<void>
-    addTask: (projectId: string, task: Task) => Promise<void>
-    updateTask: (
-        projectId: string,
-        taskId: string,
-        updates: Partial<Task>,
-    ) => Promise<void>
-    deleteTask: (projectId: string, taskId: string) => Promise<void>
-    moveTask: (
-        projectId: string,
-        taskId: string,
-        direction: TaskMoveDirection,
-    ) => Promise<void>
-}
+import {UseProjectsResult} from "../models/hooks/UseProjectsResult";
+import {TaskMoveDirection} from "../models/task/TaskMoveDirection";
 
 export function useProjects(workspaceId: string | null, userId: string | null): UseProjectsResult {
     const [projects, setProjects] = useState<Project[]>([])
@@ -49,11 +30,11 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
             return
         }
 
-        let mounted = true
+        let mounted: boolean = true
 
         const init = async () => {
             setIsLoading(true)
-            const loaded = await loadProjectsForWorkspace(workspaceId)
+            const loaded: Project[] = await loadProjectsForWorkspace(workspaceId)
             if (!mounted) return
             setProjects(loaded)
             setIsLoading(false)
@@ -83,16 +64,17 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
     }
 
     const addProject = async (name: string, color?: string, reminderTime?: string | null) => {
-        const projectColor = color ?? getNextProjectColor(projects)
-        const newProject = createProject({ name, color: projectColor, reminderTime })
-        const next = [...projects, newProject]
+        const projectColor: string = color ?? getNextProjectColor(projects)
+        const newProject: Project = createProject({ name, color: projectColor, reminderTime })
+        const next: Project[] = [...projects, newProject]
         await persist(next)
-        if (userId && workspaceId) pushProject(workspaceId, newProject)
+        if (userId && workspaceId)
+            pushProject(workspaceId, newProject)
     }
 
     const updateProject = async (projectId: string, updates: Partial<Project>) => {
-        const updatedAt = new Date().toISOString()
-        const next = projects.map((p) => {
+        const updatedAt: string = new Date().toISOString()
+        const next: Project[] = projects.map((p: Project) => {
             if (p.id !== projectId) return p
             const merged = { ...p, ...updates, updatedAt }
             if (typeof updates.name === 'string') {
@@ -102,25 +84,28 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
         })
 
         await persist(next)
-        const updated = next.find((p) => p.id === projectId)
-        if (userId && workspaceId && updated) pushProject(workspaceId, updated)
+        const updated: Project = next.find((p: Project) => p.id === projectId)
+        if (userId && workspaceId && updated)
+            pushProject(workspaceId, updated)
     }
 
     const deleteProject = async (projectId: string) => {
-        const next = projects.filter((p) => p.id !== projectId)
+        const next: Project[] = projects.filter((p: Project) => p.id !== projectId)
         await persist(next)
-        if (userId) deleteRemoteProject(projectId)
+        if (userId)
+            deleteRemoteProject(projectId)
     }
 
     const addTask = async (projectId: string, task: Task) => {
-        const next = projects.map((p) =>
+        const next: Project[] = projects.map((p: Project) =>
             p.id === projectId
                 ? { ...withTaskAdded(p, task), updatedAt: new Date().toISOString() }
                 : p,
         )
         await persist(next)
-        const updated = next.find((p) => p.id === projectId)
-        if (userId && workspaceId && updated) pushProject(workspaceId, updated)
+        const updated: Project = next.find((p: Project) => p.id === projectId)
+        if (userId && workspaceId && updated)
+            pushProject(workspaceId, updated)
     }
 
     const updateTask = async (
@@ -128,8 +113,8 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
         taskId: string,
         updates: Partial<Task>,
     ) => {
-        const updatedAt = new Date().toISOString()
-        const next = projects.map((p) =>
+        const updatedAt: string = new Date().toISOString()
+        const next: Project[] = projects.map((p: Project) =>
             p.id === projectId
                 ? {
                     ...withTaskUpdated(p, taskId, { ...updates, updatedAt }),
@@ -138,20 +123,22 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
                 : p,
         )
         await persist(next)
-        const updated = next.find((p) => p.id === projectId)
-        if (userId && workspaceId && updated) pushProject(workspaceId, updated)
+        const updated: Project = next.find((p: Project) => p.id === projectId)
+        if (userId && workspaceId && updated)
+            pushProject(workspaceId, updated)
     }
 
     const deleteTask = async (projectId: string, taskId: string) => {
-        const next = projects.map((p) =>
+        const next: Project[] = projects.map((p: Project) =>
             p.id === projectId
                 ? { ...withTaskDeleted(p, taskId), updatedAt: new Date().toISOString() }
                 : p,
         )
         await persist(next)
         if (userId) deleteRemoteTask(taskId)
-        const updated = next.find((p) => p.id === projectId)
-        if (userId && workspaceId && updated) pushProject(workspaceId, updated)
+        const updated: Project = next.find((p: Project) => p.id === projectId)
+        if (userId && workspaceId && updated)
+            pushProject(workspaceId, updated)
     }
 
     const moveTask = async (
@@ -159,15 +146,16 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
         taskId: string,
         direction: TaskMoveDirection,
     ) => {
-        const updatedAt = new Date().toISOString()
-        const next = projects.map((p) =>
+        const updatedAt: string = new Date().toISOString()
+        const next: Project[] = projects.map((p: Project) =>
             p.id === projectId
                 ? { ...withTaskMoved(p, taskId, direction), updatedAt }
                 : p,
         )
         await persist(next)
-        const updated = next.find((p) => p.id === projectId)
-        if (userId && workspaceId && updated) pushProject(workspaceId, updated)
+        const updated: Project = next.find((p: Project) => p.id === projectId)
+        if (userId && workspaceId && updated)
+            pushProject(workspaceId, updated)
     }
 
     return {

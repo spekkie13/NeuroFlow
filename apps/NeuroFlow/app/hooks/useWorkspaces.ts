@@ -8,17 +8,7 @@ import {
 import {Workspace} from "../models/Workspace";
 import {deleteRemoteWorkspace, pushWorkspace, syncWorkspaces} from "../services/sync/SyncService";
 import {generateId} from "../utils/idUtils";
-
-interface UseAccountsResult {
-    workspaces: Workspace[]
-    currentWorkspaceId: string | null
-    isLoading: boolean
-    addWorkspace: (name: string) => Promise<void>
-    updateWorkspace: (id: string, name: string) => Promise<void>
-    deleteWorkspace: (id: string) => Promise<void>
-    switchWorkspace: (id: string) => Promise<void>
-    setDailyBudget: (id: string, minutes: number | null) => Promise<void>
-}
+import {UseAccountsResult} from "../models/hooks/UseAccountsResult";
 
 export function useWorkspaces(userId: string | null): UseAccountsResult {
     const [workspaces, setWorkspaces] = useState<Workspace[]>([])
@@ -26,15 +16,15 @@ export function useWorkspaces(userId: string | null): UseAccountsResult {
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
-        let mounted = true
+        let mounted: boolean = true
         const init = async () => {
-            const loadedWorkspaces = await loadWorkspaces()
-            const savedId = await getCurrentWorkspaceId()
+            const loadedWorkspaces: Workspace[] = await loadWorkspaces()
+            const savedId: string = await getCurrentWorkspaceId()
             if (!mounted) return
 
             setWorkspaces(loadedWorkspaces)
-            const validId =
-                savedId && loadedWorkspaces.some((a) => a.id === savedId)
+            const validId: string =
+                savedId && loadedWorkspaces.some((a: Workspace) => a.id === savedId)
                     ? savedId
                     : loadedWorkspaces[0]?.id ?? null
 
@@ -77,37 +67,40 @@ export function useWorkspaces(userId: string | null): UseAccountsResult {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         }
-        const next = [...workspaces, newWorkspace]
+        const next: Workspace[] = [...workspaces, newWorkspace]
         await persist(next)
-        if (userId) pushWorkspace(newWorkspace)
+        if (userId)
+            await pushWorkspace(newWorkspace)
     }
 
     const updateWorkspace = async (id: string, name: string) => {
-        const updatedAt = new Date().toISOString()
-        const next = workspaces.map((a) =>
+        const updatedAt: string = new Date().toISOString()
+        const next: Workspace[] = workspaces.map((a: Workspace) =>
             a.id === id
                 ? { ...a, name, updatedAt }
                 : a,
         )
         await persist(next)
-        const updated = next.find((a) => a.id === id)
-        if (userId && updated) pushWorkspace(updated)
+        const updated: Workspace = next.find((a: Workspace) => a.id === id)
+        if (userId && updated)
+            await pushWorkspace(updated)
     }
 
     const deleteWorkspace = async (id: string) => {
         if (workspaces.length <= 1) {
             return
         }
-        const next = workspaces.filter((a) => a.id !== id)
+        const next: Workspace[] = workspaces.filter((a: Workspace) => a.id !== id)
         await persist(next)
 
         if (currentWorkspaceId === id && next.length > 0) {
-            const newId = next[0].id
+            const newId: string = next[0].id
             setCurrentId(newId)
             await setCurrentWorkspaceId(newId)
         }
 
-        if (userId) deleteRemoteWorkspace(id)
+        if (userId)
+            deleteRemoteWorkspace(id)
     }
 
     const switchWorkspace = async (id: string) => {
@@ -116,13 +109,14 @@ export function useWorkspaces(userId: string | null): UseAccountsResult {
     }
 
     const setDailyBudget = async (id: string, minutes: number | null) => {
-        const updatedAt = new Date().toISOString()
-        const next = workspaces.map((a) =>
+        const updatedAt: string = new Date().toISOString()
+        const next: Workspace[] = workspaces.map((a: Workspace) =>
             a.id === id ? { ...a, dailyMinutes: minutes ?? undefined, updatedAt } : a
         )
         await persist(next)
-        const updated = next.find((a) => a.id === id)
-        if (userId && updated) pushWorkspace(updated)
+        const updated: Workspace = next.find((a: Workspace) => a.id === id)
+        if (userId && updated)
+            await pushWorkspace(updated)
     }
 
     return {

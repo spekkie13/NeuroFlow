@@ -1,9 +1,9 @@
 import * as Localization from 'expo-localization'
-
-export type LocalDateInput = string | Date | null | undefined
+import {LocalDateInput} from "../models/dates.types";
+import {Locale} from "expo-localization";
 
 const getPrimaryLocale = (): string => {
-    const locales = Localization.getLocales()
+    const locales: Locale[] = Localization.getLocales()
     return locales && locales.length > 0 ? locales[0].languageTag : 'en-US'
 }
 
@@ -50,16 +50,16 @@ export const formatLocalDate = (
     value?: LocalDateInput,
     options?: Intl.DateTimeFormatOptions,
 ): string => {
-    const date = toDate(value)
+    const date: Date = toDate(value)
     if (!date) return ''
 
     if (options) {
         return date.toLocaleDateString(getPrimaryLocale(), options)
     }
 
-    const fmt = getLocalDateFormat() // bijv. "dd-MM-yyyy"
-    const day = pad2(date.getDate())
-    const month = pad2(date.getMonth() + 1)
+    const fmt: string = getLocalDateFormat() // bijv. "dd-MM-yyyy"
+    const day: string = pad2(date.getDate())
+    const month: string = pad2(date.getMonth() + 1)
     const year = `${date.getFullYear()}`
 
     return fmt
@@ -79,10 +79,11 @@ export const formatLocalDateRange = (
     end?: LocalDateInput,
     returnAsArray: boolean = false,
 ): string | [string, string] => {
-    const startStr = formatLocalDate(start)
-    if (!startStr) return returnAsArray ? ['', ''] : ''
+    const startStr: string = formatLocalDate(start)
+    if (!startStr)
+        return returnAsArray ? ['', ''] : ''
 
-    const endStr = formatLocalDate(end ?? start)
+    const endStr: string = formatLocalDate(end ?? start)
 
     if (returnAsArray) {
         return [startStr, endStr]
@@ -98,11 +99,11 @@ export const formatLocalDateRange = (
 export const parseLocalDate = (value: string): Date | null => {
     if (!value) return null
 
-    const fmt = getLocalDateFormat()        // bijv. "dd-MM-yyyy"
-    const sep = inferDateSeparator(fmt)     // bijv. "-"
+    const fmt: string = getLocalDateFormat()        // bijv. "dd-MM-yyyy"
+    const sep: string = inferDateSeparator(fmt)     // bijv. "-"
 
-    const valueParts = value.split(sep)
-    const patternParts = fmt.split(sep)
+    const valueParts: string[] = value.split(sep)
+    const patternParts: string[] = fmt.split(sep)
 
     if (valueParts.length !== 3 || patternParts.length !== 3) {
         return null
@@ -113,8 +114,8 @@ export const parseLocalDate = (value: string): Date | null => {
     let yearStr: string | undefined
 
     for (let i = 0; i < 3; i++) {
-        const pat = patternParts[i]
-        const v = valueParts[i]
+        const pat: string = patternParts[i]
+        const v: string = valueParts[i]
 
         if (pat.includes('d')) {
             dayStr = v
@@ -125,9 +126,9 @@ export const parseLocalDate = (value: string): Date | null => {
         }
     }
 
-    const day = dayStr ? parseInt(dayStr, 10) : NaN
-    const month = monthStr ? parseInt(monthStr, 10) - 1 : NaN
-    const year = yearStr ? parseInt(yearStr, 10) : NaN
+    const day: number = dayStr ? parseInt(dayStr, 10) : NaN
+    const month: number = monthStr ? parseInt(monthStr, 10) - 1 : NaN
+    const year: number = yearStr ? parseInt(yearStr, 10) : NaN
 
     const date = new Date(year, month, day)
     return isNaN(date.getTime()) ? null : date
@@ -138,9 +139,9 @@ export const parseLocalDate = (value: string): Date | null => {
  */
 export const toIsoDateString = (date: Date): string | null => {
     if (!date || isNaN(date.getTime())) return null
-    const year = date.getFullYear()
-    const month = pad2(date.getMonth() + 1)
-    const day = pad2(date.getDate())
+    const year: number = date.getFullYear()
+    const month: string = pad2(date.getMonth() + 1)
+    const day: string = pad2(date.getDate())
     return `${year}-${month}-${day}`
 }
 
@@ -148,7 +149,7 @@ export const toIsoDateString = (date: Date): string | null => {
  * Placeholder voor inputs, bv. "DD-MM-YYYY" of "MM/DD/YYYY"
  */
 export const getDateInputPlaceholder = (): string => {
-    const fmt = getLocalDateFormat()
+    const fmt: string = getLocalDateFormat()
     return fmt.replace('dd', 'DD').replace('MM', 'MM').replace('yyyy', 'YYYY')
 }
 
@@ -165,16 +166,16 @@ export const isSameDay = (a: Date, b: Date) => {
 /** Formats a number of minutes as a human-readable string, e.g. 90 → "1h 30m" */
 export const formatMinutes = (mins: number): string => {
     if (mins < 60) return `${mins}m`
-    const h = Math.floor(mins / 60)
-    const m = mins % 60
+    const h: number = Math.floor(mins / 60)
+    const m: number = mins % 60
     return m > 0 ? `${h}h ${m}m` : `${h}h`
 }
 
 export function formatTime(timeHHMM: string): string {
     const [h, m] = timeHHMM.split(':').map(Number)
-    const period = h >= 12 ? 'PM' : 'AM'
-    const hour = h % 12 || 12
-    const minute = m.toString().padStart(2, '0')
+    const period: "PM" | "AM" = h >= 12 ? 'PM' : 'AM'
+    const hour: number = h % 12 || 12
+    const minute: string = pad2(m);
     return `${hour}:${minute} ${period}`
 }
 
@@ -186,7 +187,7 @@ export function timeToDate(timeHHMM: string): Date {
 }
 
 export function dateToHHMM(date: Date): string {
-    const h = date.getHours().toString().padStart(2, '0')
-    const m = date.getMinutes().toString().padStart(2, '0')
+    const h: string = pad2(date.getHours());
+    const m: string = pad2(date.getMinutes());
     return `${h}:${m}`
 }

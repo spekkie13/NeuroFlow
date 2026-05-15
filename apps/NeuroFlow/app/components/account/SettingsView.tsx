@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker'
 import { Edit3, Trash2, Check, X, UserIcon, User, LogOut, Mail, Bell, BellOff } from 'lucide-react-native'
-import {SettingsViewProps} from "../../props/account/settings.props";
+import {SettingsViewProps} from "../../props/account/SettingsProps";
 import {dateToHHMM, formatTime, timeToDate} from "../../utils/dateUtils";
 import {styles} from "../../styles/settingsStyles";
 import {TextField} from "../ui/TextField";

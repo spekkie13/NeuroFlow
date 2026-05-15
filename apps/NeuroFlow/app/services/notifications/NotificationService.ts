@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications'
 import { Platform } from 'react-native'
 import {Project} from "../../models";
 import {formatTime} from "../../utils/dateUtils";
+import {NotificationRequest} from "expo-notifications";
 
 const REMINDER_ID_PREFIX = 'reminder-'
 
@@ -23,15 +24,19 @@ function toIdentifier(timeHHMM: string): string {
 
 function buildBody(projectNames: string[]): string {
     if (projectNames.length === 1) return `Time to work on ${projectNames[0]}!`
-    const last = projectNames[projectNames.length - 1]
-    const rest = projectNames.slice(0, -1).join(', ')
+    const last: string = projectNames[projectNames.length - 1]
+    const rest: string = projectNames.slice(0, -1).join(', ')
     return `Time to work on ${rest} and ${last}!`
 }
 
 export async function requestPermissions(): Promise<boolean> {
-    if (Platform.OS === 'web') return false
+    if (Platform.OS === 'web')
+        return false
+
     const { status: existing } = await Notifications.getPermissionsAsync()
-    if (existing === 'granted') return true
+    if (existing === 'granted')
+        return true
+
     const { status } = await Notifications.requestPermissionsAsync()
     return status === 'granted'
 }
@@ -43,16 +48,16 @@ export async function scheduleAllReminders(
     if (Platform.OS === 'web') return
 
     await cancelExistingReminders()
-    const groups = groupProjectsByTime(projects, globalReminderTime)
+    const groups: Map<string, string[]> = groupProjectsByTime(projects, globalReminderTime)
     await scheduleReminderGroup(groups);
 }
 
 async function cancelExistingReminders(): Promise<void> {
-    const scheduled = await Notifications.getAllScheduledNotificationsAsync()
+    const scheduled: NotificationRequest[] = await Notifications.getAllScheduledNotificationsAsync()
     await Promise.all(
         scheduled
-            .filter(n => n.identifier.startsWith(REMINDER_ID_PREFIX))
-            .map(n => Notifications.cancelScheduledNotificationAsync(n.identifier)),
+            .filter((n: NotificationRequest) => n.identifier.startsWith(REMINDER_ID_PREFIX))
+            .map((n: NotificationRequest) => Notifications.cancelScheduledNotificationAsync(n.identifier)),
     )
 }
 
@@ -69,7 +74,7 @@ function groupProjectsByTime(projects: Project[], globalReminderTime: string | n
         }
 
         if (!effectiveTime) continue
-        const existing = groups.get(effectiveTime) ?? []
+        const existing: string[] = groups.get(effectiveTime) ?? []
         groups.set(effectiveTime, [...existing, project.name])
     }
     return groups;

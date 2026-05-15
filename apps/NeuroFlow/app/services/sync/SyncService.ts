@@ -8,57 +8,7 @@ import {
 import { loadWorkspaces, saveAccounts } from "../storage/accountStorage"
 import { loadProjectsForWorkspace, saveProjectsForWorkspace } from "../storage/projectStorage"
 import {apiClient} from "../../lib/apiClient";
-
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-interface ApiWorkspace {
-    id: string
-    userId: string
-    name: string
-    dailyMinutes: number | null
-    createdAt: string
-    updatedAt: string | null
-}
-
-interface ApiStep {
-    id: string
-    taskId: string
-    text: string
-    done: boolean
-}
-
-interface ApiTask {
-    id: string
-    projectId: string
-    name: string
-    completed: boolean
-    priority: 'high' | 'medium' | 'low'
-    date: string | null
-    notes: string
-    estimatedMinutes: number | null
-    steps: ApiStep[]
-    createdAt: string
-    updatedAt: string | null
-}
-
-interface ApiProject {
-    id: string
-    workspaceId: string
-    name: string
-    color: string
-    reminderTime: string | null
-    tasks: ApiTask[]
-    createdAt: string
-    updatedAt: string | null
-}
-
-interface ApiSettings {
-    userId: string
-    globalReminderTime: string | null
-    updatedAt: string | null
-}
-
-// ── Mappers ───────────────────────────────────────────────────────────────────
+import {ApiProject, ApiSettings, ApiTask, ApiWorkspace} from "../../models/syncService.types";
 
 function mapApiTask(t: ApiTask): Task {
     return {
@@ -86,8 +36,6 @@ function mapApiProject(p: ApiProject): Project {
         updatedAt: p.updatedAt ?? undefined,
     }
 }
-
-// ── Push helpers ──────────────────────────────────────────────────────────────
 
 export async function pushWorkspace(workspace: Workspace): Promise<void> {
     await apiClient.post('/workspaces', {
@@ -134,16 +82,14 @@ export function deleteRemoteWorkspace(workspaceId: string): void {
         .catch(err => console.error('[SyncService] deleteRemoteWorkspace failed:', err))
 }
 
-// ── Startup sync ──────────────────────────────────────────────────────────────
-
 export async function syncGlobalSettings(): Promise<string | null | undefined> {
     try {
-        const data = await apiClient.get<ApiSettings | null>('/settings')
+        const data: ApiSettings = await apiClient.get<ApiSettings | null>('/settings')
 
         if (!data) return undefined
 
-        const localUpdatedAt = await getGlobalReminderUpdatedAt()
-        const remoteUpdatedAt = data.updatedAt ?? ''
+        const localUpdatedAt: string = await getGlobalReminderUpdatedAt()
+        const remoteUpdatedAt: string = data.updatedAt ?? ''
 
         if (!localUpdatedAt || remoteUpdatedAt > localUpdatedAt) {
             const remoteTime: string | null = data.globalReminderTime ?? null
@@ -160,12 +106,12 @@ export async function syncGlobalSettings(): Promise<string | null | undefined> {
 
 export async function syncWorkspaces(): Promise<Workspace[] | null> {
     try {
-        const remoteWorkspaces = await apiClient.get<ApiWorkspace[]>('/workspaces')
+        const remoteWorkspaces: ApiWorkspace[] = await apiClient.get<ApiWorkspace[]>('/workspaces')
 
-        const local = await loadWorkspaces()
-        const localMap = new Map(local.map(w => [w.id, w]))
-        const remoteIds = new Set(remoteWorkspaces.map(w => w.id))
-        const merged = [...local]
+        const local: Workspace[] = await loadWorkspaces()
+        const localMap = new Map(local.map((w: Workspace) => [w.id, w]))
+        const remoteIds = new Set(remoteWorkspaces.map((w: ApiWorkspace) => w.id))
+        const merged: Workspace[] = [...local]
 
         for (const row of remoteWorkspaces) {
             const remote: Workspace = {
@@ -175,9 +121,9 @@ export async function syncWorkspaces(): Promise<Workspace[] | null> {
                 createdAt: row.createdAt,
                 updatedAt: row.updatedAt ?? undefined,
             }
-            const existing = localMap.get(row.id)
+            const existing: Workspace = localMap.get(row.id)
             if (!existing || (remote.updatedAt ?? '') > (existing.updatedAt ?? '')) {
-                const idx = merged.findIndex(w => w.id === row.id)
+                const idx: number = merged.findIndex((w: Workspace) => w.id === row.id)
                 if (idx >= 0) merged[idx] = remote
                 else merged.push(remote)
             }
@@ -198,20 +144,22 @@ export async function syncWorkspaces(): Promise<Workspace[] | null> {
 
 export async function syncProjects(workspaceId: string): Promise<Project[] | null> {
     try {
-        const remoteProjects = await apiClient.get<ApiProject[]>(`/workspaces/${workspaceId}/projects`)
+        const remoteProjects: ApiProject[] = await apiClient.get<ApiProject[]>(`/workspaces/${workspaceId}/projects`)
 
-        const local = await loadProjectsForWorkspace(workspaceId)
-        const localMap = new Map(local.map(p => [p.id, p]))
-        const remoteProjectIds = new Set(remoteProjects.map(p => p.id))
-        const merged = [...local]
+        const local: Project[] = await loadProjectsForWorkspace(workspaceId)
+        const localMap = new Map(local.map((p: Project) => [p.id, p]))
+        const remoteProjectIds = new Set(remoteProjects.map((p: ApiProject) => p.id))
+        const merged: Project[] = [...local]
 
         for (const row of remoteProjects) {
-            const remote = mapApiProject(row)
-            const existing = localMap.get(row.id)
+            const remote: Project = mapApiProject(row)
+            const existing: Project = localMap.get(row.id)
             if (!existing || (remote.updatedAt ?? '') > (existing.updatedAt ?? '')) {
-                const idx = merged.findIndex(p => p.id === row.id)
-                if (idx >= 0) merged[idx] = remote
-                else merged.push(remote)
+                const idx: number = merged.findIndex((p: Project) => p.id === row.id)
+                if (idx >= 0)
+                    merged[idx] = remote
+                else
+                    merged.push(remote)
             }
         }
 
@@ -219,7 +167,7 @@ export async function syncProjects(workspaceId: string): Promise<Project[] | nul
             if (!remoteProjectIds.has(p.id)) {
                 pushProject(workspaceId, p)
             } else {
-                const remoteRow = remoteProjects.find(r => r.id === p.id)
+                const remoteRow: ApiProject = remoteProjects.find((r: ApiProject) => r.id === p.id)
                 if (remoteRow && (p.updatedAt ?? '') > (remoteRow.updatedAt ?? '')) {
                     pushProject(workspaceId, p)
                 }

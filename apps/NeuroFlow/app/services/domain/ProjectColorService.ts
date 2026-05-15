@@ -15,6 +15,6 @@ export const PROJECT_COLOR_PALETTE: readonly string[] = [
  * based on the current number of projects.
  */
 export function getNextProjectColor(projects: Project[]): string {
-    const index = projects.length % PROJECT_COLOR_PALETTE.length
+    const index: number = projects.length % PROJECT_COLOR_PALETTE.length
     return PROJECT_COLOR_PALETTE[index]
 }

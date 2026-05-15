@@ -8,17 +8,7 @@ import {
 } from '../services/auth/authService'
 import {User} from "../models";
 import {supabase} from "../lib/supabase";
-
-export interface UseAuthResult {
-    user: User | null
-    isLoading: boolean
-    error: string | null
-    signInWithGoogle: () => Promise<void>
-    signIn: (email: string, password: string) => Promise<void>
-    signUp: (email: string, password: string, name: string) => Promise<void>
-    signOut: () => Promise<void>
-    clearError: () => void
-}
+import {UseAuthResult} from "../models/hooks/UseAuthResult";
 
 export function useAuth(): UseAuthResult {
     const [user, setUser] = useState<User | null>(null)
@@ -26,7 +16,7 @@ export function useAuth(): UseAuthResult {
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
-        getSession().then((u) => {
+        getSession().then((u: User) => {
             setUser(u)
             setIsLoading(false)
         })
@@ -49,7 +39,7 @@ export function useAuth(): UseAuthResult {
         return () => subscription.unsubscribe()
     }, [])
 
-    const signInWithGoogle = async () => {
+    const signInWithGoogle : () => Promise<void> = async () => {
         setError(null)
         setIsLoading(true)
         const { error } = await authSignInWithGoogle()
@@ -75,12 +65,12 @@ export function useAuth(): UseAuthResult {
         setIsLoading(false)
     }
 
-    const signOut = async () => {
+    const signOut: () => Promise<void> = async () => {
         await authSignOut()
         setUser(null)
     }
 
-    const clearError = () => setError(null)
+    const clearError: () => void = () => setError(null)
 
     return { user, isLoading, error, signInWithGoogle, signIn, signUp, signOut, clearError }
 }

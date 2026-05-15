@@ -1,5 +1,6 @@
-import {Project, Task} from "../../models";
+import {Priority, Project, Task} from "../../models";
 import {generateId} from "../../utils/idUtils";
+import {TaskMoveDirection} from "../../models/task/TaskMoveDirection";
 
 export function createProject(params: { name: string; color: string; reminderTime?: string | null }): Project {
     const trimmed = params.name.trim()
@@ -55,20 +56,18 @@ export function withTaskDeleted(project: Project, taskId: string): Project {
     }
 }
 
-export type TaskMoveDirection = 'up' | 'down' | 'top' | 'bottom'
-
 export function withTaskMoved(
     project: Project,
     taskId: string,
     direction: TaskMoveDirection,
 ): Project {
-    const idx = project.tasks.findIndex((t) => t.id === taskId)
+    const idx: number = project.tasks.findIndex((t: Task) => t.id === taskId)
     if (idx < 0) return project
 
-    const task = project.tasks[idx]
-    const priority = task.priority
+    const task: Task = project.tasks[idx]
+    const priority: Priority = task.priority
 
-    let targetIndex = idx
+    let targetIndex: number = idx
 
     if (direction === 'up') {
         for (let i = idx - 1; i >= 0; i--) {
@@ -104,7 +103,7 @@ export function withTaskMoved(
         return project
     }
 
-    const newTasks = [...project.tasks]
+    const newTasks: Task[] = [...project.tasks]
     const [removed] = newTasks.splice(idx, 1)
     newTasks.splice(targetIndex, 0, removed)
 
