@@ -12,7 +12,7 @@ export async function taskRoutes(app: FastifyInstance) {
         const taskList: Task[] = await taskService.getTasksByProject(userId, projectId);
 
         const result = await Promise.all(
-            taskList.map(async (task) => {
+            taskList.map(async (task: Task) => {
                 const stepList: Step[] = await stepService.getStepsByTask(userId, task.id);
 
                 return { ...task, steps: stepList }
@@ -63,13 +63,12 @@ export async function taskRoutes(app: FastifyInstance) {
 
     app.delete('/projects/:projectId/tasks/:id', { preHandler: requireAuth }, async (request, reply) => {
         const { id } = request.params as { projectId: string; id: string }
-        const userId = request.user!.id;
+        const userId: string = request.user!.id;
 
         await taskService.deleteTask(userId, id)
         return reply.status(204).send()
     })
 
-    // Steps
     app.post('/tasks/:taskId/steps', { preHandler: requireAuth }, async (request, reply) => {
         const { taskId } = request.params as { taskId: string }
         const { text } = request.body as { text: string }
