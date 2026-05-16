@@ -32,9 +32,9 @@ export async function workspaceRoutes(app: FastifyInstance) {
 
     app.delete('/workspaces/:id', { preHandler: requireAuth }, async (request, reply) => {
         const { id } = request.params as { id: string }
-        const userId: string = request.user!.id;
+        const userId: string = request.user!.id
 
-        await workspaceService.deleteWorkspace(userId, id);
-        return reply.status(204).send()
+        await workspaceService.softDeleteWorkspace(userId, id)
+        return reply.status(201).send()
     })
 }

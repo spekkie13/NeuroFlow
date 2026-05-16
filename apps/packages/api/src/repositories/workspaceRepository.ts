@@ -1,6 +1,6 @@
 ﻿import { db } from "../db/index.js"
 import {workspaces} from "../db/schema.js";
-import {and, eq} from "drizzle-orm";
+import {and, eq, isNull} from "drizzle-orm";
 import {Workspace, WorkspaceInsert} from "../types/db.types.js";
 
 export class WorkspaceRepository {
@@ -9,7 +9,10 @@ export class WorkspaceRepository {
             .select()
             .from(workspaces)
             .where(
-                eq(workspaces.userId, userId)
+                and(
+                    eq(workspaces.userId, userId),
+                    isNull(workspaces.deletedAt)
+                )
             )
     }
 
@@ -39,9 +42,12 @@ export class WorkspaceRepository {
         return result;
     }
 
-    async deleteWorkspace(userId: string, id: string): Promise<void> {
+    async softDeleteWorkspace(userId: string, id: string): Promise<void> {
         await db
-            .delete(workspaces)
+            .update(workspaces)
+            .set({
+                deletedAt: new Date()
+            })
             .where(
                 and(
                     eq(workspaces.userId, userId),

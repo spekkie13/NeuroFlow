@@ -13,6 +13,11 @@ export type TaskInsert = InferInsertModel<typeof tasks>
 export type StepInsert = InferInsertModel<typeof steps>
 export type UserSettingsInsert = InferInsertModel<typeof userSettings>
 
+export type ProjectUpdate = Omit<ProjectInsert, 'name' | 'color' | 'reminderTime'> & {
+    name?: string,
+    color?: string,
+    reminderTime?: string
+}
 export type TaskUpdate = Omit<TaskInsert, 'projectId'>
 export type StepUpdate = Omit<StepInsert, 'text'> & {
     text?: string

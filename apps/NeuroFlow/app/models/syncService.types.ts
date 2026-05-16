@@ -5,6 +5,7 @@ export interface ApiWorkspace {
     dailyMinutes: number | null
     createdAt: string
     updatedAt: string | null
+    deletedAt: string | null
 }
 
 export interface ApiStep {
@@ -26,6 +27,7 @@ export interface ApiTask {
     steps: ApiStep[]
     createdAt: string
     updatedAt: string | null
+    deletedAt: string | null
 }
 
 export interface ApiProject {
@@ -37,6 +39,7 @@ export interface ApiProject {
     tasks: ApiTask[]
     createdAt: string
     updatedAt: string | null
+    deletedAt: string | null
 }
 
 export interface ApiSettings {

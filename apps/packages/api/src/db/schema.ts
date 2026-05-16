@@ -7,23 +7,26 @@ export const workspaces = pgTable('workspaces', {
     dailyMinutes: integer('daily_minutes'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow(),
+    deletedAt: timestamp('deleted_at')
+
 })
 
 export const projects = pgTable('projects', {
     id: text('id').primaryKey(),
     userId: text('user_id').notNull(),
-    workspaceId: text('workspace_id').notNull().references(() => workspaces.id, { onDelete: 'cascade' }),
+    workspaceId: text('workspace_id').notNull().references(() => workspaces.id),
     name: text('name').notNull(),
     color: text('color').notNull(),
     reminderTime: text('reminder_time'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow(),
+    deletedAt: timestamp('deleted_at'),
 })
 
 export const tasks = pgTable('tasks', {
     id: text('id').primaryKey(),
     userId: text('user_id').notNull(),
-    projectId: text('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+    projectId: text('project_id').notNull().references(() => projects.id),
     name: text('name').notNull(),
     completed: boolean('completed').default(false).notNull(),
     priority: text('priority', { enum: ['high', 'medium', 'low'] }).default('medium').notNull(),
@@ -32,6 +35,7 @@ export const tasks = pgTable('tasks', {
     estimatedMinutes: integer('estimated_minutes'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow(),
+    deletedAt: timestamp('deleted_at'),
 })
 
 export const steps = pgTable('steps', {

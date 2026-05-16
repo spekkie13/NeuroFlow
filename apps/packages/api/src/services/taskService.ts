@@ -38,8 +38,8 @@ export class TaskService {
         return await taskRepository.updateTask(userId, updatedTask);
     }
 
-    async deleteTask(userId: string, taskId: string): Promise<void> {
-        return await taskRepository.deleteTask(userId, taskId);
+    async softDeleteTask(userId: string, taskId: string): Promise<void> {
+        return await taskRepository.softDeleteTask(userId, taskId);
     }
 }
 

@@ -101,11 +101,13 @@ export async function deleteRemoteProject(projectId: string): Promise<boolean> {
 
 export async function deleteRemoteWorkspace(workspaceId: string): Promise<boolean> {
     try {
-        await apiClient.delete(`/workspaces/${workspaceId}`)
-        return true;
+        await apiClient.patch(`/workspaces/${workspaceId}`, {
+            deletedAt: new Date().toISOString(),
+        })
+        return true
     } catch (err) {
         console.error('[SyncService] deleteRemoteWorkspace failed:', err)
-        return false;
+        return false
     }
 }
 
@@ -138,9 +140,14 @@ export async function syncWorkspaces(): Promise<Workspace[] | null> {
         const local: Workspace[] = await loadWorkspaces()
         const localMap = new Map(local.map((w: Workspace) => [w.id, w]))
         const remoteIds = new Set(remoteWorkspaces.map((w: ApiWorkspace) => w.id))
-        const merged: Workspace[] = [...local]
+        let merged: Workspace[] = [...local]
 
         for (const row of remoteWorkspaces) {
+            if (row.deletedAt) {
+                merged = merged.filter(w => w.id !== row.id)
+                continue
+            }
+
             const remote: Workspace = {
                 id: row.id,
                 name: row.name,
@@ -150,7 +157,7 @@ export async function syncWorkspaces(): Promise<Workspace[] | null> {
             }
             const existing: Workspace = localMap.get(row.id)
             if (!existing || (remote.updatedAt ?? '') > (existing.updatedAt ?? '')) {
-                const idx: number = merged.findIndex((w: Workspace) => w.id === row.id)
+                const idx = merged.findIndex((w: Workspace) => w.id === row.id)
                 if (idx >= 0) merged[idx] = remote
                 else merged.push(remote)
             }
@@ -158,9 +165,7 @@ export async function syncWorkspaces(): Promise<Workspace[] | null> {
 
         for (const w of local) {
             if (!remoteIds.has(w.id)) {
-                const synced: Workspace = await pushWorkspace(w)
-                if (!synced)
-                    console.warn('[useWorkspaces] addWorkspace sync failed:', w.id)
+                await pushWorkspace(w)
             }
         }
 
@@ -178,31 +183,30 @@ export async function syncProjects(workspaceId: string): Promise<Project[] | nul
         const local: Project[] = await loadProjectsForWorkspace(workspaceId)
         const localMap = new Map(local.map((p: Project) => [p.id, p]))
         const remoteProjectIds = new Set(remoteProjects.map((p: ApiProject) => p.id))
-        const merged: Project[] = [...local]
+        let merged: Project[] = [...local]
 
         for (const row of remoteProjects) {
+            if (row.deletedAt) {
+                merged = merged.filter(p => p.id !== row.id)
+                continue
+            }
+
             const remote: Project = mapApiProject(row)
             const existing: Project = localMap.get(row.id)
             if (!existing || (remote.updatedAt ?? '') > (existing.updatedAt ?? '')) {
-                const idx: number = merged.findIndex((p: Project) => p.id === row.id)
-                if (idx >= 0)
-                    merged[idx] = remote
-                else
-                    merged.push(remote)
+                const idx = merged.findIndex((p: Project) => p.id === row.id)
+                if (idx >= 0) merged[idx] = remote
+                else merged.push(remote)
             }
         }
 
         for (const p of local) {
             if (!remoteProjectIds.has(p.id)) {
-                const synced: Project = await pushProject(workspaceId, p)
-                if (!synced)
-                    console.warn('[usePushProject] addWorkspace sync failed:', p.id);
+                await pushProject(workspaceId, p)
             } else {
                 const remoteRow: ApiProject = remoteProjects.find((r: ApiProject) => r.id === p.id)
                 if (remoteRow && (p.updatedAt ?? '') > (remoteRow.updatedAt ?? '')) {
-                    const synced: Project = await pushProject(workspaceId, p)
-                    if (!synced)
-                        console.warn('[usePushProject] addWorkspace sync failed:', p.id);
+                    await pushProject(workspaceId, p)
                 }
             }
         }

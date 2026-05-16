@@ -1,7 +1,7 @@
 ﻿import {Task, TaskInsert, TaskUpdate} from "../types/db.types.js";
 import { db } from "../db/index.js"
 import {tasks} from "../db/schema.js";
-import {and, eq} from "drizzle-orm";
+import {and, eq, isNull} from "drizzle-orm";
 
 export class TaskRepository {
     async getTasksByProject(userId: string, projectId: string): Promise<Task[]> {
@@ -11,7 +11,8 @@ export class TaskRepository {
             .where(
                 and(
                     eq(tasks.userId, userId),
-                    eq(tasks.projectId, projectId)
+                    eq(tasks.projectId, projectId),
+                    isNull(tasks.deletedAt)
                 )
             )
     }
@@ -41,9 +42,10 @@ export class TaskRepository {
         return updatedTask;
     }
 
-    async deleteTask(userId: string, taskId: string): Promise<void> {
+    async softDeleteTask(userId: string, taskId: string): Promise<void> {
         await db
-            .delete(tasks)
+            .update(tasks)
+            .set({ deletedAt: new Date() })
             .where(
                 and(
                     eq(tasks.userId, userId),

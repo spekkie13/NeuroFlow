@@ -30,8 +30,8 @@ export class WorkspaceService {
         return await workspaceRepository.updateWorkspace(userId, workspace.id, workspace);
     }
 
-    async deleteWorkspace(userId: string, workspaceId: string) {
-        await workspaceRepository.deleteWorkspace(userId, workspaceId);
+    async softDeleteWorkspace(userId: string, workspaceId: string) {
+        await workspaceRepository.softDeleteWorkspace(userId, workspaceId);
     }
 }
 
