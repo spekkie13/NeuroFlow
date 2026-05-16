@@ -1,4 +1,4 @@
-﻿import {projectRepository} from "../repositories/projectRepository";
+﻿import {projectRepository} from "../repositories/projectRepository.js";
 import {Project} from "../types/db.types";
 import {randomUUID} from "crypto";
 
