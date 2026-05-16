@@ -21,6 +21,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
         },
     })
 
+    // 204 No Content — don't try to parse the body
+    if (response.status === 204) {
+        return null as T
+    }
+
     if (!response.ok) {
         throw new Error(`API error: ${response.status}`)
     }
