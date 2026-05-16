@@ -10,7 +10,7 @@ interface WorkspaceSwitcherBarProps {
 export const WorkspaceSwitcherBar: React.FC<WorkspaceSwitcherBarProps> = ({
     workspaceName,
     onPress,
-}) => (
+}: WorkspaceSwitcherBarProps) => (
     <TouchableOpacity style={styles.bar} onPress={onPress} activeOpacity={0.7}>
         <View style={styles.left}>
             <Layers size={14} color="#6b7280" />

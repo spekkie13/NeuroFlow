@@ -14,6 +14,7 @@ export function useWorkspaces(userId: string | null): UseAccountsResult {
     const [workspaces, setWorkspaces] = useState<Workspace[]>([])
     const [currentWorkspaceId, setCurrentId] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+    const [syncError, setSyncError] = useState<string | null>(null)
 
     useEffect(() => {
         let mounted: boolean = true
@@ -35,7 +36,6 @@ export function useWorkspaces(userId: string | null): UseAccountsResult {
 
             setIsLoading(false)
 
-            // Background sync: fetch from Supabase and merge if we have a user
             if (userId) {
                 syncWorkspaces().then(async (merged: Workspace[]) => {
                     if (!mounted || !merged) return
@@ -49,12 +49,9 @@ export function useWorkspaces(userId: string | null): UseAccountsResult {
             }
         }
         init()
-        return () => {
-            mounted = false
-        }
+        return () => { mounted = false }
     }, [userId])
 
-    // Optimistic update: apply state immediately, then persist to storage.
     const persist = async (next: Workspace[]): Promise<void> => {
         setWorkspaces(next)
         await saveAccounts(next)
@@ -69,27 +66,34 @@ export function useWorkspaces(userId: string | null): UseAccountsResult {
         }
         const next: Workspace[] = [...workspaces, newWorkspace]
         await persist(next)
-        if (userId)
-            await pushWorkspace(newWorkspace)
+        if (userId) {
+            const synced: Workspace | null = await pushWorkspace(newWorkspace)
+            if (!synced)
+                setSyncError(`Changes for workspace "${newWorkspace.name}" couldn't be synced. They're saved on this device.`)
+            else
+                setSyncError(null)
+        }
     }
 
     const updateWorkspace = async (id: string, name: string) => {
         const updatedAt: string = new Date().toISOString()
         const next: Workspace[] = workspaces.map((a: Workspace) =>
-            a.id === id
-                ? { ...a, name, updatedAt }
-                : a,
+            a.id === id ? { ...a, name, updatedAt } : a
         )
         await persist(next)
         const updated: Workspace = next.find((a: Workspace) => a.id === id)
-        if (userId && updated)
-            await pushWorkspace(updated)
+        if (userId && updated) {
+            const synced: Workspace | null = await pushWorkspace(updated)
+            if (!synced)
+                setSyncError(`Changes for workspace "${updated.name}" couldn't be synced. They're saved on this device.`)
+            else
+                setSyncError(null)
+        }
     }
 
     const deleteWorkspace = async (id: string) => {
-        if (workspaces.length <= 1) {
-            return
-        }
+        if (workspaces.length <= 1) return
+        const target: Workspace = workspaces.find((a: Workspace) => a.id === id)
         const next: Workspace[] = workspaces.filter((a: Workspace) => a.id !== id)
         await persist(next)
 
@@ -99,8 +103,13 @@ export function useWorkspaces(userId: string | null): UseAccountsResult {
             await setCurrentWorkspaceId(newId)
         }
 
-        if (userId)
-            deleteRemoteWorkspace(id)
+        if (userId) {
+            const deleted: boolean = await deleteRemoteWorkspace(id)
+            if (!deleted)
+                setSyncError(`Workspace "${target?.name}" couldn't be deleted from the server. It's removed on this device.`)
+            else
+                setSyncError(null)
+        }
     }
 
     const switchWorkspace = async (id: string) => {
@@ -115,14 +124,20 @@ export function useWorkspaces(userId: string | null): UseAccountsResult {
         )
         await persist(next)
         const updated: Workspace = next.find((a: Workspace) => a.id === id)
-        if (userId && updated)
-            await pushWorkspace(updated)
+        if (userId && updated) {
+            const synced: Workspace | null = await pushWorkspace(updated)
+            if (!synced)
+                setSyncError(`Budget changes for workspace "${updated.name}" couldn't be synced. They're saved on this device.`)
+            else
+                setSyncError(null)
+        }
     }
 
     return {
-        workspaces: workspaces,
-        currentWorkspaceId: currentWorkspaceId,
+        workspaces,
+        currentWorkspaceId,
         isLoading,
+        syncError,
         addWorkspace,
         updateWorkspace,
         deleteWorkspace,

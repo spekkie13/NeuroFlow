@@ -3,6 +3,7 @@ import { Modal, Text, TouchableOpacity, View } from 'react-native'
 import { styles } from '../../styles/planner'
 import {ProjectPickerModalProps} from "../../props/planner/ProjectPickerModalProps";
 import {AppButton} from "../ui/AppButton";
+import {Project} from "../../models";
 
 export const ProjectPickerModal: React.FC<ProjectPickerModalProps> = ({
     visible,
@@ -10,7 +11,7 @@ export const ProjectPickerModal: React.FC<ProjectPickerModalProps> = ({
     activeProjectId,
     onSelectProject,
     onClose,
-}) => (
+}: ProjectPickerModalProps) => (
     <Modal
         visible={visible}
         transparent
@@ -20,8 +21,8 @@ export const ProjectPickerModal: React.FC<ProjectPickerModalProps> = ({
         <View style={styles.modalOverlay}>
             <View style={styles.pickerCard}>
                 <Text style={styles.pickerTitle}>Select project</Text>
-                {projects.map((project) => {
-                    const isActive = project.id === activeProjectId
+                {projects.map((project: Project) => {
+                    const isActive: boolean = project.id === activeProjectId
                     return (
                         <TouchableOpacity
                             key={project.id}

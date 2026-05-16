@@ -4,6 +4,7 @@ export interface UseAccountsResult {
     workspaces: Workspace[]
     currentWorkspaceId: string | null
     isLoading: boolean
+    syncError: string | null
     addWorkspace: (name: string) => Promise<void>
     updateWorkspace: (id: string, name: string) => Promise<void>
     deleteWorkspace: (id: string) => Promise<void>

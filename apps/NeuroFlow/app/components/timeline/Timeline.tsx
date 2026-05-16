@@ -1,4 +1,4 @@
-import React, { useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import React, {RefObject, useEffect, useImperativeHandle, useMemo, useRef, useState} from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Plus, CheckCircle2, Circle } from 'lucide-react-native'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -26,31 +26,31 @@ export const Timeline = ({
     onUpdateTask,
     ref,
 }: TimelineProps & { ref?: React.Ref<TimelineHandle | null> }) => {
-    const [showModal, setShowModal] = useState(false)
+    const [isGrabbing, setIsGrabbing] = useState<boolean>(false)
+    const [isScrolled, setIsScrolled] = useState<boolean>(false)
+    const [showModal, setShowModal] = useState<boolean>(false)
     const [selectedDate, setSelectedDate] = useState<Date | null>(null)
     const [rescheduleTask, setRescheduleTask] = useState<Task | null>(null)
-    const [rescheduleDate, setRescheduleDate] = useState('')
+    const [rescheduleDate, setRescheduleDate] = useState<string>('')
 
     const openReschedule = (task: Task) => {
         setRescheduleTask(task)
         setRescheduleDate(task.date ? formatLocalDate(task.date) : '')
-    }
 
+    }
     const handleSaveReschedule = () => {
         if (!rescheduleTask || !rescheduleDate) return
-        const parsed = parseLocalDate(rescheduleDate)
+        const parsed: Date = parseLocalDate(rescheduleDate)
         if (!parsed) return
         onUpdateTask(rescheduleTask.id, { date: toIsoDateString(parsed)! })
         setRescheduleTask(null)
         setRescheduleDate('')
-    }
 
-    const scrollViewRef = useRef<ScrollView>(null)
-    const isDragging = useRef(false)
-    const dragStartX = useRef(0)
-    const dragStartScrollLeft = useRef(0)
-    const [isGrabbing, setIsGrabbing] = useState(false)
-    const [isScrolled, setIsScrolled] = useState(false)
+    }
+    const scrollViewRef: RefObject<ScrollView> = useRef<ScrollView>(null)
+    const isDragging: RefObject<boolean> = useRef(false)
+    const dragStartX: RefObject<number> = useRef(0)
+    const dragStartScrollLeft: RefObject<number> = useRef(0)
 
     // Mouse event handlers for click-and-drag scrolling on web.
     // Parameters typed as `any` because React Native's types don't include
@@ -86,9 +86,9 @@ export const Timeline = ({
         scrollViewRef.current?.scrollTo({ x: 0, animated: false })
     }, [])
 
-    const today = useMemo(() => new Date(), [])
+    const today: Date = useMemo(() => new Date(), [])
 
-    const dates = useMemo(() => {
+    const dates: Date[] = useMemo(() => {
         return Array.from({ length: 14 }, (_, i) => {
             const d = new Date(today)
             d.setDate(today.getDate() + i)
@@ -96,22 +96,24 @@ export const Timeline = ({
         })
     }, [today])
 
-    const selectableExistingTasks = useMemo(
-        () => project.tasks.filter((task) => !task.date || isOverdue(task)),
+    const selectableExistingTasks: Task[] = useMemo(
+        () => project.tasks.filter((task: Task) => !task.date || isOverdue(task)),
         [project.tasks],
     )
 
-    const overdueTasks = useMemo(() => {
+    const overdueTasks: Task[] = useMemo(() => {
         return project.tasks
             .filter(isOverdue)
-            .sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority])
+            .sort(((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]))
     }, [project.tasks])
 
     const tasksByDate = useMemo(() => {
-        return dates.map((date) => {
-            const dateStr = toIsoDateString(date)
-            const tasksForDay = project.tasks.filter((task) => {
-                if (!task.date) return false
+        return dates.map((date: Date) => {
+            const dateStr: string = toIsoDateString(date)
+            const tasksForDay: Task[] = project.tasks.filter((task) => {
+                if (!task.date)
+                    return false
+
                 return task.date === dateStr
             })
 
@@ -119,7 +121,7 @@ export const Timeline = ({
                 (a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority],
             )
 
-            const estimatedTotal = tasksForDay.reduce((sum, t) => sum + (t.estimatedMinutes ?? 0), 0)
+            const estimatedTotal: number = tasksForDay.reduce((sum, t) => sum + (t.estimatedMinutes ?? 0), 0)
             return { date, tasks: tasksForDay, completedCount: tasksForDay.filter(t => t.completed).length, estimatedTotal }
         })
     }, [dates, project.tasks])

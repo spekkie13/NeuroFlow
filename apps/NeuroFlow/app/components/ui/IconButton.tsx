@@ -1,5 +1,5 @@
 import React from 'react'
-import { GestureResponderEvent, StyleProp, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native'
+import { TouchableOpacity, ViewStyle } from 'react-native'
 import { uiColors, uiRadius, uiSpacing } from '../../styles/uiTheme'
 import {IconButtonProps} from "../../props/ui/IconButtonProps";
 import {styles} from "../../styles/ui/iconButton";

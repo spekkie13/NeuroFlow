@@ -28,7 +28,8 @@ export function useGlobalSettings(userId: string | null): UseGlobalSettingsResul
     const setGlobalReminder = async (time: string | null) => {
         setTime(time)
         await setGlobalReminderTime(time)
-        if (userId) pushGlobalSettings(time)
+        if (userId)
+            await pushGlobalSettings(time)
     }
 
     return { globalReminderTime, isLoading, setGlobalReminder }

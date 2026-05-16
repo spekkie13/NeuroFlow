@@ -3,7 +3,7 @@ import {Text, TouchableOpacity, View} from "react-native";
 import {MenuItemProps} from "../../props/ui/MenuItemProps";
 import {styles} from "../../styles/taskView";
 
-export const MenuItem = ({
+export const MenuItem: React.FC<MenuItemProps> = ({
                              icon,
                              label,
                              onPress,

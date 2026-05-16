@@ -5,6 +5,7 @@ import {TaskMoveDirection} from "../task/TaskMoveDirection";
 export interface UseProjectsResult {
     projects: Project[]
     isLoading: boolean
+    syncError: string | null
     addProject: (name: string, color?: string, reminderTime?: string | null) => Promise<void>
     updateProject: (projectId: string, updates: Partial<Project>) => Promise<void>
     deleteProject: (projectId: string) => Promise<void>

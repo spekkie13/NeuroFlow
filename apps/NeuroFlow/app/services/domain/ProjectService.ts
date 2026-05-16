@@ -17,7 +17,7 @@ export function createProject(params: { name: string; color: string; reminderTim
 }
 
 export function withUpdatedProjectName(project: Project, name: string): Project {
-    const trimmed = name.trim()
+    const trimmed: string = name.trim()
     return {
         ...project,
         name: trimmed || 'Untitled Project',
@@ -38,7 +38,7 @@ export function withTaskUpdated(
 ): Project {
     return {
         ...project,
-        tasks: project.tasks.map((t) =>
+        tasks: project.tasks.map((t: Task) =>
             t.id === taskId
                 ? {
                     ...t,
@@ -52,7 +52,7 @@ export function withTaskUpdated(
 export function withTaskDeleted(project: Project, taskId: string): Project {
     return {
         ...project,
-        tasks: project.tasks.filter((t) => t.id !== taskId),
+        tasks: project.tasks.filter((t: Task) => t.id !== taskId),
     }
 }
 

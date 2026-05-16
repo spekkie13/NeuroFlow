@@ -2,15 +2,15 @@ import React from 'react'
 import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native'
 import { styles } from "../../styles/bottomNav";
 import {BottomNavProps} from "../../props/ui/BottomNavProps";
-import {navItems} from "../../constants/navItems";
+import {NavItem, navItems} from "../../constants/navItems";
 
 export const BottomNav: React.FC<BottomNavProps> = ({ currentView, onViewChange }: BottomNavProps) => {
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.navContainer}>
-                {navItems.map((item) => {
+                {navItems.map((item: NavItem) => {
                     const Icon = item.icon
-                    const isActive = currentView === item.id
+                    const isActive: boolean = currentView === item.id
 
                     return (
                         <TouchableOpacity

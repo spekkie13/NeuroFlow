@@ -82,6 +82,6 @@ export async function signOut(): Promise<void> {
 
 export async function getSession(): Promise<User | null> {
     const { data } = await supabase.auth.getSession()
-    const user = data.session?.user
+    const user: SupabaseUser = data.session?.user
     return user ? toAppUser(user) : null
 }

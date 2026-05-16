@@ -2,7 +2,7 @@ import { ComponentType } from 'react'
 import { Calendar, ListTodo, Sun, User as UserIcon } from "lucide-react-native";
 import {ViewType} from "../props/ui/BottomNavProps";
 
-type NavItem = {
+export type NavItem = {
     id: ViewType
     label: string
     icon: ComponentType<{ size?: number; color?: string; strokeWidth?: number }>

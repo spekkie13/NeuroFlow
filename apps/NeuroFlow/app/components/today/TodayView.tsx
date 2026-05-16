@@ -20,7 +20,7 @@ export const TodayView: React.FC<TodayViewProps> = ({ projects, onUpdateTask }) 
     const [rescheduleTarget, setRescheduleTarget] = useState<{ projectId: string; task: Task } | null>(null)
     const [rescheduleDate, setRescheduleDate] = useState('')
 
-    const todayStr = useMemo(() => toIsoDateString(new Date())!, [])
+    const todayStr: string = useMemo(() => toIsoDateString(new Date())!, [])
 
     const toggleSection = (id: string) => {
         setCollapsedSections(prev => {
@@ -32,7 +32,7 @@ export const TodayView: React.FC<TodayViewProps> = ({ projects, onUpdateTask }) 
 
     const overdueItems = useMemo(() =>
         projects
-            .flatMap(p => p.tasks.filter(isOverdue).map(t => ({ task: t, project: p })))
+            .flatMap((p: Project) => p.tasks.filter(isOverdue).map((t: Task) => ({ task: t, project: p })))
             .sort((a, b) => PRIORITY_ORDER[a.task.priority] - PRIORITY_ORDER[b.task.priority]),
         [projects]
     )
@@ -45,14 +45,14 @@ export const TodayView: React.FC<TodayViewProps> = ({ projects, onUpdateTask }) 
                     .filter(t => t.date === todayStr)
                     .sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]),
             }))
-            .filter(({ tasks }) => tasks.length > 0),
+            .filter(({ tasks }: {project: Project, tasks: Task[]}) => tasks.length > 0),
         [projects, todayStr]
     )
 
-    const todayTotal = todayByProject.reduce((sum, { tasks }) => sum + tasks.length, 0)
-    const todayDone = todayByProject.reduce((sum, { tasks }) => sum + tasks.filter(t => t.completed).length, 0)
-    const overdueTotal = overdueItems.length
-    const hasAnything = todayTotal > 0 || overdueTotal > 0
+    const todayTotal: number = todayByProject.reduce((sum, { tasks }) => sum + tasks.length, 0)
+    const todayDone: number = todayByProject.reduce((sum, { tasks }) => sum + tasks.filter(t => t.completed).length, 0)
+    const overdueTotal: number = overdueItems.length
+    const hasAnything: boolean = todayTotal > 0 || overdueTotal > 0
 
     const openReschedule = (projectId: string, task: Task) => {
         setRescheduleTarget({ projectId, task })
@@ -61,7 +61,7 @@ export const TodayView: React.FC<TodayViewProps> = ({ projects, onUpdateTask }) 
 
     const handleSaveReschedule = () => {
         if (!rescheduleTarget || !rescheduleDate) return
-        const parsed = parseLocalDate(rescheduleDate)
+        const parsed: Date = parseLocalDate(rescheduleDate)
         if (!parsed) return
         onUpdateTask(rescheduleTarget.projectId, rescheduleTarget.task.id, { date: toIsoDateString(parsed)! })
         setRescheduleTarget(null)

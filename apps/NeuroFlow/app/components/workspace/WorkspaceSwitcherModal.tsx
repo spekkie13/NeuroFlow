@@ -26,12 +26,12 @@ export const WorkspaceSwitcherModal: React.FC<WorkspaceSwitcherModalProps> = ({
     onSwitch,
     onAdd,
     onClose,
-}) => {
+}: WorkspaceSwitcherModalProps) => {
     const [isAdding, setIsAdding] = useState(false)
     const [newName, setNewName] = useState('')
 
     const handleAdd = () => {
-        const trimmed = newName.trim()
+        const trimmed: string = newName.trim()
         if (!trimmed) return
         onAdd(trimmed)
         setNewName('')

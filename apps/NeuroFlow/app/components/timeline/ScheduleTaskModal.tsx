@@ -20,17 +20,17 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
     onAddNewTask,
     onUpdateTask,
     onClose,
-}) => {
+}: ScheduleTaskModalProps) => {
     const [modalTab, setModalTab] = useState<ModalTab>('new')
     const [newTaskName, setNewTaskName] = useState('')
     const [newTaskPriority, setNewTaskPriority] = useState<Priority>('medium')
-    const [taskDate, setTaskDate] = useState('')
+    const [taskDate, setTaskDate] = useState<string>('')
     const [selectedExistingTaskId, setSelectedExistingTaskId] = useState<string | null>(null)
 
     useEffect(() => {
         if (!visible) return
         const opts: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' }
-        const formatted = selectedDate ? formatLocalDate(selectedDate, opts) : ''
+        const formatted: string = selectedDate ? formatLocalDate(selectedDate, opts) : ''
         setTaskDate(formatted)
         setNewTaskName('')
         setNewTaskPriority('medium')

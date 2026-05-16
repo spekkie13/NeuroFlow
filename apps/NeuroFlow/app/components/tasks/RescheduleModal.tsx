@@ -18,8 +18,8 @@ export const RescheduleModal: React.FC<RescheduleModalProps> = ({
                                                                 }: RescheduleModalProps) => {
     if (!visible) return null
 
-    const placeholder = getDateInputPlaceholder()
-    const disabled = !date
+    const placeholder: string = getDateInputPlaceholder()
+    const disabled: boolean = !date
 
     return (
         <Modal

@@ -9,7 +9,7 @@ export const PriorityModal: React.FC<PriorityModalProps> = ({
                                                                 taskName,
                                                                 onSetPriority,
                                                                 onClose,
-                                                            }) => {
+                                                            }: PriorityModalProps) => {
     if (!visible) return null
 
     return (

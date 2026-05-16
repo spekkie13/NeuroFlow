@@ -15,7 +15,7 @@ export const DateField: React.FC<DateFieldProps> = ({
                                                     }) => {
     const [showPicker, setShowPicker] = useState(false)
 
-    const currentDate = useMemo(
+    const currentDate: Date = useMemo(
         () => parseLocalDate(value) ?? new Date(),
         [value],
     )
@@ -29,8 +29,8 @@ export const DateField: React.FC<DateFieldProps> = ({
             setShowPicker(false)
             return
         }
-        const picked = date ?? currentDate
-        const formatted = formatLocalDate(picked)
+        const picked: Date = date ?? currentDate
+        const formatted: string = formatLocalDate(picked)
         onChangeText(formatted)
         onChangeDate?.(picked)
         if (Platform.OS !== 'ios') {
@@ -42,9 +42,9 @@ export const DateField: React.FC<DateFieldProps> = ({
         <View style={style}>
             <TextField
                 value={value}
-                onChangeText={(text) => {
+                onChangeText={(text: string) => {
                     onChangeText(text)
-                    const parsed = parseLocalDate(text)
+                    const parsed: Date = parseLocalDate(text)
                     onChangeDate?.(parsed)
                 }}
                 placeholder={placeholder}

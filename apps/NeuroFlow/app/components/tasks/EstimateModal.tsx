@@ -13,7 +13,7 @@ export const EstimateModal: React.FC<EstimateModalProps> = ({
     currentMinutes,
     onSetEstimate,
     onClose,
-}) => {
+}: EstimateModalProps) => {
     if (!visible) return null
 
     return (

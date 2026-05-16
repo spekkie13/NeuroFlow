@@ -19,8 +19,8 @@ export const AppButton: React.FC<AppButtonProps> = ({
                                                         textStyle,
                                                         accessibilityLabel,
                                                     }: AppButtonProps) => {
-    const isDisabled = disabled || loading
-    const hasText = Boolean(title && title.trim().length > 0)
+    const isDisabled: boolean = disabled || loading
+    const hasText: boolean = Boolean(title && title.trim().length > 0)
 
     const { containerStyle, textBaseStyle, spinnerColor } = getStylesForVariant(
         variant,
@@ -93,7 +93,7 @@ function getStylesForVariant(
 
     let containerStyle: ViewStyle = {}
     let textBaseStyle: TextStyle = {}
-    let spinnerColor = '#ffffff'
+    let spinnerColor: string = '#ffffff'
 
     switch (variant) {
         case 'primary':

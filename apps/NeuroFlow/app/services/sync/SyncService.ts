@@ -8,7 +8,7 @@ import {
 import { loadWorkspaces, saveAccounts } from "../storage/accountStorage"
 import { loadProjectsForWorkspace, saveProjectsForWorkspace } from "../storage/projectStorage"
 import {apiClient} from "../../lib/apiClient";
-import {ApiProject, ApiSettings, ApiTask, ApiWorkspace} from "../../models/syncService.types";
+import {ApiProject, ApiSettings, ApiStep, ApiTask, ApiWorkspace} from "../../models/syncService.types";
 
 function mapApiTask(t: ApiTask): Task {
     return {
@@ -19,7 +19,7 @@ function mapApiTask(t: ApiTask): Task {
         date: t.date ?? null,
         notes: t.notes,
         estimatedMinutes: t.estimatedMinutes ?? undefined,
-        steps: t.steps.map(s => ({ id: s.id, text: s.text, done: s.done })),
+        steps: t.steps.map((s: ApiStep) => ({ id: s.id, text: s.text, done: s.done })),
         createdAt: t.createdAt,
         updatedAt: t.updatedAt ?? undefined,
     }
@@ -37,23 +37,30 @@ function mapApiProject(p: ApiProject): Project {
     }
 }
 
-export async function pushWorkspace(workspace: Workspace): Promise<void> {
-    await apiClient.post('/workspaces', {
-        id: workspace.id,
-        name: workspace.name,
-        dailyMinutes: workspace.dailyMinutes ?? null,
-    }).catch(err => console.error('[SyncService] pushWorkspace failed:', err))
+export async function pushWorkspace(workspace: Workspace): Promise<Workspace | null> {
+    try {
+        return await apiClient.post('/workspaces', {
+            id: workspace.id,
+            name: workspace.name,
+            dailyMinutes: workspace.dailyMinutes ?? null,
+        });
+    } catch (err) {
+        console.error('[SyncService] pushWorkspace failed:', err)
+        return null;
+    }
 }
 
-export function pushProject(workspaceId: string, project: Project): void {
-    apiClient.post(`/workspaces/${workspaceId}/projects`, {
-        id: project.id,
-        name: project.name,
-        color: project.color,
-        reminderTime: project.reminderTime ?? null,
-    }).then(async () => {
-        for (const task of project.tasks) {
-            await apiClient.post(`/projects/${project.id}/tasks`, {
+export async function pushProject(workspaceId: string, project: Project): Promise<Project | null> {
+    try {
+        await apiClient.post(`/workspaces/${workspaceId}/projects`, {
+            id: project.id,
+            name: project.name,
+            color: project.color,
+            reminderTime: project.reminderTime ?? null,
+        })
+
+        await Promise.all(project.tasks.map((task: Task) =>
+            apiClient.post(`/projects/${project.id}/tasks`, {
                 id: task.id,
                 name: task.name,
                 completed: task.completed,
@@ -62,24 +69,44 @@ export function pushProject(workspaceId: string, project: Project): void {
                 notes: task.notes,
                 estimatedMinutes: task.estimatedMinutes ?? null,
                 steps: task.steps ?? [],
-            }).catch(err => console.error('[SyncService] pushProject task failed:', err))
-        }
-    }).catch(err => console.error('[SyncService] pushProject failed:', err))
+            })
+        ))
+
+        return project
+    } catch (err) {
+        console.error('[SyncService] pushProject failed:', err)
+        return null
+    }
 }
 
-export function deleteRemoteTask(taskId: string): void {
-    apiClient.delete(`/tasks/${taskId}`)
-        .catch(err => console.error('[SyncService] deleteRemoteTask failed:', err))
+export async function deleteRemoteTask(taskId: string): Promise<boolean> {
+    try {
+        await apiClient.delete(`/tasks/${taskId}`);
+        return true;
+    } catch (err) {
+        console.error('[SyncService] deleteRemoteTask failed:', err);
+        return false;
+    }
 }
 
-export function deleteRemoteProject(projectId: string): void {
-    apiClient.delete(`/projects/${projectId}`)
-        .catch(err => console.error('[SyncService] deleteRemoteProject failed:', err))
+export async function deleteRemoteProject(projectId: string): Promise<boolean> {
+    try {
+        await apiClient.delete(`/projects/${projectId}`);
+        return true;
+    } catch (err) {
+        console.error('[SyncService] deleteRemoteProject failed:', err);
+        return false;
+    }
 }
 
-export function deleteRemoteWorkspace(workspaceId: string): void {
-    apiClient.delete(`/workspaces/${workspaceId}`)
-        .catch(err => console.error('[SyncService] deleteRemoteWorkspace failed:', err))
+export async function deleteRemoteWorkspace(workspaceId: string): Promise<boolean> {
+    try {
+        await apiClient.delete(`/workspaces/${workspaceId}`)
+        return true;
+    } catch (err) {
+        console.error('[SyncService] deleteRemoteWorkspace failed:', err)
+        return false;
+    }
 }
 
 export async function syncGlobalSettings(): Promise<string | null | undefined> {
@@ -131,7 +158,9 @@ export async function syncWorkspaces(): Promise<Workspace[] | null> {
 
         for (const w of local) {
             if (!remoteIds.has(w.id)) {
-                await pushWorkspace(w)
+                const synced: Workspace = await pushWorkspace(w)
+                if (!synced)
+                    console.warn('[useWorkspaces] addWorkspace sync failed:', w.id)
             }
         }
 
@@ -165,11 +194,15 @@ export async function syncProjects(workspaceId: string): Promise<Project[] | nul
 
         for (const p of local) {
             if (!remoteProjectIds.has(p.id)) {
-                pushProject(workspaceId, p)
+                const synced: Project = await pushProject(workspaceId, p)
+                if (!synced)
+                    console.warn('[usePushProject] addWorkspace sync failed:', p.id);
             } else {
                 const remoteRow: ApiProject = remoteProjects.find((r: ApiProject) => r.id === p.id)
                 if (remoteRow && (p.updatedAt ?? '') > (remoteRow.updatedAt ?? '')) {
-                    pushProject(workspaceId, p)
+                    const synced: Project = await pushProject(workspaceId, p)
+                    if (!synced)
+                        console.warn('[usePushProject] addWorkspace sync failed:', p.id);
                 }
             }
         }
@@ -181,8 +214,14 @@ export async function syncProjects(workspaceId: string): Promise<Project[] | nul
     }
 }
 
-export function pushGlobalSettings(reminderTime: string | null): void {
-    apiClient.patch('/settings', {
-        globalReminderTime: reminderTime,
-    }).catch(err => console.error('[SyncService] pushGlobalSettings failed:', err))
+export async function pushGlobalSettings(reminderTime: string | null): Promise<boolean> {
+    try {
+        await apiClient.patch('/settings', {
+            globalReminderTime: reminderTime,
+        });
+        return true;
+    } catch (err) {
+        console.error('[SyncService] pushGlobalSettings failed:', err)
+        return false;
+    }
 }

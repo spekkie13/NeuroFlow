@@ -21,19 +21,19 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     reminderTime,
     globalReminderTime,
     onSetReminderTime,
-}) => {
+}: CreateProjectModalProps) => {
     const [showTimePicker, setShowTimePicker] = useState(false)
 
-    const pickerSeedTime = typeof reminderTime === 'string'
+    const pickerSeedTime: string = typeof reminderTime === 'string'
         ? reminderTime
         : typeof globalReminderTime === 'string'
             ? globalReminderTime
             : '09:00'
-    const pickerDate = timeToDate(pickerSeedTime)
+    const pickerDate: Date = timeToDate(pickerSeedTime)
 
-    const isDefault = reminderTime === undefined
-    const isOff = reminderTime === null
-    const customTime = typeof reminderTime === 'string' ? reminderTime : null
+    const isDefault: boolean = reminderTime === undefined
+    const isOff: boolean = reminderTime === null
+    const customTime: string = typeof reminderTime === 'string' ? reminderTime : null
 
     const handleDelete = () => {
         Alert.alert(

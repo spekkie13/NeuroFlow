@@ -21,7 +21,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
                                                       onUpdateTask,
                                                       onDeleteTask,
                                                       onMoveTask,
-                                                  }) => {
+                                                  }: TaskViewProps) => {
     const [newTaskName, setNewTaskName] = useState('')
     const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
     const [editTaskName, setEditTaskName] = useState('')
@@ -34,15 +34,15 @@ export const TaskView: React.FC<TaskViewProps> = ({
     const [openMenuTaskId, setOpenMenuTaskId] = useState<string | null>(null)
     const [estimateModalTask, setEstimateModalTask] = useState<Task | null>(null)
 
-    const activeTasks = useMemo(() => project.tasks.filter(t => !t.completed), [project.tasks])
-    const completedTasks = useMemo(() => project.tasks.filter(t => t.completed), [project.tasks])
+    const activeTasks: Task[] = useMemo(() => project.tasks.filter(t => !t.completed), [project.tasks])
+    const completedTasks: Task[] = useMemo(() => project.tasks.filter(t => t.completed), [project.tasks])
 
     const toggleMenu = (taskId: string) => {
         setOpenMenuTaskId((prev) => (prev === taskId ? null : taskId))
     }
 
     const handleAddTask = () => {
-        const trimmed = newTaskName.trim()
+        const trimmed: string = newTaskName.trim()
         if (!trimmed) return
         onAddTask(createTask({ name: trimmed }))
         setNewTaskName('')
@@ -55,7 +55,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
     }
 
     const saveEdit = (taskId: string) => {
-        const trimmed = editTaskName.trim()
+        const trimmed: string = editTaskName.trim()
         onUpdateTask(taskId, { name: trimmed || 'Untitled Task' })
         setEditingTaskId(null)
     }
@@ -95,7 +95,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
 
     const handleSaveReschedule = () => {
         if (!rescheduleTask) return
-        const start = parseLocalDate(rescheduleStart)
+        const start: Date = parseLocalDate(rescheduleStart)
         if (!start) return
         onUpdateTask(rescheduleTask.id, { date: toIsoDateString(start)! })
         setRescheduleTask(null)

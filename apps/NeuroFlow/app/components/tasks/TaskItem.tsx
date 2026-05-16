@@ -1,5 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { Animated, Modal, PanResponder, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native'
+import React, {RefObject, useEffect, useRef, useState} from 'react'
+import {
+    Animated, Modal, PanResponder,
+    PanResponderInstance, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View
+} from 'react-native'
 import { ArrowDown, ArrowUp, CheckCircle2, ChevronsDown, ChevronsUp, Circle, Clock, Edit3, FileText, Flag, ListChecks, MoreHorizontal, Plus, Timer, Trash2, X } from 'lucide-react-native'
 import { TaskItemProps } from "../../props/tasks/TaskItemProps"
 import {formatLocalDate, formatMinutes} from "../../utils/dateUtils";
@@ -11,6 +14,7 @@ import {TextField} from "../ui/TextField";
 import { IconButton } from "../ui/IconButton";
 import {getPriorityStyle} from "../../utils/priorityUtils";
 import {MenuItem} from "../ui/MenuItem";
+import Value = Animated.Value;
 
 export const TaskItem: React.FC<TaskItemProps> = ({
     task,
@@ -38,42 +42,42 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     onSaveNotes,
     onSaveSteps,
     onOpenEstimateModal,
-}) => {
-    const rangeLabel = task.date ? formatLocalDate(task.date) : null
-    const overdue = isOverdue(task)
-
+}: TaskItemProps) => {
     const [notesExpanded, setNotesExpanded] = useState(false)
     const [localNotes, setLocalNotes] = useState(task.notes || '')
-    const [notesDirty, setNotesDirty] = useState(false)
-
-    const steps = task.steps ?? []
     const [stepsExpanded, setStepsExpanded] = useState(false)
     const [newStepText, setNewStepText] = useState('')
+    const [notesDirty, setNotesDirty] = useState(false)
+
+    const rangeLabel: string = task.date ? formatLocalDate(task.date) : null
+
+    const overdue: boolean = isOverdue(task)
+    const steps: Step[] = task.steps ?? []
 
     const handleToggleStep = (id: string) => {
-        onSaveSteps(steps.map(s => s.id === id ? { ...s, done: !s.done } : s))
+        onSaveSteps(steps.map((s: Step) => s.id === id ? { ...s, done: !s.done } : s))
     }
 
     const handleDeleteStep = (id: string) => {
-        onSaveSteps(steps.filter(s => s.id !== id))
+        onSaveSteps(steps.filter((s: Step) => s.id !== id))
     }
 
     const handleAddStep = () => {
-        const trimmed = newStepText.trim()
+        const trimmed: string = newStepText.trim()
         if (!trimmed) return
         const newStep: Step = { id: generateId(), text: trimmed, done: false }
         onSaveSteps([...steps, newStep])
         setNewStepText('')
     }
 
-    const doneCount = steps.filter(s => s.done).length
+    const doneCount: number = steps.filter((s: Step) => s.done).length
 
     useEffect(() => {
         setLocalNotes(task.notes || '')
         setNotesDirty(false)
     }, [task.notes])
 
-    const cardRef = useRef<View>(null)
+    const cardRef: RefObject<View> = useRef<View>(null)
     const [menuAnchor, setMenuAnchor] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
     const { width: screenWidth, height: screenHeight } = useWindowDimensions()
 
@@ -90,13 +94,13 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     }, [menuOpen])
 
     // Swipe-to-complete
-    const swipeAnim = useRef(new Animated.Value(0)).current
-    const menuOpenRef = useRef(menuOpen)
-    const isEditingRef = useRef(isEditing)
+    const swipeAnim: Value = useRef(new Animated.Value(0)).current
+    const menuOpenRef: RefObject<boolean> = useRef(menuOpen)
+    const isEditingRef: RefObject<boolean> = useRef(isEditing)
     useEffect(() => { menuOpenRef.current = menuOpen }, [menuOpen])
     useEffect(() => { isEditingRef.current = isEditing }, [isEditing])
 
-    const panResponder = useRef(
+    const panResponder: PanResponderInstance = useRef(
         PanResponder.create({
             onMoveShouldSetPanResponder: (_, { dx, dy }) =>
                 !menuOpenRef.current && !isEditingRef.current &&
