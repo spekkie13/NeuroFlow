@@ -42,7 +42,9 @@
           "color": "#2563eb",
           "sounds": []
         }
-      ]
+      ],
+      "expo-localization",
+      "expo-router"
     ]
   }
 }
