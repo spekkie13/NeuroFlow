@@ -8,7 +8,11 @@ import { settingsRoutes } from './routes/settings.js'
 
 const app = Fastify({ logger: true })
 
-await app.register(cors, { origin: '*' })
+await app.register(cors, {
+    origin: '*',
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+})
 await app.register(workspaceRoutes)
 await app.register(projectRoutes)
 await app.register(taskRoutes)
