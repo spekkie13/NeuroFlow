@@ -1,9 +1,9 @@
 import { FastifyInstance } from 'fastify'
 import { requireAuth } from "../middleware/auth.js"
-import {projectService} from "../services/projectService";
+import {projectService} from "../services/projectService.js";
 import {Project, Step, Task} from "../types/db.types";
-import {taskService} from "../services/taskService";
-import {stepService} from "../services/stepService";
+import {taskService} from "../services/taskService.js";
+import {stepService} from "../services/stepService.js";
 
 export async function projectRoutes(app: FastifyInstance) {
     app.get('/workspaces/:workspaceId/projects', { preHandler: requireAuth }, async (request, reply) => {
@@ -16,7 +16,7 @@ export async function projectRoutes(app: FastifyInstance) {
             projectList.map(async (project) => {
                 const taskList: Task[] = await taskService.getTasksByProject(userId, project.id);
 
-                const tasksWithSteps = await Promise.all(
+                const tasksWithSteps: Task[] = await Promise.all(
                     taskList.map(async (task) => {
                         const stepList: Step[] = await stepService.getStepsByTask(userId, task.id);
 
