@@ -70,6 +70,14 @@ export async function taskRoutes(app: FastifyInstance) {
         return reply.status(201).send()
     })
 
+    app.delete('/tasks/:id', { preHandler: requireAuth }, async (request, reply) => {
+        const { id } = request.params as { id: string }
+        const userId: string = request.user!.id
+
+        await taskService.softDeleteTask(userId, id)
+        return reply.status(204).send()
+    })
+
     app.post('/tasks/:taskId/steps', { preHandler: requireAuth }, async (request, reply) => {
         const { taskId } = request.params as { taskId: string }
         const { text } = request.body as { text: string }
