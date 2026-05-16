@@ -1,8 +1,6 @@
-/**
- * Generates a unique string ID.
- * Combines a base-36 timestamp with a random suffix to prevent collisions
- * when multiple IDs are created within the same millisecond.
- */
+import 'react-native-get-random-values'
+import { v4 as uuidv4 } from 'uuid'
+
 export function generateId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2)
+    return uuidv4()
 }

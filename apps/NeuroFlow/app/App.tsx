@@ -1,3 +1,4 @@
+import 'react-native-get-random-values'
 import React from 'react'
 import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import {AuthScreen} from "./components/auth/AuthScreen";
