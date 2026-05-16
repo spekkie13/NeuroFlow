@@ -1,6 +1,6 @@
-﻿import {workspaceRepository} from "../repositories/workspaceRepository";
+﻿import {workspaceRepository} from "../repositories/workspaceRepository.js";
 import {randomUUID} from "crypto";
-import {Workspace, WorkspaceInsert} from "../types/db.types";
+import {Workspace, WorkspaceInsert} from "../types/db.types.js";
 
 export class WorkspaceService {
     async selectWorkspace(userId: string): Promise<Workspace[]> {

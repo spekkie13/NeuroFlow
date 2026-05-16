@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify'
-import { requireAuth } from '../middleware/auth.js'
-import { workspaceService } from "../services/workspaceService";
-import { Workspace, WorkspaceInsert } from "../types/db.types";
+import { requireAuth } from "../middleware/auth.js"
+import { workspaceService } from "../services/workspaceService.js";
+import { Workspace, WorkspaceInsert } from "../types/db.types.js";
 
 export async function workspaceRoutes(app: FastifyInstance) {
     app.get('/workspaces', { preHandler: requireAuth }, async (request, reply) => {

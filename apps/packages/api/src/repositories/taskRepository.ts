@@ -1,6 +1,6 @@
-﻿import {Task, TaskInsert, TaskUpdate} from "../types/db.types";
-import { db } from '../db/index.js'
-import {tasks} from "../db/schema";
+﻿import {Task, TaskInsert, TaskUpdate} from "../types/db.types.js";
+import { db } from "../db/index.js"
+import {tasks} from "../db/schema.js";
 import {and, eq} from "drizzle-orm";
 
 export class TaskRepository {

@@ -1,7 +1,7 @@
-﻿import { db } from '../db/index.js'
-import {workspaces} from "../db/schema";
+﻿import { db } from "../db/index.js"
+import {workspaces} from "../db/schema.js";
 import {and, eq} from "drizzle-orm";
-import {Workspace, WorkspaceInsert} from "../types/db.types";
+import {Workspace, WorkspaceInsert} from "../types/db.types.js";
 
 export class WorkspaceRepository {
     async selectWorkspace(userId: string): Promise<Workspace[]> {

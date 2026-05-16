@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify'
-import { requireAuth } from '../middleware/auth.js'
-import {taskService} from "../services/taskService";
-import {Step, Task} from "../types/db.types";
-import {stepService} from "../services/stepService";
+import { requireAuth } from "../middleware/auth.js"
+import {taskService} from "../services/taskService.js";
+import {Step, Task} from "../types/db.types.js";
+import {stepService} from "../services/stepService.js";
 
 export async function taskRoutes(app: FastifyInstance) {
     app.get('/projects/:projectId/tasks', { preHandler: requireAuth }, async (request, reply) => {

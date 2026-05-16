@@ -1,5 +1,5 @@
-﻿import {Task} from "../types/db.types";
-import {taskRepository} from "../repositories/taskRepository";
+﻿import {Task} from "../types/db.types.js";
+import {taskRepository} from "../repositories/taskRepository.js";
 import {randomUUID} from "crypto";
 
 export class TaskService {

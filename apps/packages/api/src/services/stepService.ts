@@ -1,5 +1,5 @@
-﻿import {stepRepository} from "../repositories/stepRepository";
-import {Step} from "../types/db.types";
+﻿import {stepRepository} from "../repositories/stepRepository.js";
+import {Step} from "../types/db.types.js";
 import {randomUUID} from "crypto";
 
 export class StepService {

@@ -1,5 +1,5 @@
 ﻿import { InferSelectModel, InferInsertModel } from 'drizzle-orm'
-import {projects, steps, tasks, userSettings, workspaces} from "../db/schema";
+import {projects, steps, tasks, userSettings, workspaces} from "../db/schema.js";
 
 export type Workspace = InferSelectModel<typeof workspaces>
 export type Project = InferSelectModel<typeof projects>

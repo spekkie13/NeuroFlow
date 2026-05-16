@@ -1,5 +1,5 @@
-import {settingsRepository} from "../repositories/settingsRepository";
-import {UserSettings} from "../types/db.types";
+import {settingsRepository} from "../repositories/settingsRepository.js";
+import {UserSettings} from "../types/db.types.js";
 
 export class SettingsService {
     async fetchSettingsByUserId(userId: string): Promise<UserSettings[]> {

@@ -1,7 +1,7 @@
-import {userSettings} from "../db/schema";
-import { db } from '../db/index.js'
+import {userSettings} from "../db/schema.js";
+import { db } from "../db/index.js"
 import {eq} from "drizzle-orm";
-import {UserSettings} from "../types/db.types";
+import {UserSettings} from "../types/db.types.js";
 
 export class SettingsRepository {
     async fetchSettingsByUser(userId: string): Promise<UserSettings[]> {

@@ -1,7 +1,7 @@
-﻿import { db } from '../db/index.js'
-import {steps} from "../db/schema";
+﻿import { db } from "../db/index.js"
+import {steps} from "../db/schema.js";
 import {and, eq} from "drizzle-orm";
-import {Step, StepInsert, StepUpdate} from "../types/db.types";
+import {Step, StepInsert, StepUpdate} from "../types/db.types.js";
 
 export class StepRepository {
     async getStepsByTask(userId: string, taskId: string): Promise<Step[]> {

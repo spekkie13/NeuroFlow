@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify'
-import { requireAuth } from '../middleware/auth.js'
-import {settingsService} from "../services/settingsService";
-import {UserSettings} from "../types/db.types";
+import { requireAuth } from "../middleware/auth.js"
+import {settingsService} from "../services/settingsService.js";
+import {UserSettings} from "../types/db.types.js";
 
 export async function settingsRoutes(app: FastifyInstance) {
     app.get('/settings', { preHandler: requireAuth }, async (request, reply) => {

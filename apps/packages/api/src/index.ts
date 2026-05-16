@@ -1,10 +1,10 @@
 import 'dotenv/config'
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
-import { workspaceRoutes } from './routes/workspaces.js'
-import { projectRoutes } from './routes/projects.js'
-import { taskRoutes } from './routes/tasks.js'
-import { settingsRoutes } from './routes/settings.js'
+import { workspaceRoutes } from "./routes/workspaces.js"
+import { projectRoutes } from "./routes/projects.js"
+import { taskRoutes } from "./routes/tasks.js"
+import { settingsRoutes } from "./routes/settings.js"
 
 const app = Fastify({ logger: true })
 

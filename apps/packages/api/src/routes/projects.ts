@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify'
-import { requireAuth } from '../middleware/auth.js'
-import { db } from '../db/index.js'
-import { projects, tasks, steps } from '../db/schema.js'
+import { requireAuth } from "../middleware/auth.js"
+import { db } from "../db/index.js"
+import { projects, tasks, steps } from "../db/schema.js"
 import { eq } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
 
