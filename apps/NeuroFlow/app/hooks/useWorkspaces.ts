@@ -19,34 +19,68 @@ export function useWorkspaces(userId: string | null): UseAccountsResult {
     useEffect(() => {
         let mounted: boolean = true
         const init = async () => {
-            const loadedWorkspaces: Workspace[] = await loadWorkspaces()
+            const localWorkspaces: Workspace[] = await loadWorkspaces()
             const savedId: string = await getCurrentWorkspaceId()
             if (!mounted) return
 
-            setWorkspaces(loadedWorkspaces)
-            const validId: string =
-                savedId && loadedWorkspaces.some((a: Workspace) => a.id === savedId)
-                    ? savedId
-                    : loadedWorkspaces[0]?.id ?? null
+            if (localWorkspaces.length > 0) {
+                // Fast path: show local data immediately, sync in background
+                setWorkspaces(localWorkspaces)
+                const validId: string =
+                    savedId && localWorkspaces.some((a: Workspace) => a.id === savedId)
+                        ? savedId
+                        : localWorkspaces[0]?.id ?? null
+                if (validId) {
+                    setCurrentId(validId)
+                    await setCurrentWorkspaceId(validId)
+                }
+                setIsLoading(false)
 
+                if (userId) {
+                    syncWorkspaces().then(async (merged: Workspace[]) => {
+                        if (!mounted || !merged) return
+                        setWorkspaces(merged)
+                        if (!validId && merged.length > 0) {
+                            const firstId: string = merged[0].id
+                            setCurrentId(firstId)
+                            await setCurrentWorkspaceId(firstId)
+                        }
+                    })
+                }
+                return
+            }
+
+            // Slow path: local storage is empty — wait for sync before creating default
+            let workspacesToShow: Workspace[] = []
+            if (userId) {
+                const merged: Workspace[] | null = await syncWorkspaces()
+                if (!mounted) return
+                if (merged) workspacesToShow = merged
+            }
+
+            if (workspacesToShow.length === 0) {
+                const defaultWorkspace: Workspace = {
+                    id: generateId(),
+                    name: 'My Workspace',
+                    createdAt: new Date().toISOString(),
+                }
+                await saveAccounts([defaultWorkspace])
+                await setCurrentWorkspaceId(defaultWorkspace.id)
+                workspacesToShow = [defaultWorkspace]
+                if (userId) await pushWorkspace(defaultWorkspace)
+            }
+
+            if (!mounted) return
+            setWorkspaces(workspacesToShow)
+            const validId: string =
+                savedId && workspacesToShow.some((a: Workspace) => a.id === savedId)
+                    ? savedId
+                    : workspacesToShow[0]?.id ?? null
             if (validId) {
                 setCurrentId(validId)
                 await setCurrentWorkspaceId(validId)
             }
-
             setIsLoading(false)
-
-            if (userId) {
-                syncWorkspaces().then(async (merged: Workspace[]) => {
-                    if (!mounted || !merged) return
-                    setWorkspaces(merged)
-                    if (!validId && merged.length > 0) {
-                        const firstId: string = merged[0].id
-                        setCurrentId(firstId)
-                        await setCurrentWorkspaceId(firstId)
-                    }
-                })
-            }
         }
         init()
         return () => { mounted = false }
