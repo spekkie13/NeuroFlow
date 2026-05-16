@@ -19,12 +19,19 @@ export class StepService {
         return await stepRepository.createStep(newStep);
     }
 
-    async createSteps(userId: string, taskId: string, stepInput: { text: string }[] ): Promise<Step[]> {
+    async createSteps(userId: string, taskId: string,     stepInput: { id?: string; text: string; done?: boolean }[]): Promise<Step[]> {
         const createdSteps = []
 
         for (const step of stepInput) {
-            const newStep: Step = await this.createStep(userId, taskId, step.text);
-            createdSteps.push(newStep)
+            const newStep = {
+                id: step.id ?? randomUUID(),
+                userId,
+                taskId,
+                text: step.text,
+                done: step.done ?? false,
+            }
+            const created: Step = await stepRepository.createStep(newStep)
+            createdSteps.push(created)
         }
         return createdSteps;
     }

@@ -7,12 +7,13 @@ export class WorkspaceService {
         return await workspaceRepository.selectWorkspace(userId);
     }
 
-    async upsertWorkspace(userId: string, name: string, id?: string, dailyMinutes?: number): Promise<WorkspaceInsert> {
+    async upsertWorkspace(userId: string, name: string, id?: string, dailyMinutes?: number, updatedAt?: string): Promise<WorkspaceInsert> {
         const workspace = {
             id: id ?? randomUUID(),
             userId: userId,
             name,
             dailyMinutes: dailyMinutes ?? null,
+            updatedAt: updatedAt ? new Date(updatedAt) : new Date(),
         }
 
         await workspaceRepository.upsertWorkspace(workspace)

@@ -12,10 +12,10 @@ export async function workspaceRoutes(app: FastifyInstance) {
     })
 
     app.post('/workspaces', { preHandler: requireAuth }, async (request, reply) => {
-        const { id, name, dailyMinutes } = request.body as { id?: string; name: string; dailyMinutes?: number }
+        const { id, name, dailyMinutes, updatedAt } = request.body as { id?: string; name: string; dailyMinutes?: number, updatedAt?: string }
 
         const userId: string = request.user!.id
-        const workspace: WorkspaceInsert = await workspaceService.upsertWorkspace(userId, name, id, dailyMinutes);
+        const workspace: WorkspaceInsert = await workspaceService.upsertWorkspace(userId, name, id, dailyMinutes, updatedAt);
 
         return reply.status(201).send(workspace)
     })

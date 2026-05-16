@@ -26,17 +26,18 @@ export async function taskRoutes(app: FastifyInstance) {
         const { projectId } = request.params as { projectId: string }
         const userId: string = request.user!.id;
 
-        const { id, name, priority, date, notes, estimatedMinutes, steps: stepsInput } = request.body as {
+        const { id, name, priority, date, notes, estimatedMinutes, completed, steps: stepsInput } = request.body as {
             id?: string
             name: string
             priority?: 'high' | 'medium' | 'low'
             date?: string
             notes?: string
             estimatedMinutes?: number
+            completed?: boolean
             steps?: { text: string }[]
         }
 
-        const task: Task = await taskService.createTask(userId, projectId, name, date, notes, estimatedMinutes, priority, id)
+        const task: Task = await taskService.createTask(userId, projectId, name, date, notes, estimatedMinutes, completed, priority, id)
         let createdSteps: Step[] = []
         if (stepsInput?.length) {
             createdSteps = await stepService.createSteps(userId, task.id, stepsInput);

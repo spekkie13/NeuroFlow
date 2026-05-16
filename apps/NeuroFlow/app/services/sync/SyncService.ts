@@ -43,6 +43,7 @@ export async function pushWorkspace(workspace: Workspace): Promise<Workspace | n
             id: workspace.id,
             name: workspace.name,
             dailyMinutes: workspace.dailyMinutes ?? null,
+            updatedAt: workspace.updatedAt,
         });
     } catch (err) {
         console.error('[SyncService] pushWorkspace failed:', err)
@@ -57,6 +58,7 @@ export async function pushProject(workspaceId: string, project: Project): Promis
             name: project.name,
             color: project.color,
             reminderTime: project.reminderTime ?? null,
+            updatedAt: project.updatedAt,
         })
 
         await Promise.all(project.tasks.map((task: Task) =>

@@ -7,7 +7,7 @@ export class ProjectService {
         return await projectRepository.getProjectsForWorkspace(userId, workspaceId);
     }
 
-    async createProject(userId: string, id: string, workspaceId: string, name: string, color: string, reminderTime?: string) {
+    async createProject(userId: string, id: string, workspaceId: string, name: string, color: string, reminderTime?: string, updatedAt?: string) {
         const project = {
             id: id ?? randomUUID(),
             userId: userId,
@@ -15,6 +15,7 @@ export class ProjectService {
             name,
             color,
             reminderTime: reminderTime ?? null,
+            updatedAt: updatedAt ? new Date(updatedAt) : new Date()
         }
 
         return await projectRepository.createProject(project);

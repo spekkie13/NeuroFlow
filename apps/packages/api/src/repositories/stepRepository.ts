@@ -23,9 +23,8 @@ export class StepRepository {
                 target: steps.id,
                 set: { text: newStep.text, done: newStep.done }
             })
-            .returning();
-
-        return step;
+            .returning()
+        return step
     }
 
     async updateStep(step: StepUpdate): Promise<Step> {

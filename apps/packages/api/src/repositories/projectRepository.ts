@@ -23,7 +23,7 @@ export class ProjectRepository {
             .values(projectData)
             .onConflictDoUpdate({
                 target: projects.id,
-                set: { name: projectData.name, color: projectData.color, reminderTime: projectData.reminderTime, updatedAt: new Date() }
+                set: { name: projectData.name, color: projectData.color, reminderTime: projectData.reminderTime, updatedAt: projectData.updatedAt },
             })
             .returning()
 

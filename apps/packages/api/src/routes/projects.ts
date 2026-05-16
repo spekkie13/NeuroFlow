@@ -35,14 +35,15 @@ export async function projectRoutes(app: FastifyInstance) {
         const { workspaceId } = request.params as { workspaceId: string }
         const userId: string = request.user!.id;
 
-        const { id, name, color, reminderTime } = request.body as {
+        const { id, name, color, reminderTime, updatedAt } = request.body as {
             id: string
             name: string
             color: string
             reminderTime?: string
+            updatedAt?: string
         }
 
-        const project: Project = await projectService.createProject(userId, id, workspaceId, name, color, reminderTime);
+        const project: Project = await projectService.createProject(userId, id, workspaceId, name, color, reminderTime, updatedAt);
         return reply.status(201).send(project)
     })
 

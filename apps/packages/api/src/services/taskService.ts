@@ -7,13 +7,13 @@ export class TaskService {
         return await taskRepository.getTasksByProject(userId, projectId);
     }
 
-    async createTask(userId: string, projectId: string, name: string, date?: string, notes?: string, estimatedMinutes?: number,  priority?: 'high' | 'medium' | 'low', id?: string): Promise<Task> {
+    async createTask(userId: string, projectId: string, name: string, date?: string, notes?: string, estimatedMinutes?: number, completed?: boolean, priority?: 'high' | 'medium' | 'low', id?: string): Promise<Task> {
         const task = {
             id: id ?? randomUUID(),
             userId: userId,
             projectId,
             name,
-            completed: false,
+            completed: completed,
             priority: priority ?? 'medium',
             date: date ?? null,
             notes: notes ?? '',

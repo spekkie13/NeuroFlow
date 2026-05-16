@@ -21,7 +21,7 @@ export class WorkspaceRepository {
             .values(workspace)
             .onConflictDoUpdate({
                 target: workspaces.id,
-                set: { name: workspace.name, dailyMinutes: workspace.dailyMinutes, updatedAt: new Date() }
+                set: { name: workspace.name, dailyMinutes: workspace.dailyMinutes, updatedAt: workspace.updatedAt },
             })
             .returning()
         return result
