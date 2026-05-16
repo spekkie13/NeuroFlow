@@ -1,6 +1,6 @@
 ﻿import {Project, ProjectInsert, ProjectUpdate} from "../types/db.types";
 import {db} from "../db/index.js";
-import {projects} from "../db/schema";
+import {projects} from "../db/schema.js";
 import {and, eq, isNull} from "drizzle-orm";
 
 export class ProjectRepository {
