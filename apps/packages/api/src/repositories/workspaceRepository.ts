@@ -1,6 +1,6 @@
-﻿import { db } from "../db/index.js"
+import { db } from "../db/index.js"
 import {workspaces} from "../db/schema.js";
-import {and, eq, isNull} from "drizzle-orm";
+import {and, eq} from "drizzle-orm";
 import {Workspace, WorkspaceInsert} from "../types/db.types.js";
 
 export class WorkspaceRepository {
@@ -8,12 +8,7 @@ export class WorkspaceRepository {
         return await db
             .select()
             .from(workspaces)
-            .where(
-                and(
-                    eq(workspaces.userId, userId),
-                    isNull(workspaces.deletedAt)
-                )
-            )
+            .where(eq(workspaces.userId, userId))
     }
 
     async upsertWorkspace(workspace: WorkspaceInsert): Promise<Workspace> {

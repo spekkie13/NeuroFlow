@@ -40,7 +40,8 @@ export function useWorkspaces(userId: string | null): UseAccountsResult {
                     syncWorkspaces().then(async (merged: Workspace[]) => {
                         if (!mounted || !merged) return
                         setWorkspaces(merged)
-                        if (!validId && merged.length > 0) {
+                        const stillValid: boolean = merged.some((w: Workspace) => w.id === validId)
+                        if (!stillValid && merged.length > 0) {
                             const firstId: string = merged[0].id
                             setCurrentId(firstId)
                             await setCurrentWorkspaceId(firstId)

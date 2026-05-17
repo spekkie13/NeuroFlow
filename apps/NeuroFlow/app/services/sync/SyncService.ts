@@ -103,9 +103,7 @@ export async function deleteRemoteProject(projectId: string): Promise<boolean> {
 
 export async function deleteRemoteWorkspace(workspaceId: string): Promise<boolean> {
     try {
-        await apiClient.patch(`/workspaces/${workspaceId}`, {
-            deletedAt: new Date().toISOString(),
-        })
+        await apiClient.delete(`/workspaces/${workspaceId}`)
         return true
     } catch (err) {
         console.error('[SyncService] deleteRemoteWorkspace failed:', err)
@@ -141,15 +139,12 @@ export async function syncWorkspaces(): Promise<Workspace[] | null> {
 
         const local: Workspace[] = await loadWorkspaces()
         const localMap = new Map(local.map((w: Workspace) => [w.id, w]))
-        const remoteIds = new Set(remoteWorkspaces.map((w: ApiWorkspace) => w.id))
-        let merged: Workspace[] = [...local]
 
+        const merged: Workspace[] = []
         for (const row of remoteWorkspaces) {
-            if (row.deletedAt) {
-                merged = merged.filter(w => w.id !== row.id)
-                continue
-            }
+            if (row.deletedAt) continue
 
+            const existing: Workspace | undefined = localMap.get(row.id)
             const remote: Workspace = {
                 id: row.id,
                 name: row.name,
@@ -157,23 +152,13 @@ export async function syncWorkspaces(): Promise<Workspace[] | null> {
                 createdAt: row.createdAt,
                 updatedAt: row.updatedAt ?? undefined,
             }
-            const existing: Workspace = localMap.get(row.id)
-            if (!existing || (remote.updatedAt ?? '') > (existing.updatedAt ?? '')) {
-                const idx = merged.findIndex((w: Workspace) => w.id === row.id)
-                if (idx >= 0) merged[idx] = remote
-                else merged.push(remote)
-            }
-        }
-
-        for (const w of local) {
-            if (!remoteIds.has(w.id)) {
-                await pushWorkspace(w)
-            }
+            merged.push((!existing || (remote.updatedAt ?? '') > (existing.updatedAt ?? '')) ? remote : existing)
         }
 
         await saveAccounts(merged)
         return merged
-    } catch {
+    } catch (e) {
+        console.error('[SyncService] syncWorkspaces failed:', e)
         return null
     }
 }
