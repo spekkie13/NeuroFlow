@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Text, TouchableOpacity, View } from 'react-native'
+import { Modal, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 import { styles } from '../../styles/planner'
 import {ProjectPickerModalProps} from "../../props/planner/ProjectPickerModalProps";
 import {AppButton} from "../ui/AppButton";
@@ -18,7 +18,9 @@ export const ProjectPickerModal: React.FC<ProjectPickerModalProps> = ({
         animationType="fade"
         onRequestClose={onClose}
     >
+        <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
             <View style={styles.pickerCard}>
                 <Text style={styles.pickerTitle}>Select project</Text>
                 {projects.map((project: Project) => {
@@ -57,6 +59,8 @@ export const ProjectPickerModal: React.FC<ProjectPickerModalProps> = ({
                     style={{ marginTop: 8 }}
                 />
             </View>
+            </TouchableWithoutFeedback>
         </View>
+        </TouchableWithoutFeedback>
     </Modal>
 )

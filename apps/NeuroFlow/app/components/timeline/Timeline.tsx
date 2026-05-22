@@ -97,7 +97,7 @@ export const Timeline = ({
     }, [today])
 
     const selectableExistingTasks: Task[] = useMemo(
-        () => project.tasks.filter((task: Task) => !task.date || isOverdue(task)),
+        () => project.tasks.filter((task: Task) => (!task.date || isOverdue(task)) && !task.completed),
         [project.tasks],
     )
 
