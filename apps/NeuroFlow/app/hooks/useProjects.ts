@@ -9,7 +9,11 @@ import {
     withTaskMoved,
 } from '../services/domain/ProjectService'
 import { getNextProjectColor } from '../services/domain/ProjectColorService'
-import {Project, Task} from "../models";
+import {
+    cleanupOldInstances,
+    generateRoutineInstances,
+} from '../services/domain/RoutineService'
+import {Project, Task, Routine} from "../models";
 import {
     deleteRemoteProject,
     deleteRemoteTask,
@@ -37,7 +41,12 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
             setIsLoading(true)
             const loaded: Project[] = await loadProjectsForWorkspace(workspaceId)
             if (!mounted) return
-            setProjects(loaded)
+
+            const today = new Date()
+            const withInstances = generateRoutineInstances(cleanupOldInstances(loaded), today)
+            const didGenerate = withInstances.some((p, i) => p !== loaded[i])
+            if (didGenerate) await saveProjectsForWorkspace(workspaceId, withInstances)
+            setProjects(withInstances)
             setIsLoading(false)
 
             if (userId) {
@@ -45,7 +54,13 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
 
                 syncProjects(workspaceId).then((merged: Project[]) => {
                     if (!mounted || !merged) return
-                    setProjects(merged)
+                    const withSyncedInstances = generateRoutineInstances(
+                        cleanupOldInstances(merged),
+                        today,
+                    )
+                    const syncedDidGenerate = withSyncedInstances.some((p, i) => p !== merged[i])
+                    if (syncedDidGenerate) saveProjectsForWorkspace(workspaceId, withSyncedInstances)
+                    setProjects(withSyncedInstances)
                 })
             }
         }
@@ -192,6 +207,68 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
         }
     }
 
+    const addRoutine = async (projectId: string, routine: Routine) => {
+        const today = new Date()
+        const next: Project[] = projects.map((p: Project) => {
+            if (p.id !== projectId) return p
+            return { ...p, routines: [...(p.routines ?? []), routine], updatedAt: new Date().toISOString() }
+        })
+        const withInstances = generateRoutineInstances(next, today)
+        await persist(withInstances)
+        const updated: Project = withInstances.find((p: Project) => p.id === projectId)
+        if (userId && workspaceId && updated) {
+            const synced: Project | null = await pushProject(workspaceId, updated)
+            if (!synced)
+                setSyncError(`Routine "${routine.name}" couldn't be synced. It's saved on this device.`)
+            else
+                setSyncError(null)
+        }
+    }
+
+    const updateRoutine = async (projectId: string, routineId: string, updates: Partial<Routine>) => {
+        const today = new Date()
+        const next: Project[] = projects.map((p: Project) => {
+            if (p.id !== projectId) return p
+            return {
+                ...p,
+                routines: (p.routines ?? []).map(r =>
+                    r.id === routineId ? { ...r, ...updates, updatedAt: new Date().toISOString() } : r,
+                ),
+                updatedAt: new Date().toISOString(),
+            }
+        })
+        const withInstances = generateRoutineInstances(next, today)
+        await persist(withInstances)
+        const updated: Project = withInstances.find((p: Project) => p.id === projectId)
+        if (userId && workspaceId && updated) {
+            const synced: Project | null = await pushProject(workspaceId, updated)
+            if (!synced)
+                setSyncError(`Routine changes couldn't be synced. They're saved on this device.`)
+            else
+                setSyncError(null)
+        }
+    }
+
+    const deleteRoutine = async (projectId: string, routineId: string) => {
+        const next: Project[] = projects.map((p: Project) => {
+            if (p.id !== projectId) return p
+            return {
+                ...p,
+                routines: (p.routines ?? []).filter(r => r.id !== routineId),
+                updatedAt: new Date().toISOString(),
+            }
+        })
+        await persist(next)
+        const updated: Project = next.find((p: Project) => p.id === projectId)
+        if (userId && workspaceId && updated) {
+            const synced: Project | null = await pushProject(workspaceId, updated)
+            if (!synced)
+                setSyncError(`Routine couldn't be deleted from the server. It's removed on this device.`)
+            else
+                setSyncError(null)
+        }
+    }
+
     return {
         projects,
         isLoading,
@@ -203,5 +280,8 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
         updateTask,
         deleteTask,
         moveTask,
+        addRoutine,
+        updateRoutine,
+        deleteRoutine,
     }
 }

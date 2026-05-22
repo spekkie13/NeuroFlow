@@ -15,6 +15,7 @@ export interface Task {
     notes: string
     steps?: Step[]
     estimatedMinutes?: number
+    routineId?: string
     createdAt?: string
     updatedAt?: string
 }

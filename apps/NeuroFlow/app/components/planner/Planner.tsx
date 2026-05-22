@@ -47,6 +47,9 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }: PlannerProp
         updateTask,
         deleteTask,
         moveTask,
+        addRoutine,
+        updateRoutine,
+        deleteRoutine,
     } = useProjects(currentWorkspaceId, user.id)
 
     const currentWorkspace: Workspace | null = workspaces.find((w: Workspace) => w.id === currentWorkspaceId) ?? null
@@ -97,6 +100,9 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }: PlannerProp
                         onUpdateTask={updateTask}
                         onDeleteTask={deleteTask}
                         onMoveTask={moveTask}
+                        onAddRoutine={addRoutine}
+                        onUpdateRoutine={updateRoutine}
+                        onDeleteRoutine={deleteRoutine}
                     />
                 )
             case 'today':

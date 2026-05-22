@@ -3,7 +3,7 @@ import {
     Animated, Modal, PanResponder,
     PanResponderInstance, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View
 } from 'react-native'
-import { ArrowDown, ArrowUp, CheckCircle2, ChevronsDown, ChevronsUp, Circle, Clock, Edit3, FileText, Flag, ListChecks, MoreHorizontal, Plus, Timer, Trash2, X } from 'lucide-react-native'
+import { ArrowDown, ArrowUp, CheckCircle2, ChevronsDown, ChevronsUp, Circle, Clock, Edit3, FileText, Flag, ListChecks, MoreHorizontal, Plus, Repeat2, Timer, Trash2, X } from 'lucide-react-native'
 import { TaskItemProps } from "../../props/tasks/TaskItemProps"
 import {formatLocalDate, formatMinutes} from "../../utils/dateUtils";
 import { isOverdue } from "../../services/domain/TaskService";
@@ -192,6 +192,9 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                                             >
                                                 {task.name}
                                             </Text>
+                                            {task.routineId ? (
+                                                <Repeat2 size={12} color="#9ca3af" style={{ marginLeft: 4, marginTop: 2 }} />
+                                            ) : null}
                                         </View>
 
                                         <View style={styles.dateRow}>

@@ -18,7 +18,11 @@ create table if not exists public.projects (
   created_at timestamptz not null,
   updated_at timestamptz not null,
   reminder_time text,
+  routines jsonb not null default '[]'
 );
+
+-- Migration for existing databases:
+-- alter table public.projects add column if not exists routines jsonb not null default '[]';
 
 create table if not exists public.tasks (
   id text primary key,

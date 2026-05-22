@@ -1,5 +1,6 @@
 import { Workspace } from "../../models/Workspace"
 import { Project, Task } from "../../models"
+import {Routine} from "../../models/Routine"
 import {
     getGlobalReminderTime,
     getGlobalReminderUpdatedAt,
@@ -8,7 +9,7 @@ import {
 import { loadWorkspaces, saveAccounts } from "../storage/accountStorage"
 import { loadProjectsForWorkspace, saveProjectsForWorkspace } from "../storage/projectStorage"
 import {apiClient} from "../../lib/apiClient";
-import {ApiProject, ApiSettings, ApiStep, ApiTask, ApiWorkspace} from "../../models/syncService.types";
+import {ApiProject, ApiRoutine, ApiSettings, ApiStep, ApiTask, ApiWorkspace} from "../../models/syncService.types";
 
 function mapApiTask(t: ApiTask): Task {
     return {
@@ -20,8 +21,23 @@ function mapApiTask(t: ApiTask): Task {
         notes: t.notes,
         estimatedMinutes: t.estimatedMinutes ?? undefined,
         steps: t.steps.map((s: ApiStep) => ({ id: s.id, text: s.text, done: s.done })),
+        routineId: (t as any).routineId ?? undefined,
         createdAt: t.createdAt,
         updatedAt: t.updatedAt ?? undefined,
+    }
+}
+
+function mapApiRoutine(r: ApiRoutine): Routine {
+    return {
+        id: r.id,
+        name: r.name,
+        recurrence: r.recurrence,
+        priority: r.priority,
+        estimatedMinutes: r.estimatedMinutes ?? undefined,
+        notes: r.notes ?? undefined,
+        active: r.active,
+        createdAt: r.createdAt,
+        updatedAt: r.updatedAt,
     }
 }
 
@@ -32,6 +48,7 @@ function mapApiProject(p: ApiProject): Project {
         color: p.color,
         reminderTime: p.reminderTime ?? undefined,
         tasks: p.tasks.map(mapApiTask),
+        routines: (p.routines ?? []).map(mapApiRoutine),
         createdAt: p.createdAt,
         updatedAt: p.updatedAt ?? undefined,
     }
@@ -58,6 +75,7 @@ export async function pushProject(workspaceId: string, project: Project): Promis
             name: project.name,
             color: project.color,
             reminderTime: project.reminderTime ?? null,
+            routines: project.routines ?? [],
             updatedAt: project.updatedAt,
         })
 
@@ -71,6 +89,7 @@ export async function pushProject(workspaceId: string, project: Project): Promis
                 notes: task.notes,
                 estimatedMinutes: task.estimatedMinutes ?? null,
                 steps: task.steps ?? [],
+                routineId: task.routineId ?? null,
             })
         ))
 

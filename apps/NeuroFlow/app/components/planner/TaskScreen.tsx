@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Plus, ChevronDown, Pencil } from 'lucide-react-native'
 import { Project, Task } from '../../models'
+import { Routine } from '../../models/Routine'
 import { styles } from '../../styles/planner'
 import { AppButton } from '../ui/AppButton'
 import { TaskView } from '../tasks/TaskView'
@@ -23,6 +24,9 @@ interface TasksScreenProps {
     onUpdateTask: (projectId: string, taskId: string, updates: Partial<Task>) => Promise<void>
     onDeleteTask: (projectId: string, taskId: string) => Promise<void>
     onMoveTask: (projectId: string, taskId: string, direction: 'up' | 'down' | 'top' | 'bottom') => Promise<void>
+    onAddRoutine: (projectId: string, routine: Routine) => Promise<void>
+    onUpdateRoutine: (projectId: string, routineId: string, updates: Partial<Routine>) => Promise<void>
+    onDeleteRoutine: (projectId: string, routineId: string) => Promise<void>
 }
 
 export const TasksScreen: React.FC<TasksScreenProps> = ({
@@ -37,6 +41,9 @@ export const TasksScreen: React.FC<TasksScreenProps> = ({
                                                             onUpdateTask,
                                                             onDeleteTask,
                                                             onMoveTask,
+                                                            onAddRoutine,
+                                                            onUpdateRoutine,
+                                                            onDeleteRoutine,
                                                         }) => {
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
         projects[0]?.id ?? null
@@ -242,6 +249,9 @@ export const TasksScreen: React.FC<TasksScreenProps> = ({
                     onUpdateTask={(taskId, updates) => onUpdateTask(activeProject.id, taskId, updates)}
                     onDeleteTask={(taskId) => onDeleteTask(activeProject.id, taskId)}
                     onMoveTask={(taskId, direction) => onMoveTask(activeProject.id, taskId, direction)}
+                    onAddRoutine={(routine) => onAddRoutine(activeProject.id, routine)}
+                    onUpdateRoutine={(routineId, updates) => onUpdateRoutine(activeProject.id, routineId, updates)}
+                    onDeleteRoutine={(routineId) => onDeleteRoutine(activeProject.id, routineId)}
                 />
             </ScrollView>
 

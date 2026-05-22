@@ -30,6 +30,22 @@ export interface ApiTask {
     deletedAt: string | null
 }
 
+export interface ApiRoutine {
+    id: string
+    name: string
+    recurrence: {
+        frequency: 'daily' | 'weekly' | 'monthly'
+        daysOfWeek?: number[]
+        dayOfMonth?: number
+    }
+    priority: 'high' | 'medium' | 'low'
+    estimatedMinutes: number | null
+    notes: string | null
+    active: boolean
+    createdAt: string
+    updatedAt: string
+}
+
 export interface ApiProject {
     id: string
     workspaceId: string
@@ -37,6 +53,7 @@ export interface ApiProject {
     color: string
     reminderTime: string | null
     tasks: ApiTask[]
+    routines: ApiRoutine[]
     createdAt: string
     updatedAt: string | null
     deletedAt: string | null

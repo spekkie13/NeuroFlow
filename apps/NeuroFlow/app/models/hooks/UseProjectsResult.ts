@@ -1,5 +1,6 @@
 import {Project} from "../Project";
 import {Task} from "../Task";
+import {Routine} from "../Routine";
 import {TaskMoveDirection} from "../task/TaskMoveDirection";
 
 export interface UseProjectsResult {
@@ -21,4 +22,7 @@ export interface UseProjectsResult {
         taskId: string,
         direction: TaskMoveDirection,
     ) => Promise<void>
+    addRoutine: (projectId: string, routine: Routine) => Promise<void>
+    updateRoutine: (projectId: string, routineId: string, updates: Partial<Routine>) => Promise<void>
+    deleteRoutine: (projectId: string, routineId: string) => Promise<void>
 }

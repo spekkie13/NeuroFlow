@@ -3,9 +3,11 @@ import {Text, TouchableOpacity, View} from 'react-native'
 import { Plus, ChevronDown, ChevronUp } from 'lucide-react-native'
 import {TaskViewProps} from "../../props/tasks/TaskViewProps";
 import {createTask} from "../../services/domain/TaskService";
-import {Priority, Task} from "../../models";
+import {Priority, Task, Routine} from "../../models";
 import {formatLocalDate, parseLocalDate, toIsoDateString} from "../../utils/dateUtils";
 import {TaskItem} from "./TaskItem";
+import {RoutineItem} from "./RoutineItem";
+import {RoutineModal} from "./RoutineModal";
 import {styles} from "../../styles/taskView";
 import {TextField} from "../ui/TextField";
 import {AppButton} from "../ui/AppButton";
@@ -21,6 +23,9 @@ export const TaskView: React.FC<TaskViewProps> = ({
                                                       onUpdateTask,
                                                       onDeleteTask,
                                                       onMoveTask,
+                                                      onAddRoutine,
+                                                      onUpdateRoutine,
+                                                      onDeleteRoutine,
                                                   }: TaskViewProps) => {
     const [newTaskName, setNewTaskName] = useState('')
     const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
@@ -33,6 +38,12 @@ export const TaskView: React.FC<TaskViewProps> = ({
     const [rescheduleStart, setRescheduleStart] = useState('')
     const [openMenuTaskId, setOpenMenuTaskId] = useState<string | null>(null)
     const [estimateModalTask, setEstimateModalTask] = useState<Task | null>(null)
+
+    const [showRoutines, setShowRoutines] = useState(true)
+    const [routineModalOpen, setRoutineModalOpen] = useState(false)
+    const [editingRoutine, setEditingRoutine] = useState<Routine | null>(null)
+
+    const routines: Routine[] = project.routines ?? []
 
     const activeTasks: Task[] = useMemo(() => project.tasks.filter(t => !t.completed), [project.tasks])
     const completedTasks: Task[] = useMemo(() => project.tasks.filter(t => t.completed), [project.tasks])
@@ -236,6 +247,48 @@ export const TaskView: React.FC<TaskViewProps> = ({
                 </View>
             )}
 
+            {/* Routines section */}
+            <View style={routineStyles.section}>
+                <TouchableOpacity
+                    style={routineStyles.sectionHeader}
+                    onPress={() => setShowRoutines(v => !v)}
+                    activeOpacity={0.7}
+                >
+                    <Text style={routineStyles.sectionTitle}>Routines ({routines.length})</Text>
+                    <View style={routineStyles.sectionHeaderRight}>
+                        <TouchableOpacity
+                            onPress={() => { setEditingRoutine(null); setRoutineModalOpen(true) }}
+                            hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}
+                            style={routineStyles.addButton}
+                        >
+                            <Plus size={14} color="#2563eb"/>
+                        </TouchableOpacity>
+                        {showRoutines
+                            ? <ChevronUp size={14} color="#9ca3af"/>
+                            : <ChevronDown size={14} color="#9ca3af"/>
+                        }
+                    </View>
+                </TouchableOpacity>
+
+                {showRoutines && (
+                    <View>
+                        {routines.length === 0 ? (
+                            <Text style={routineStyles.emptyText}>
+                                No routines yet. Tap + to add one.
+                            </Text>
+                        ) : routines.map(routine => (
+                            <RoutineItem
+                                key={routine.id}
+                                routine={routine}
+                                onToggleActive={(active) => onUpdateRoutine(routine.id, {active})}
+                                onEdit={() => { setEditingRoutine(routine); setRoutineModalOpen(true) }}
+                                onDelete={() => onDeleteRoutine(routine.id)}
+                            />
+                        ))}
+                    </View>
+                )}
+            </View>
+
             <PriorityModal
                 visible={!!priorityModalTask}
                 taskName={priorityModalTask?.name}
@@ -265,6 +318,58 @@ export const TaskView: React.FC<TaskViewProps> = ({
                 onSetEstimate={handleSetEstimate}
                 onClose={() => setEstimateModalTask(null)}
             />
+
+            <RoutineModal
+                visible={routineModalOpen}
+                routine={editingRoutine ?? undefined}
+                onSave={(routine) => {
+                    if (editingRoutine) {
+                        onUpdateRoutine(routine.id, routine)
+                    } else {
+                        onAddRoutine(routine)
+                    }
+                    setRoutineModalOpen(false)
+                    setEditingRoutine(null)
+                }}
+                onClose={() => { setRoutineModalOpen(false); setEditingRoutine(null) }}
+            />
         </View>
     )
 }
+
+import {StyleSheet} from 'react-native'
+const routineStyles = StyleSheet.create({
+    section: {
+        marginTop: 24,
+        paddingTop: 16,
+        borderTopWidth: 1,
+        borderTopColor: '#e5e7eb',
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    sectionHeaderRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+    addButton: {
+        padding: 2,
+    },
+    sectionTitle: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#9ca3af',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    emptyText: {
+        fontSize: 13,
+        color: '#9ca3af',
+        textAlign: 'center',
+        paddingVertical: 12,
+    },
+})
