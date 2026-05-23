@@ -1,6 +1,6 @@
-﻿import { db } from "../db/index.js"
+import { db } from "../db/index.js"
 import {steps} from "../db/schema.js";
-import {and, eq} from "drizzle-orm";
+import {and, eq, inArray} from "drizzle-orm";
 import {Step, StepInsert, StepUpdate} from "../types/db.types.js";
 
 export class StepRepository {
@@ -46,6 +46,23 @@ export class StepRepository {
                     eq(steps.id, stepId)
                 )
             )
+    }
+
+    async syncStepsForTask(userId: string, taskId: string, incoming: {id: string; text: string; done: boolean}[]): Promise<void> {
+        const existing = await db.select({ id: steps.id }).from(steps).where(eq(steps.taskId, taskId))
+
+        const incomingIds = new Set(incoming.map(s => s.id))
+        const toDelete = existing.map(e => e.id).filter(id => !incomingIds.has(id))
+
+        if (toDelete.length > 0) {
+            await db.delete(steps).where(inArray(steps.id, toDelete))
+        }
+
+        for (const step of incoming) {
+            await db.insert(steps)
+                .values({ id: step.id, userId, taskId, text: step.text, done: step.done })
+                .onConflictDoUpdate({ target: steps.id, set: { text: step.text, done: step.done } })
+        }
     }
 }
 

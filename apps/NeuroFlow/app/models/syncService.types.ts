@@ -24,6 +24,7 @@ export interface ApiTask {
     date: string | null
     notes: string
     estimatedMinutes: number | null
+    routineId: string | null
     steps: ApiStep[]
     createdAt: string
     updatedAt: string | null

@@ -227,6 +227,9 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
 
     const updateRoutine = async (projectId: string, routineId: string, updates: Partial<Routine>) => {
         const today = new Date()
+        const shouldReset = updates.active === false || updates.recurrence !== undefined
+        const removedInstanceIds: string[] = []
+
         const next: Project[] = projects.map((p: Project) => {
             if (p.id !== projectId) return p
 
@@ -236,9 +239,14 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
 
             // Remove pending instances when deactivating or when the schedule changes,
             // so the generator can recreate them with the correct dates.
-            const shouldReset = updates.active === false || updates.recurrence !== undefined
             const tasks = shouldReset
-                ? p.tasks.filter(t => !(t.routineId === routineId && !t.completed))
+                ? p.tasks.filter(t => {
+                    if (t.routineId === routineId && !t.completed) {
+                        removedInstanceIds.push(t.id)
+                        return false
+                    }
+                    return true
+                })
                 : p.tasks
 
             return { ...p, routines: updatedRoutines, tasks, updatedAt: new Date().toISOString() }
@@ -247,6 +255,9 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
         await persist(withInstances)
         const updated: Project = withInstances.find((p: Project) => p.id === projectId)
         if (userId && workspaceId && updated) {
+            // Explicitly delete removed instances from the server — pushProject is additive-only
+            // and will not remove tasks that are no longer in the local array.
+            await Promise.all(removedInstanceIds.map(id => deleteRemoteTask(id)))
             const synced: Project | null = await pushProject(workspaceId, updated)
             if (!synced)
                 setSyncError(`Routine changes couldn't be synced. They're saved on this device.`)

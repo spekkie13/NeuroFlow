@@ -1,4 +1,4 @@
-import { pgTable, text, boolean, integer, timestamp } from 'drizzle-orm/pg-core'
+import { pgTable, text, boolean, integer, timestamp, json } from 'drizzle-orm/pg-core'
 
 export const workspaces = pgTable('workspaces', {
     id: text('id').primaryKey(),
@@ -18,6 +18,7 @@ export const projects = pgTable('projects', {
     name: text('name').notNull(),
     color: text('color').notNull(),
     reminderTime: text('reminder_time'),
+    routines: json('routines').$type<any[]>(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow(),
     deletedAt: timestamp('deleted_at'),
@@ -33,6 +34,7 @@ export const tasks = pgTable('tasks', {
     date: text('date'),
     notes: text('notes').default('').notNull(),
     estimatedMinutes: integer('estimated_minutes'),
+    routineId: text('routine_id'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow(),
     deletedAt: timestamp('deleted_at'),

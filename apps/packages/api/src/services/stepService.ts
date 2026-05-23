@@ -1,4 +1,4 @@
-﻿import {stepRepository} from "../repositories/stepRepository.js";
+import {stepRepository} from "../repositories/stepRepository.js";
 import {Step} from "../types/db.types.js";
 import {randomUUID} from "crypto";
 
@@ -50,6 +50,10 @@ export class StepService {
 
     async deleteStep(userId: string, stepId: string): Promise<void> {
         await stepRepository.deleteStep(userId, stepId);
+    }
+
+    async syncStepsForTask(userId: string, taskId: string, incoming: {id: string; text: string; done: boolean}[]): Promise<void> {
+        await stepRepository.syncStepsForTask(userId, taskId, incoming)
     }
 }
 

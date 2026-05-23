@@ -21,8 +21,9 @@ create table if not exists public.projects (
   routines jsonb not null default '[]'
 );
 
--- Migration for existing databases:
+-- Migrations for existing databases:
 -- alter table public.projects add column if not exists routines jsonb not null default '[]';
+-- alter table public.tasks add column if not exists routine_id text;
 
 create table if not exists public.tasks (
   id text primary key,

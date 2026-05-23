@@ -1,4 +1,4 @@
-﻿import {projectRepository} from "../repositories/projectRepository.js";
+import {projectRepository} from "../repositories/projectRepository.js";
 import {Project} from "../types/db.types";
 import {randomUUID} from "crypto";
 
@@ -7,7 +7,7 @@ export class ProjectService {
         return await projectRepository.getProjectsForWorkspace(userId, workspaceId);
     }
 
-    async createProject(userId: string, id: string, workspaceId: string, name: string, color: string, reminderTime?: string, updatedAt?: string) {
+    async createProject(userId: string, id: string, workspaceId: string, name: string, color: string, reminderTime?: string, routines?: any[], updatedAt?: string) {
         const project = {
             id: id ?? randomUUID(),
             userId: userId,
@@ -15,6 +15,7 @@ export class ProjectService {
             name,
             color,
             reminderTime: reminderTime ?? null,
+            routines: routines ?? [],
             updatedAt: updatedAt ? new Date(updatedAt) : new Date()
         }
 

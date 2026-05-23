@@ -1,4 +1,4 @@
-﻿import {Project, ProjectInsert, ProjectUpdate} from "../types/db.types";
+import {Project, ProjectInsert, ProjectUpdate} from "../types/db.types";
 import {db} from "../db/index.js";
 import {projects} from "../db/schema.js";
 import {and, eq, isNull} from "drizzle-orm";
@@ -23,7 +23,7 @@ export class ProjectRepository {
             .values(projectData)
             .onConflictDoUpdate({
                 target: projects.id,
-                set: { name: projectData.name, color: projectData.color, reminderTime: projectData.reminderTime, updatedAt: projectData.updatedAt },
+                set: { name: projectData.name, color: projectData.color, reminderTime: projectData.reminderTime, routines: projectData.routines, updatedAt: projectData.updatedAt },
             })
             .returning()
 

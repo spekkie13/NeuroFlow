@@ -21,7 +21,7 @@ function mapApiTask(t: ApiTask): Task {
         notes: t.notes,
         estimatedMinutes: t.estimatedMinutes ?? undefined,
         steps: t.steps.map((s: ApiStep) => ({ id: s.id, text: s.text, done: s.done })),
-        routineId: (t as any).routineId ?? undefined,
+        routineId: t.routineId ?? undefined,
         createdAt: t.createdAt,
         updatedAt: t.updatedAt ?? undefined,
     }
@@ -77,10 +77,7 @@ export async function pushProject(workspaceId: string, project: Project): Promis
             reminderTime: project.reminderTime ?? null,
             routines: project.routines ?? [],
             updatedAt: project.updatedAt,
-        })
-
-        await Promise.all(project.tasks.map((task: Task) =>
-            apiClient.post(`/projects/${project.id}/tasks`, {
+            tasks: project.tasks.map((task: Task) => ({
                 id: task.id,
                 name: task.name,
                 completed: task.completed,
@@ -88,11 +85,10 @@ export async function pushProject(workspaceId: string, project: Project): Promis
                 date: task.date ?? null,
                 notes: task.notes,
                 estimatedMinutes: task.estimatedMinutes ?? null,
-                steps: task.steps ?? [],
                 routineId: task.routineId ?? null,
-            })
-        ))
-
+                steps: (task.steps ?? []).map(s => ({ id: s.id, text: s.text, done: s.done })),
+            })),
+        })
         return project
     } catch (err) {
         console.error('[SyncService] pushProject failed:', err)
