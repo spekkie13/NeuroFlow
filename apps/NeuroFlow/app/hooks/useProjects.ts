@@ -267,15 +267,25 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
     }
 
     const deleteRoutine = async (projectId: string, routineId: string) => {
+        const removedInstanceIds: string[] = []
         const next: Project[] = projects.map((p: Project) => {
             if (p.id !== projectId) return p
+            const tasks = p.tasks.filter(t => {
+                if (t.routineId === routineId) {
+                    removedInstanceIds.push(t.id)
+                    return false
+                }
+                return true
+            })
             return {
                 ...p,
                 routines: (p.routines ?? []).filter(r => r.id !== routineId),
+                tasks,
                 updatedAt: new Date().toISOString(),
             }
         })
         await persist(next)
+        await Promise.all(removedInstanceIds.map(id => deleteRemoteTask(id)))
         const updated: Project = next.find((p: Project) => p.id === projectId)
         if (userId && workspaceId && updated) {
             const synced: Project | null = await pushProject(workspaceId, updated)
