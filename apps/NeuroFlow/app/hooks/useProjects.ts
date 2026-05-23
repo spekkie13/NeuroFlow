@@ -229,13 +229,18 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
         const today = new Date()
         const next: Project[] = projects.map((p: Project) => {
             if (p.id !== projectId) return p
-            return {
-                ...p,
-                routines: (p.routines ?? []).map(r =>
-                    r.id === routineId ? { ...r, ...updates, updatedAt: new Date().toISOString() } : r,
-                ),
-                updatedAt: new Date().toISOString(),
-            }
+
+            const updatedRoutines = (p.routines ?? []).map(r =>
+                r.id === routineId ? { ...r, ...updates, updatedAt: new Date().toISOString() } : r,
+            )
+
+            // When deactivating, remove all pending (non-completed) instances for this routine
+            // so they immediately disappear from the timeline and today view.
+            const tasks = updates.active === false
+                ? p.tasks.filter(t => !(t.routineId === routineId && !t.completed))
+                : p.tasks
+
+            return { ...p, routines: updatedRoutines, tasks, updatedAt: new Date().toISOString() }
         })
         const withInstances = generateRoutineInstances(next, today)
         await persist(withInstances)

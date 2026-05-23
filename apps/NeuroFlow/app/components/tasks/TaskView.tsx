@@ -3,7 +3,7 @@ import {Text, TouchableOpacity, View} from 'react-native'
 import { Plus, ChevronDown, ChevronUp } from 'lucide-react-native'
 import {TaskViewProps} from "../../props/tasks/TaskViewProps";
 import {createTask} from "../../services/domain/TaskService";
-import {Priority, Task, Routine} from "../../models";
+import {Priority, Task, Routine, Step} from "../../models";
 import {formatLocalDate, parseLocalDate, toIsoDateString} from "../../utils/dateUtils";
 import {TaskItem} from "./TaskItem";
 import {RoutineItem} from "./RoutineItem";
@@ -45,8 +45,8 @@ export const TaskView: React.FC<TaskViewProps> = ({
 
     const routines: Routine[] = project.routines ?? []
 
-    const activeTasks: Task[] = useMemo(() => project.tasks.filter(t => !t.completed), [project.tasks])
-    const completedTasks: Task[] = useMemo(() => project.tasks.filter(t => t.completed), [project.tasks])
+    const activeTasks: Task[] = useMemo(() => project.tasks.filter((t: Task) => !t.completed && !t.routineId), [project.tasks])
+    const completedTasks: Task[] = useMemo(() => project.tasks.filter((t: Task) => t.completed), [project.tasks])
 
     const toggleMenu = (taskId: string) => {
         setOpenMenuTaskId((prev) => (prev === taskId ? null : taskId))
@@ -143,15 +143,15 @@ export const TaskView: React.FC<TaskViewProps> = ({
             onMoveToTop={() => { setOpenMenuTaskId(null); onMoveTask?.(task.id, 'top') }}
             onMoveToBottom={() => { setOpenMenuTaskId(null); onMoveTask?.(task.id, 'bottom') }}
             onDelete={() => { setOpenMenuTaskId(null); onDeleteTask(task.id) }}
-            onSaveNotes={(notes) => onUpdateTask(task.id, { notes })}
-            onSaveSteps={(steps) => onUpdateTask(task.id, { steps })}
+            onSaveNotes={(notes: string) => onUpdateTask(task.id, { notes })}
+            onSaveSteps={(steps: Step[]) => onUpdateTask(task.id, { steps })}
             onOpenEstimateModal={() => openEstimateModal(task)}
         />
     )
 
-    const displayActive = filterMode !== 'completed' ? activeTasks : []
-    const displayCompleted = filterMode !== 'active' ? completedTasks : []
-    const isEmpty = displayActive.length === 0 && displayCompleted.length === 0
+    const displayActive: Task[] = filterMode !== 'completed' ? activeTasks : []
+    const displayCompleted: Task[] = filterMode !== 'active' ? completedTasks : []
+    const isEmpty: boolean = displayActive.length === 0 && displayCompleted.length === 0
 
     return (
         <View style={styles.container}>
