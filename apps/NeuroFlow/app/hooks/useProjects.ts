@@ -234,9 +234,10 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
                 r.id === routineId ? { ...r, ...updates, updatedAt: new Date().toISOString() } : r,
             )
 
-            // When deactivating, remove all pending (non-completed) instances for this routine
-            // so they immediately disappear from the timeline and today view.
-            const tasks = updates.active === false
+            // Remove pending instances when deactivating or when the schedule changes,
+            // so the generator can recreate them with the correct dates.
+            const shouldReset = updates.active === false || updates.recurrence !== undefined
+            const tasks = shouldReset
                 ? p.tasks.filter(t => !(t.routineId === routineId && !t.completed))
                 : p.tasks
 
