@@ -1,24 +1,14 @@
 import React, {useEffect, useState} from 'react'
-import {Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View} from 'react-native'
+import {Modal, ScrollView, Text, TouchableOpacity, View} from 'react-native'
 import {X} from 'lucide-react-native'
-import {Priority} from "../../models"
-import {Routine, RecurrenceFrequency, RecurrenceRule} from "../../models/Routine"
+import { Priority, RecurrenceFrequency, RecurrenceRule } from "../../models"
 import {createRoutine} from "../../services/domain/RoutineService"
-import {TextField} from "../ui/TextField"
-import {AppButton} from "../ui/AppButton"
+import { AppButton, TextField } from "../ui"
+import {RoutineModalProps} from "../../props/tasks/RoutineModalProps";
+import {DAY_LABELS, ESTIMATE_PRESETS, MONTH_DAYS} from "../../constants/budgetConstants";
+import { routineModalStyles } from "../../styles/tasks/routineModal.styles"
 
-interface RoutineModalProps {
-    visible: boolean
-    routine?: Routine
-    onSave: (routine: Routine) => void
-    onClose: () => void
-}
-
-const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-const ESTIMATE_PRESETS = [5, 10, 15, 30, 45, 60]
-const MONTH_DAYS = Array.from({ length: 28 }, (_, i) => i + 1)
-
-export const RoutineModal: React.FC<RoutineModalProps> = ({visible, routine, onSave, onClose}) => {
+export const RoutineModal: React.FC<RoutineModalProps> = ({visible, routine, onSave, onClose}: RoutineModalProps) => {
     const [name, setName] = useState('')
     const [frequency, setFrequency] = useState<RecurrenceFrequency>('daily')
     const [daysOfWeek, setDaysOfWeek] = useState<number[]>([])
@@ -75,18 +65,17 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({visible, routine, onS
 
     return (
         <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-            <View style={styles.overlay}>
-                <View style={styles.card}>
-                    <View style={styles.headerRow}>
-                        <Text style={styles.title}>{routine ? 'Edit routine' : 'New routine'}</Text>
-                        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <View style={routineModalStyles.overlay}>
+                <View style={routineModalStyles.card}>
+                    <View style={routineModalStyles.headerRow}>
+                        <Text style={routineModalStyles.title}>{routine ? 'Edit routine' : 'New routine'}</Text>
+                        <TouchableOpacity onPress={onClose} style={routineModalStyles.closeButton}>
                             <X size={18} color="#6b7280"/>
                         </TouchableOpacity>
                     </View>
 
                     <ScrollView showsVerticalScrollIndicator={false}>
-                        {/* Name */}
-                        <Text style={styles.label}>Name</Text>
+                        <Text style={routineModalStyles.label}>Name</Text>
                         <TextField
                             value={name}
                             onChangeText={setName}
@@ -94,34 +83,32 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({visible, routine, onS
                             returnKeyType="done"
                         />
 
-                        {/* Frequency */}
-                        <Text style={styles.label}>Repeats</Text>
-                        <View style={styles.chipRow}>
+                        <Text style={routineModalStyles.label}>Repeats</Text>
+                        <View style={routineModalStyles.chipRow}>
                             {(['daily', 'weekly', 'monthly'] as RecurrenceFrequency[]).map(f => (
                                 <TouchableOpacity
                                     key={f}
-                                    style={[styles.chip, frequency === f && styles.chipActive]}
+                                    style={[routineModalStyles.chip, frequency === f && routineModalStyles.chipActive]}
                                     onPress={() => setFrequency(f)}
                                 >
-                                    <Text style={[styles.chipText, frequency === f && styles.chipTextActive]}>
+                                    <Text style={[routineModalStyles.chipText, frequency === f && routineModalStyles.chipTextActive]}>
                                         {f.charAt(0).toUpperCase() + f.slice(1)}
                                     </Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
 
-                        {/* Day-of-week picker */}
                         {frequency === 'weekly' && (
                             <>
-                                <Text style={styles.label}>On these days</Text>
-                                <View style={styles.dayRow}>
+                                <Text style={routineModalStyles.label}>On these days</Text>
+                                <View style={routineModalStyles.dayRow}>
                                     {DAY_LABELS.map((label, i) => (
                                         <TouchableOpacity
                                             key={i}
-                                            style={[styles.dayChip, daysOfWeek.includes(i) && styles.dayChipActive]}
+                                            style={[routineModalStyles.dayChip, daysOfWeek.includes(i) && routineModalStyles.dayChipActive]}
                                             onPress={() => toggleDay(i)}
                                         >
-                                            <Text style={[styles.dayChipText, daysOfWeek.includes(i) && styles.dayChipTextActive]}>
+                                            <Text style={[routineModalStyles.dayChipText, daysOfWeek.includes(i) && routineModalStyles.dayChipTextActive]}>
                                                 {label}
                                             </Text>
                                         </TouchableOpacity>
@@ -130,18 +117,17 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({visible, routine, onS
                             </>
                         )}
 
-                        {/* Day-of-month picker */}
                         {frequency === 'monthly' && (
                             <>
-                                <Text style={styles.label}>On day</Text>
-                                <View style={styles.monthDayGrid}>
+                                <Text style={routineModalStyles.label}>On day</Text>
+                                <View style={routineModalStyles.monthDayGrid}>
                                     {MONTH_DAYS.map(d => (
                                         <TouchableOpacity
                                             key={d}
-                                            style={[styles.monthDayChip, dayOfMonth === d && styles.dayChipActive]}
+                                            style={[routineModalStyles.monthDayChip, dayOfMonth === d && routineModalStyles.dayChipActive]}
                                             onPress={() => setDayOfMonth(d)}
                                         >
-                                            <Text style={[styles.monthDayText, dayOfMonth === d && styles.dayChipTextActive]}>
+                                            <Text style={[routineModalStyles.monthDayText, dayOfMonth === d && routineModalStyles.dayChipTextActive]}>
                                                 {d}
                                             </Text>
                                         </TouchableOpacity>
@@ -150,32 +136,30 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({visible, routine, onS
                             </>
                         )}
 
-                        {/* Priority */}
-                        <Text style={styles.label}>Priority</Text>
-                        <View style={styles.chipRow}>
+                        <Text style={routineModalStyles.label}>Priority</Text>
+                        <View style={routineModalStyles.chipRow}>
                             {(['high', 'medium', 'low'] as Priority[]).map(p => (
                                 <TouchableOpacity
                                     key={p}
-                                    style={[styles.chip, priority === p && styles.chipActive]}
+                                    style={[routineModalStyles.chip, priority === p && routineModalStyles.chipActive]}
                                     onPress={() => setPriority(p)}
                                 >
-                                    <Text style={[styles.chipText, priority === p && styles.chipTextActive]}>
+                                    <Text style={[routineModalStyles.chipText, priority === p && routineModalStyles.chipTextActive]}>
                                         {p.charAt(0).toUpperCase() + p.slice(1)}
                                     </Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
 
-                        {/* Estimate */}
-                        <Text style={styles.label}>Estimated time (optional)</Text>
-                        <View style={styles.chipRow}>
+                        <Text style={routineModalStyles.label}>Estimated time (optional)</Text>
+                        <View style={routineModalStyles.chipRow}>
                             {ESTIMATE_PRESETS.map(mins => (
                                 <TouchableOpacity
                                     key={mins}
-                                    style={[styles.chip, estimatedMinutes === mins && styles.chipActive]}
+                                    style={[routineModalStyles.chip, estimatedMinutes === mins && routineModalStyles.chipActive]}
                                     onPress={() => setEstimatedMinutes(prev => prev === mins ? undefined : mins)}
                                 >
-                                    <Text style={[styles.chipText, estimatedMinutes === mins && styles.chipTextActive]}>
+                                    <Text style={[routineModalStyles.chipText, estimatedMinutes === mins && routineModalStyles.chipTextActive]}>
                                         {mins < 60 ? `${mins}m` : `${mins / 60}h`}
                                     </Text>
                                 </TouchableOpacity>
@@ -203,114 +187,3 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({visible, routine, onS
         </Modal>
     )
 }
-
-const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: 'rgba(15, 23, 42, 0.5)',
-        justifyContent: 'flex-end',
-    },
-    card: {
-        backgroundColor: '#ffffff',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        padding: 20,
-        maxHeight: '90%',
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#111827',
-    },
-    closeButton: {
-        padding: 4,
-        borderRadius: 999,
-    },
-    label: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#6b7280',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
-        marginTop: 16,
-        marginBottom: 8,
-    },
-    chipRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 8,
-    },
-    chip: {
-        paddingHorizontal: 14,
-        paddingVertical: 7,
-        borderRadius: 999,
-        borderWidth: 1,
-        borderColor: '#e5e7eb',
-        backgroundColor: '#f9fafb',
-    },
-    chipActive: {
-        backgroundColor: '#eff6ff',
-        borderColor: '#2563eb',
-    },
-    chipText: {
-        fontSize: 13,
-        fontWeight: '500',
-        color: '#374151',
-    },
-    chipTextActive: {
-        color: '#2563eb',
-        fontWeight: '600',
-    },
-    dayRow: {
-        flexDirection: 'row',
-        gap: 6,
-    },
-    dayChip: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        borderWidth: 1,
-        borderColor: '#e5e7eb',
-        backgroundColor: '#f9fafb',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    dayChipActive: {
-        backgroundColor: '#eff6ff',
-        borderColor: '#2563eb',
-    },
-    dayChipText: {
-        fontSize: 13,
-        fontWeight: '600',
-        color: '#374151',
-    },
-    dayChipTextActive: {
-        color: '#2563eb',
-    },
-    monthDayGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 6,
-    },
-    monthDayChip: {
-        width: 36,
-        height: 36,
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: '#e5e7eb',
-        backgroundColor: '#f9fafb',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    monthDayText: {
-        fontSize: 12,
-        fontWeight: '500',
-        color: '#374151',
-    },
-})

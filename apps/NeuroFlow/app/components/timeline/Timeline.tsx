@@ -6,7 +6,7 @@ import { formatLocalDateRange, formatLocalDate, formatMinutes, parseLocalDate, t
 import {Priority, Task} from "../../models";
 import { TimelineProps } from "../../props/timeline/TimelineProps"
 import { isOverdue } from "../../services/domain/TaskService"
-import {styles} from "../../styles/timeline";
+import { timelineStyles } from "../../styles/timeline/timeline.styles";
 import {getPriorityStyle} from "../../utils/priorityUtils";
 import {ScheduleTaskModal} from "./ScheduleTaskModal";
 import {RescheduleModal} from "../tasks/RescheduleModal";
@@ -136,7 +136,7 @@ export const Timeline = ({
     }
 
     return (
-        <View style={styles.container}>
+        <View style={timelineStyles.container}>
             {/* Columns */}
             <WebView
                 style={{ position: 'relative', cursor: isGrabbing ? 'grabbing' : 'grab' }}
@@ -149,52 +149,52 @@ export const Timeline = ({
                 ref={scrollViewRef}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.columnsScroll}
+                contentContainerStyle={timelineStyles.columnsScroll}
                 onScroll={(e) => setIsScrolled(e.nativeEvent.contentOffset.x > 0)}
                 scrollEventThrottle={16}
             >
                 {/* #6 — overdue column */}
                 {overdueTasks.length > 0 && (
-                    <View style={[styles.column, styles.columnOverdue]}>
-                        <View style={[styles.columnHeader, styles.columnOverdueHeader]}>
-                            <Text style={styles.columnOverdueLabel}>Overdue</Text>
-                            <Text style={styles.columnOverdueCount}>
+                    <View style={[timelineStyles.column, timelineStyles.columnOverdue]}>
+                        <View style={[timelineStyles.columnHeader, timelineStyles.columnOverdueHeader]}>
+                            <Text style={timelineStyles.columnOverdueLabel}>Overdue</Text>
+                            <Text style={timelineStyles.columnOverdueCount}>
                                 {overdueTasks.length} task{overdueTasks.length !== 1 ? 's' : ''}
                             </Text>
                         </View>
-                        <View style={styles.columnBody}>
+                        <View style={timelineStyles.columnBody}>
                             {overdueTasks.map((task) => {
                                 const dateRange = formatLocalDateRange(task.date, task.date)
                                 return (
                                     <View
                                         key={task.id}
-                                        style={[styles.taskCard, { borderLeftColor: '#ef4444' }]}
+                                        style={[timelineStyles.taskCard, { borderLeftColor: '#ef4444' }]}
                                     >
-                                        <View style={styles.taskRow}>
+                                        <View style={timelineStyles.taskRow}>
                                             <TouchableOpacity
                                                 onPress={() => handleToggleComplete(task)}
-                                                style={styles.checkButton}
+                                                style={timelineStyles.checkButton}
                                                 activeOpacity={0.7}
                                                 delayPressIn={50}
                                             >
                                                 <Circle size={16} color="#9ca3af" />
                                             </TouchableOpacity>
                                             <TouchableOpacity
-                                                style={styles.taskContent}
+                                                style={timelineStyles.taskContent}
                                                 onPress={() => openReschedule(task)}
                                                 activeOpacity={0.7}
                                                 delayPressIn={50}
                                             >
-                                                <Text style={styles.taskName} numberOfLines={2}>
+                                                <Text style={timelineStyles.taskName} numberOfLines={2}>
                                                     {task.name}
                                                 </Text>
                                                 {dateRange && (
-                                                    <Text style={[styles.taskDates, styles.taskDatesOverdue]}>
+                                                    <Text style={[timelineStyles.taskDates, timelineStyles.taskDatesOverdue]}>
                                                         {dateRange}
                                                     </Text>
                                                 )}
-                                                <View style={[styles.priorityBadge, getPriorityStyle(task.priority, styles.priorityBadgeHigh, styles.priorityBadgeMedium, styles.priorityBadgeLow)]}>
-                                                    <Text style={styles.priorityBadgeText}>{task.priority}</Text>
+                                                <View style={[timelineStyles.priorityBadge, getPriorityStyle(task.priority, timelineStyles.priorityBadgeHigh, timelineStyles.priorityBadgeMedium, timelineStyles.priorityBadgeLow)]}>
+                                                    <Text style={timelineStyles.priorityBadgeText}>{task.priority}</Text>
                                                 </View>
                                             </TouchableOpacity>
                                         </View>
@@ -229,37 +229,37 @@ export const Timeline = ({
                         <View
                             key={index}
                             style={[
-                                styles.column,
-                                isSameDay(date, today) && styles.columnToday,
+                                timelineStyles.column,
+                                isSameDay(date, today) && timelineStyles.columnToday,
                             ]}
                         >
-                            <View style={styles.columnHeader}>
-                                <View style={styles.columnHeaderTopRow}>
-                                    <Text style={styles.columnWeekday}>{weekday}</Text>
+                            <View style={timelineStyles.columnHeader}>
+                                <View style={timelineStyles.columnHeaderTopRow}>
+                                    <Text style={timelineStyles.columnWeekday}>{weekday}</Text>
 
                                     {/* Always render to keep height consistent */}
                                     <Text
                                         style={[
-                                            styles.todayBadgeInline,
-                                            !isSameDay(date, today) && styles.todayBadgeHidden,
+                                            timelineStyles.todayBadgeInline,
+                                            !isSameDay(date, today) && timelineStyles.todayBadgeHidden,
                                         ]}
                                     >
                                         Today
                                     </Text>
                                 </View>
 
-                                <Text style={styles.columnDate}>{dayMonth}</Text>
+                                <Text style={timelineStyles.columnDate}>{dayMonth}</Text>
 
                                 {/* task count + completion progress */}
                                 {tasks.length > 0 && (
-                                    <View style={styles.columnStats}>
-                                        <View style={styles.progressTrack}>
-                                            <View style={[styles.progressFill, {
+                                    <View style={timelineStyles.columnStats}>
+                                        <View style={timelineStyles.progressTrack}>
+                                            <View style={[timelineStyles.progressFill, {
                                                 width: `${Math.round((completedCount / tasks.length) * 100)}%` as any,
                                                 backgroundColor: completedCount === tasks.length ? '#22c55e' : '#2563eb',
                                             }]} />
                                         </View>
-                                        <Text style={styles.progressText}>
+                                        <Text style={timelineStyles.progressText}>
                                             {completedCount}/{tasks.length}
                                         </Text>
                                     </View>
@@ -267,17 +267,16 @@ export const Timeline = ({
 
                                 {/* time estimate total */}
                                 {estimatedTotal > 0 && (
-                                    <Text style={[styles.timeEstimateText, { color: timeColor }]}>
+                                    <Text style={[timelineStyles.timeEstimateText, { color: timeColor }]}>
                                         ~{formatMinutes(estimatedTotal)}{dailyMinutes ? ` / ${formatMinutes(dailyMinutes)}` : ''}
                                     </Text>
                                 )}
                             </View>
 
-                            <View style={styles.columnBody}>
-                                {/* #3 — empty state */}
+                            <View style={timelineStyles.columnBody}>
                                 {tasks.length === 0 && (
-                                    <View style={styles.emptyColumn}>
-                                        <Text style={styles.emptyColumnText}>No tasks</Text>
+                                    <View style={timelineStyles.emptyColumn}>
+                                        <Text style={timelineStyles.emptyColumnText}>No tasks</Text>
                                     </View>
                                 )}
 
@@ -292,19 +291,19 @@ export const Timeline = ({
                                         <View
                                             key={task.id}
                                             style={[
-                                                styles.taskCard,
+                                                timelineStyles.taskCard,
                                                 {
                                                     borderLeftColor: task.completed
                                                         ? '#9ca3af'
                                                         : project.color,
                                                 },
-                                                task.completed && styles.taskCardCompleted,
+                                                task.completed && timelineStyles.taskCardCompleted,
                                             ]}
                                         >
-                                            <View style={styles.taskRow}>
+                                            <View style={timelineStyles.taskRow}>
                                                 <TouchableOpacity
                                                     onPress={() => handleToggleComplete(task)}
-                                                    style={styles.checkButton}
+                                                    style={timelineStyles.checkButton}
                                                     activeOpacity={0.7}
                                                     delayPressIn={50}
                                                 >
@@ -319,15 +318,15 @@ export const Timeline = ({
                                                 </TouchableOpacity>
 
                                                 <TouchableOpacity
-                                                    style={styles.taskContent}
+                                                    style={timelineStyles.taskContent}
                                                     onPress={() => openReschedule(task)}
                                                     activeOpacity={0.7}
                                                     delayPressIn={50}
                                                 >
                                                     <Text
                                                         style={[
-                                                            styles.taskName,
-                                                            task.completed && styles.taskNameCompleted,
+                                                            timelineStyles.taskName,
+                                                            task.completed && timelineStyles.taskNameCompleted,
                                                         ]}
                                                         numberOfLines={2}
                                                     >
@@ -337,8 +336,8 @@ export const Timeline = ({
                                                     {dateRange && (
                                                         <Text
                                                             style={[
-                                                                styles.taskDates,
-                                                                overdue && styles.taskDatesOverdue,
+                                                                timelineStyles.taskDates,
+                                                                overdue && timelineStyles.taskDatesOverdue,
                                                             ]}
                                                         >
                                                             {overdue ? 'Needs attention · ' : ''}
@@ -348,11 +347,11 @@ export const Timeline = ({
 
                                                     <View
                                                         style={[
-                                                            styles.priorityBadge,
-                                                            getPriorityStyle(task.priority, styles.priorityBadgeHigh, styles.priorityBadgeMedium, styles.priorityBadgeLow),
+                                                            timelineStyles.priorityBadge,
+                                                            getPriorityStyle(task.priority, timelineStyles.priorityBadgeHigh, timelineStyles.priorityBadgeMedium, timelineStyles.priorityBadgeLow),
                                                         ]}
                                                     >
-                                                        <Text style={styles.priorityBadgeText}>
+                                                        <Text style={timelineStyles.priorityBadgeText}>
                                                             {task.priority}
                                                         </Text>
                                                     </View>
@@ -363,7 +362,7 @@ export const Timeline = ({
                                 })}
 
                                 <TouchableOpacity
-                                    style={styles.addTaskButton}
+                                    style={timelineStyles.addTaskButton}
                                     onPress={() => openAddModalForDate(date)}
                                     activeOpacity={0.8}
                                     delayPressIn={50}
@@ -373,7 +372,7 @@ export const Timeline = ({
                                         color="#6b7280"
                                         style={{ marginRight: 4 }}
                                     />
-                                    <Text style={styles.addTaskText}>Add task</Text>
+                                    <Text style={timelineStyles.addTaskText}>Add task</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>

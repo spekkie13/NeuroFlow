@@ -8,9 +8,8 @@ import {formatLocalDate, parseLocalDate, toIsoDateString} from "../../utils/date
 import {TaskItem} from "./TaskItem";
 import {RoutineItem} from "./RoutineItem";
 import {RoutineModal} from "./RoutineModal";
-import {styles} from "../../styles/taskView";
-import {TextField} from "../ui/TextField";
-import {AppButton} from "../ui/AppButton";
+import {taskViewStyles} from "../../styles/tasks/taskView.styles";
+import { AppButton, TextField } from "../ui";
 import {PriorityModal} from "./PriorityModal";
 import {RescheduleModal} from "./RescheduleModal";
 import {EstimateModal} from "./EstimateModal";
@@ -154,23 +153,21 @@ export const TaskView: React.FC<TaskViewProps> = ({
     const isEmpty: boolean = displayActive.length === 0 && displayCompleted.length === 0
 
     return (
-        <View style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <Text style={[styles.projectName, { color: project.color }]}>{project.name}</Text>
-                <View style={styles.headerMetaRow}>
-                    <Text style={styles.headerMetaText}>
-                        <Text style={styles.headerMetaNumber}>{project.tasks.length}</Text> tasks
+        <View style={taskViewStyles.container}>
+            <View style={taskViewStyles.header}>
+                <Text style={[taskViewStyles.projectName, { color: project.color }]}>{project.name}</Text>
+                <View style={taskViewStyles.headerMetaRow}>
+                    <Text style={taskViewStyles.headerMetaText}>
+                        <Text style={taskViewStyles.headerMetaNumber}>{project.tasks.length}</Text> tasks
                     </Text>
-                    <Text style={styles.headerMetaDot}>•</Text>
-                    <Text style={styles.headerMetaText}>
-                        <Text style={styles.headerMetaNumber}>{completedTasks.length}</Text> completed
+                    <Text style={taskViewStyles.headerMetaDot}>•</Text>
+                    <Text style={taskViewStyles.headerMetaText}>
+                        <Text style={taskViewStyles.headerMetaNumber}>{completedTasks.length}</Text> completed
                     </Text>
                 </View>
             </View>
 
-            {/* Add task */}
-            <View style={styles.addRow}>
+            <View style={taskViewStyles.addRow}>
                 <View style={{ flex: 1 }}>
                     <TextField
                         value={newTaskName}
@@ -192,17 +189,16 @@ export const TaskView: React.FC<TaskViewProps> = ({
                 </View>
             </View>
 
-            {/* Filter bar */}
             {project.tasks.length > 0 && (
-                <View style={styles.filterBar}>
+                <View style={taskViewStyles.filterBar}>
                     {(['all', 'active', 'completed'] as FilterMode[]).map((mode) => (
                         <TouchableOpacity
                             key={mode}
-                            style={[styles.filterChip, filterMode === mode && styles.filterChipActive]}
+                            style={[taskViewStyles.filterChip, filterMode === mode && taskViewStyles.filterChipActive]}
                             onPress={() => setFilterMode(mode)}
                             activeOpacity={0.7}
                         >
-                            <Text style={[styles.filterChipText, filterMode === mode && styles.filterChipTextActive]}>
+                            <Text style={[taskViewStyles.filterChipText, filterMode === mode && taskViewStyles.filterChipTextActive]}>
                                 {mode === 'all' ? `All (${project.tasks.length})` : mode === 'active' ? `Active (${activeTasks.length})` : `Done (${completedTasks.length})`}
                             </Text>
                         </TouchableOpacity>
@@ -210,28 +206,27 @@ export const TaskView: React.FC<TaskViewProps> = ({
                 </View>
             )}
 
-            {/* Task list */}
             {project.tasks.length === 0 ? (
-                <View style={styles.emptyState}>
-                    <Text style={styles.emptyTitle}>No tasks yet</Text>
-                    <Text style={styles.emptySubtitle}>Add your first task to get started</Text>
+                <View style={taskViewStyles.emptyState}>
+                    <Text style={taskViewStyles.emptyTitle}>No tasks yet</Text>
+                    <Text style={taskViewStyles.emptySubtitle}>Add your first task to get started</Text>
                 </View>
             ) : isEmpty ? (
-                <View style={styles.emptyState}>
-                    <Text style={styles.emptyTitle}>No {filterMode} tasks</Text>
+                <View style={taskViewStyles.emptyState}>
+                    <Text style={taskViewStyles.emptyTitle}>No {filterMode} tasks</Text>
                 </View>
             ) : (
-                <View style={styles.list}>
+                <View style={taskViewStyles.list}>
                     {displayActive.map((task, i) => renderTaskItem(task, i, displayActive))}
 
                     {filterMode === 'all' && completedTasks.length > 0 && (
                         <>
                             <TouchableOpacity
-                                style={styles.completedSectionHeader}
+                                style={taskViewStyles.completedSectionHeader}
                                 onPress={() => setShowCompleted(v => !v)}
                                 activeOpacity={0.7}
                             >
-                                <Text style={styles.completedSectionTitle}>
+                                <Text style={taskViewStyles.completedSectionTitle}>
                                     Completed ({completedTasks.length})
                                 </Text>
                                 {showCompleted
@@ -247,19 +242,18 @@ export const TaskView: React.FC<TaskViewProps> = ({
                 </View>
             )}
 
-            {/* Routines section */}
-            <View style={routineStyles.section}>
+            <View style={taskViewStyles.section}>
                 <TouchableOpacity
-                    style={routineStyles.sectionHeader}
+                    style={taskViewStyles.sectionHeader}
                     onPress={() => setShowRoutines(v => !v)}
                     activeOpacity={0.7}
                 >
-                    <Text style={routineStyles.sectionTitle}>Routines ({routines.length})</Text>
-                    <View style={routineStyles.sectionHeaderRight}>
+                    <Text style={taskViewStyles.sectionTitle}>Routines ({routines.length})</Text>
+                    <View style={taskViewStyles.sectionHeaderRight}>
                         <TouchableOpacity
                             onPress={() => { setEditingRoutine(null); setRoutineModalOpen(true) }}
                             hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}
-                            style={routineStyles.addButton}
+                            style={taskViewStyles.addButton}
                         >
                             <Plus size={14} color="#2563eb"/>
                         </TouchableOpacity>
@@ -273,7 +267,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
                 {showRoutines && (
                     <View>
                         {routines.length === 0 ? (
-                            <Text style={routineStyles.emptyText}>
+                            <Text style={taskViewStyles.emptyText}>
                                 No routines yet. Tap + to add one.
                             </Text>
                         ) : routines.map(routine => (
@@ -336,40 +330,3 @@ export const TaskView: React.FC<TaskViewProps> = ({
         </View>
     )
 }
-
-import {StyleSheet} from 'react-native'
-const routineStyles = StyleSheet.create({
-    section: {
-        marginTop: 24,
-        paddingTop: 16,
-        borderTopWidth: 1,
-        borderTopColor: '#e5e7eb',
-    },
-    sectionHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    sectionHeaderRight: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10,
-    },
-    addButton: {
-        padding: 2,
-    },
-    sectionTitle: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#9ca3af',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
-    },
-    emptyText: {
-        fontSize: 13,
-        color: '#9ca3af',
-        textAlign: 'center',
-        paddingVertical: 12,
-    },
-})

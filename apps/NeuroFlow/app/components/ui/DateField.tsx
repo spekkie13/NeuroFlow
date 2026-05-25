@@ -2,9 +2,9 @@ import React, {useMemo, useState} from 'react'
 import { Platform, TouchableOpacity, View } from 'react-native'
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker'
 import { Calendar } from 'lucide-react-native'
-import { TextField } from './TextField'
 import { formatLocalDate, parseLocalDate } from '../../utils/dateUtils'
 import {DateFieldProps} from "../../props/ui/DateFieldProps";
+import {TextField} from "./TextField";
 
 export const DateField: React.FC<DateFieldProps> = ({
                                                         value,

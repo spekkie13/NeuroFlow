@@ -5,7 +5,7 @@ import { AppButton } from '../ui/AppButton'
 import { TextField } from '../ui/TextField'
 import { CreateProjectModalProps } from '../../props/planner/CreateProjectModalProps'
 import { PROJECT_COLOR_PALETTE } from '../../services/domain/ProjectColorService'
-import { styles } from '../../styles/planner'
+import { createProjectModalStyles } from '../../styles/planner/createProjectModal.styles'
 import {dateToHHMM, formatTime, timeToDate} from "../../utils/dateUtils";
 
 export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
@@ -53,13 +53,13 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
             animationType="fade"
             onRequestClose={onCancel}
         >
-            <View style={styles.modalOverlay}>
-                <View style={styles.modalCard}>
-                    <Text style={styles.modalTitle}>
+            <View style={createProjectModalStyles.modalOverlay}>
+                <View style={createProjectModalStyles.modalCard}>
+                    <Text style={createProjectModalStyles.modalTitle}>
                         {editMode ? 'Edit Project' : 'New Project'}
                     </Text>
                     {!editMode && (
-                        <Text style={styles.modalSubtitle}>
+                        <Text style={createProjectModalStyles.modalSubtitle}>
                             Group related tasks into a project to keep your planning focused.
                         </Text>
                     )}
@@ -74,15 +74,15 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                         onSubmitEditing={onCreate}
                     />
 
-                    <Text style={styles.colorPickerLabel}>Color</Text>
-                    <View style={styles.colorDotsRow}>
+                    <Text style={createProjectModalStyles.colorPickerLabel}>Color</Text>
+                    <View style={createProjectModalStyles.colorDotsRow}>
                         {PROJECT_COLOR_PALETTE.map((color) => (
                             <TouchableOpacity
                                 key={color}
                                 style={[
-                                    styles.colorDot,
+                                    createProjectModalStyles.colorDot,
                                     { backgroundColor: color },
-                                    selectedColor === color && styles.colorDotSelected,
+                                    selectedColor === color && createProjectModalStyles.colorDotSelected,
                                 ]}
                                 onPress={() => onSelectColor(color)}
                                 activeOpacity={0.8}
@@ -92,34 +92,34 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
                     {onSetReminderTime && (
                         <>
-                            <Text style={styles.reminderLabel}>Reminder</Text>
-                            <View style={styles.modalReminderRow}>
+                            <Text style={createProjectModalStyles.reminderLabel}>Reminder</Text>
+                            <View style={createProjectModalStyles.modalReminderRow}>
                                 <TouchableOpacity
-                                    style={[styles.reminderChip, isDefault && styles.reminderChipActive]}
+                                    style={[createProjectModalStyles.reminderChip, isDefault && createProjectModalStyles.reminderChipActive]}
                                     onPress={() => { onSetReminderTime(undefined); setShowTimePicker(false) }}
                                     activeOpacity={0.7}
                                 >
-                                    <Text style={[styles.reminderChipText, isDefault && styles.reminderChipTextActive]}>
+                                    <Text style={[createProjectModalStyles.reminderChipText, isDefault && createProjectModalStyles.reminderChipTextActive]}>
                                         {globalReminderTime
                                             ? `Default (${formatTime(globalReminderTime)})`
                                             : 'Default (none)'}
                                     </Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
-                                    style={[styles.reminderChip, isOff && styles.reminderChipDanger]}
+                                    style={[createProjectModalStyles.reminderChip, isOff && createProjectModalStyles.reminderChipDanger]}
                                     onPress={() => { onSetReminderTime(null); setShowTimePicker(false) }}
                                     activeOpacity={0.7}
                                 >
-                                    <Text style={[styles.reminderChipText, isOff && styles.reminderChipTextDanger]}>
+                                    <Text style={[createProjectModalStyles.reminderChipText, isOff && createProjectModalStyles.reminderChipTextDanger]}>
                                         Off
                                     </Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
-                                    style={[styles.reminderChip, !!customTime && styles.reminderChipActive]}
+                                    style={[createProjectModalStyles.reminderChip, !!customTime && createProjectModalStyles.reminderChipActive]}
                                     onPress={() => setShowTimePicker(true)}
                                     activeOpacity={0.7}
                                 >
-                                    <Text style={[styles.reminderChipText, !!customTime && styles.reminderChipTextActive]}>
+                                    <Text style={[createProjectModalStyles.reminderChipText, !!customTime && createProjectModalStyles.reminderChipTextActive]}>
                                         {customTime ? formatTime(customTime) : 'Custom time…'}
                                     </Text>
                                 </TouchableOpacity>
@@ -138,17 +138,17 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                             )}
                             {Platform.OS === 'ios' && showTimePicker && (
                                 <TouchableOpacity
-                                    style={styles.reminderDoneButton}
+                                    style={createProjectModalStyles.reminderDoneButton}
                                     onPress={() => setShowTimePicker(false)}
                                     activeOpacity={0.7}
                                 >
-                                    <Text style={styles.reminderDoneText}>Done</Text>
+                                    <Text style={createProjectModalStyles.reminderDoneText}>Done</Text>
                                 </TouchableOpacity>
                             )}
                         </>
                     )}
 
-                    <View style={styles.modalButtonsRow}>
+                    <View style={createProjectModalStyles.modalButtonsRow}>
                         <AppButton title="Cancel" variant="outline" onPress={onCancel} fullWidth />
                         <AppButton
                             title={editMode ? 'Save' : 'Create'}
@@ -161,11 +161,11 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
                     {editMode && onDelete && (
                         <TouchableOpacity
-                            style={styles.deleteProjectButton}
+                            style={createProjectModalStyles.deleteProjectButton}
                             onPress={handleDelete}
                             activeOpacity={0.7}
                         >
-                            <Text style={styles.deleteProjectButtonText}>Delete project</Text>
+                            <Text style={createProjectModalStyles.deleteProjectButtonText}>Delete project</Text>
                         </TouchableOpacity>
                     )}
                 </View>

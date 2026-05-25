@@ -1,6 +1,6 @@
 import React from 'react'
 import { Modal, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
-import { styles } from '../../styles/planner'
+import { projectPickerModalStyles } from '../../styles/planner/projectPickerModal.styles'
 import {ProjectPickerModalProps} from "../../props/planner/ProjectPickerModalProps";
 import {AppButton} from "../ui/AppButton";
 import {Project} from "../../models";
@@ -19,32 +19,32 @@ export const ProjectPickerModal: React.FC<ProjectPickerModalProps> = ({
         onRequestClose={onClose}
     >
         <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.modalOverlay}>
+        <View style={projectPickerModalStyles.modalOverlay}>
             <TouchableWithoutFeedback>
-            <View style={styles.pickerCard}>
-                <Text style={styles.pickerTitle}>Select project</Text>
+            <View style={projectPickerModalStyles.pickerCard}>
+                <Text style={projectPickerModalStyles.pickerTitle}>Select project</Text>
                 {projects.map((project: Project) => {
                     const isActive: boolean = project.id === activeProjectId
                     return (
                         <TouchableOpacity
                             key={project.id}
-                            style={[styles.pickerItem, isActive && styles.pickerItemActive]}
+                            style={[projectPickerModalStyles.pickerItem, isActive && projectPickerModalStyles.pickerItemActive]}
                             onPress={() => onSelectProject(project.id)}
                         >
                             <View
-                                style={[styles.projectDot, { backgroundColor: project.color }]}
+                                style={[projectPickerModalStyles.projectDot, { backgroundColor: project.color }]}
                             />
                             <View style={{ flex: 1 }}>
                                 <Text
                                     style={[
-                                        styles.pickerItemText,
-                                        isActive && styles.pickerItemTextActive,
+                                        projectPickerModalStyles.pickerItemText,
+                                        isActive && projectPickerModalStyles.pickerItemTextActive,
                                     ]}
                                     numberOfLines={1}
                                 >
                                     {project.name}
                                 </Text>
-                                <Text style={styles.pickerItemMeta}>
+                                <Text style={projectPickerModalStyles.pickerItemMeta}>
                                     {project.tasks.length} task{project.tasks.length !== 1 ? 's' : ''} · {project.tasks.filter(t => t.completed).length} done
                                 </Text>
                             </View>

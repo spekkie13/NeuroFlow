@@ -1,10 +1,10 @@
 import React from "react";
-import {Modal, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import {Modal, Text, TouchableOpacity, View} from "react-native";
 import {X} from "lucide-react-native";
 import {RescheduleModalProps} from "../../props/ui/RescheduleModalProps";
 import {getDateInputPlaceholder} from "../../utils/dateUtils";
-import {DateField} from "../ui/DateField";
-import {AppButton} from "../ui/AppButton";
+import {AppButton, DateField} from "../ui";
+import {rescheduleModalStyles} from "../../styles/tasks/rescheduleModal.styles";
 
 export const RescheduleModal: React.FC<RescheduleModalProps> = ({
                                                                     visible,
@@ -28,26 +28,26 @@ export const RescheduleModal: React.FC<RescheduleModalProps> = ({
             animationType="fade"
             onRequestClose={onCancel}
         >
-            <View style={styles.overlay}>
-                <View style={styles.card}>
-                    <View style={styles.headerRow}>
-                        <Text style={styles.title}>Reschedule task</Text>
+            <View style={rescheduleModalStyles.overlay}>
+                <View style={rescheduleModalStyles.card}>
+                    <View style={rescheduleModalStyles.headerRow}>
+                        <Text style={rescheduleModalStyles.title}>Reschedule task</Text>
                         <TouchableOpacity
                             onPress={onCancel}
-                            style={styles.closeButton}
+                            style={rescheduleModalStyles.closeButton}
                         >
                             <X size={18} color="#6b7280" />
                         </TouchableOpacity>
                     </View>
 
                     {taskName ? (
-                        <Text style={styles.subtitle} numberOfLines={2}>
+                        <Text style={rescheduleModalStyles.subtitle} numberOfLines={2}>
                             {taskName}
                         </Text>
                     ) : null}
 
-                    <View style={styles.fieldGroup}>
-                        <Text style={styles.label}>
+                    <View style={rescheduleModalStyles.fieldGroup}>
+                        <Text style={rescheduleModalStyles.label}>
                             New date ({placeholder})
                         </Text>
                         <DateField
@@ -57,7 +57,7 @@ export const RescheduleModal: React.FC<RescheduleModalProps> = ({
                         />
                     </View>
 
-                    <View style={styles.footerRow}>
+                    <View style={rescheduleModalStyles.footerRow}>
                         <AppButton
                             title="Cancel"
                             variant="outline"
@@ -85,56 +85,3 @@ export const RescheduleModal: React.FC<RescheduleModalProps> = ({
         </Modal>
     )
 }
-
-const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: 'rgba(15, 23, 42, 0.5)',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 16,
-    },
-    card: {
-        width: '100%',
-        maxWidth: 400,
-        borderRadius: 16,
-        backgroundColor: '#ffffff',
-        padding: 16,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#111827',
-    },
-    subtitle: {
-        fontSize: 12,
-        color: '#6b7280',
-        marginBottom: 12,
-    },
-    closeButton: {
-        padding: 4,
-        borderRadius: 999,
-    },
-    fieldGroup: {
-        marginTop: 8,
-        marginBottom: 4,
-    },
-    label: {
-        fontSize: 12,
-        fontWeight: '500',
-        color: '#374151',
-        marginBottom: 4,
-    },
-    footerRow: {
-        flexDirection: 'row',
-        justifyContent: 'center', // 🔥 centreert de groep
-        gap: 8,
-        marginTop: 12,
-    },
-})

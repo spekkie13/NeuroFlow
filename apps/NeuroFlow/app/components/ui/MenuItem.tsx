@@ -1,7 +1,7 @@
 import React from "react";
 import {Text, TouchableOpacity, View} from "react-native";
 import {MenuItemProps} from "../../props/ui/MenuItemProps";
-import {styles} from "../../styles/taskView";
+import {menuItemStyles} from "../../styles/tasks/menuItem.styles";
 
 export const MenuItem: React.FC<MenuItemProps> = ({
                              icon,
@@ -14,18 +14,18 @@ export const MenuItem: React.FC<MenuItemProps> = ({
         activeOpacity={0.85}
         onPress={disabled ? undefined : onPress}
         style={[
-            styles.inlineMenuItem,
-            danger && styles.inlineMenuItemDanger,
-            disabled && styles.inlineMenuItemDisabled,
+            menuItemStyles.inlineMenuItem,
+            danger && menuItemStyles.inlineMenuItemDanger,
+            disabled && menuItemStyles.inlineMenuItemDisabled,
         ]}
         accessibilityLabel={label}
     >
-        <View style={styles.inlineMenuIcon}>{icon}</View>
+        <View style={menuItemStyles.inlineMenuIcon}>{icon}</View>
         <Text
             style={[
-                styles.inlineMenuLabel,
-                danger && styles.inlineMenuLabelDanger,
-                disabled && styles.inlineMenuLabelDisabled,
+                menuItemStyles.inlineMenuLabel,
+                danger && menuItemStyles.inlineMenuLabelDanger,
+                disabled && menuItemStyles.inlineMenuLabelDisabled,
             ]}
             numberOfLines={1}
         >

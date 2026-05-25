@@ -96,4 +96,13 @@ export async function projectRoutes(app: FastifyInstance) {
 
         return reply.status(201).send()
     })
+
+    app.delete('/projects/:id', { preHandler: requireAuth }, async (request, reply) => {
+        const { id } = request.params as { id: string }
+        const userId: string = request.user!.id;
+
+        await projectService.softDeleteProject(userId, id);
+
+        return reply.status(201).send()
+    })
 }

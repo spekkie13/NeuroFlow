@@ -1,11 +1,11 @@
 import React from 'react'
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Modal, Text, TouchableOpacity, View } from 'react-native'
 import { X } from 'lucide-react-native'
 import {EstimateModalProps} from "../../props/ui/EstimateModalProps";
 import {formatMinutes} from "../../utils/dateUtils";
-import {AppButton} from "../ui/AppButton";
-
-const PRESETS = [15, 30, 45, 60, 90, 120, 180, 240]
+import {AppButton} from "../ui";
+import {PRESETS} from "../../constants/budgetConstants";
+import {estimateModalStyles} from "../../styles/tasks/estimateModal.styles";
 
 export const EstimateModal: React.FC<EstimateModalProps> = ({
     visible,
@@ -18,27 +18,27 @@ export const EstimateModal: React.FC<EstimateModalProps> = ({
 
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-            <View style={styles.overlay}>
-                <View style={styles.card}>
-                    <View style={styles.headerRow}>
-                        <Text style={styles.title}>Time estimate</Text>
-                        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <View style={estimateModalStyles.overlay}>
+                <View style={estimateModalStyles.card}>
+                    <View style={estimateModalStyles.headerRow}>
+                        <Text style={estimateModalStyles.title}>Time estimate</Text>
+                        <TouchableOpacity onPress={onClose} style={estimateModalStyles.closeButton}>
                             <X size={18} color="#6b7280" />
                         </TouchableOpacity>
                     </View>
 
                     {taskName ? (
-                        <Text style={styles.subtitle} numberOfLines={2}>{taskName}</Text>
+                        <Text style={estimateModalStyles.subtitle} numberOfLines={2}>{taskName}</Text>
                     ) : null}
 
-                    <View style={styles.presetGrid}>
+                    <View style={estimateModalStyles.presetGrid}>
                         {PRESETS.map((mins) => (
                             <TouchableOpacity
                                 key={mins}
-                                style={[styles.presetChip, currentMinutes === mins && styles.presetChipActive]}
+                                style={[estimateModalStyles.presetChip, currentMinutes === mins && estimateModalStyles.presetChipActive]}
                                 onPress={() => { onSetEstimate(mins); onClose() }}
                             >
-                                <Text style={[styles.presetLabel, currentMinutes === mins && styles.presetLabelActive]}>
+                                <Text style={[estimateModalStyles.presetLabel, currentMinutes === mins && estimateModalStyles.presetLabelActive]}>
                                     {formatMinutes(mins)}
                                 </Text>
                             </TouchableOpacity>
@@ -67,67 +67,3 @@ export const EstimateModal: React.FC<EstimateModalProps> = ({
         </Modal>
     )
 }
-
-const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: 'rgba(15, 23, 42, 0.5)',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 16,
-    },
-    card: {
-        width: '100%',
-        maxWidth: 360,
-        borderRadius: 16,
-        backgroundColor: '#ffffff',
-        padding: 16,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#111827',
-    },
-    subtitle: {
-        fontSize: 12,
-        color: '#6b7280',
-        marginBottom: 12,
-    },
-    closeButton: {
-        padding: 4,
-        borderRadius: 999,
-    },
-    presetGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 8,
-        marginTop: 8,
-    },
-    presetChip: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 999,
-        borderWidth: 1,
-        borderColor: '#e5e7eb',
-        backgroundColor: '#f9fafb',
-    },
-    presetChipActive: {
-        backgroundColor: '#eff6ff',
-        borderColor: '#2563eb',
-    },
-    presetLabel: {
-        fontSize: 13,
-        fontWeight: '500',
-        color: '#374151',
-    },
-    presetLabelActive: {
-        color: '#2563eb',
-        fontWeight: '600',
-    },
-})

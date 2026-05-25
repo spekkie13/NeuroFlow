@@ -8,16 +8,8 @@ import {styles} from "../../styles/settingsStyles";
 import {TextField} from "../ui/TextField";
 import {AppButton} from "../ui/AppButton";
 import {IconButton} from "../ui/IconButton";
-
-const BUDGET_PRESETS: { label: string; minutes: number | null }[] = [
-    { label: 'No limit', minutes: null },
-    { label: '1h', minutes: 60 },
-    { label: '2h', minutes: 120 },
-    { label: '3h', minutes: 180 },
-    { label: '4h', minutes: 240 },
-    { label: '6h', minutes: 360 },
-    { label: '8h', minutes: 480 },
-]
+import {Workspace} from "../../models/Workspace";
+import {BUDGET_PRESETS} from "../../constants/budgetConstants";
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
                                                             user,
@@ -32,13 +24,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                                                             onSetGlobalReminder,
                                                             onSignOut,
                                                         } : SettingsViewProps) => {
-    const currentWorkspace = workspaces.find(w => w.id === currentWorkspaceId) ?? null
+    const currentWorkspace: Workspace = workspaces.find((w: Workspace) => w.id === currentWorkspaceId) ?? null
     const [isAdding, setIsAdding] = useState(false)
     const [newWorkspaceName, setNewWorkspaceName] = useState('')
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editName, setEditName] = useState('')
     const [showReminderPicker, setShowReminderPicker] = useState(false)
-    const reminderPickerDate = timeToDate(globalReminderTime ?? '09:00');
+    const reminderPickerDate: Date = timeToDate(globalReminderTime ?? '09:00');
 
     const handleAdd = () => {
         const trimmed = newWorkspaceName.trim()
@@ -67,14 +59,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
     return (
         <ScrollView style={styles.screen} contentContainerStyle={styles.screenContent}>
-            {/* SECTION HEADER */}
             <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Workspace Management</Text>
                 <Text style={styles.sectionSubtitle}>
                     Manage your workspaces and switch between them
                 </Text>
             </View>
-            {/* ACCOUNT CARD */}
             <View style={styles.profileCard}>
                 <View style={styles.profileRow}>
                     <View style={styles.profileLeft}>
@@ -104,7 +94,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     </TouchableOpacity>
                 </View>
             </View>
-            {/* ADD WORKSPACE */}
             <View style={styles.addCard}>
                 <View style={styles.addTitleRow}>
                     <Text style={styles.addTitle}>Add New Workspace</Text>
@@ -148,7 +137,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 )}
             </View>
 
-            {/* DAILY TIME BUDGET */}
             {currentWorkspace && (
                 <View style={styles.addCard}>
                     <View style={styles.addTitleRow}>
@@ -159,7 +147,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     </Text>
                     <View style={styles.budgetRow}>
                         {BUDGET_PRESETS.map(({ label, minutes }) => {
-                            const isActive = (currentWorkspace.dailyMinutes ?? null) === minutes
+                            const isActive: boolean = (currentWorkspace.dailyMinutes ?? null) === minutes
                             return (
                                 <TouchableOpacity
                                     key={label}
@@ -177,7 +165,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 </View>
             )}
 
-            {/* NOTIFICATION REMINDER */}
             <View style={styles.addCard}>
                 <View style={styles.addTitleRow}>
                     <Bell size={14} color="#111827" style={styles.addTitleIcon} />
@@ -231,7 +218,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 )}
             </View>
 
-            {/* WORKSPACES LIST */}
             <View style={styles.listCard}>
                 <View style={styles.listHeader}>
                     <Text style={styles.listHeaderTitle}>Your Workspaces</Text>
@@ -251,9 +237,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     </View>
                 ) : (
                     <View>
-                        {workspaces.map((workspace) => {
-                            const isActive = currentWorkspaceId === workspace.id
-                            const isEditing = editingId === workspace.id
+                        {workspaces.map((workspace: Workspace) => {
+                            const isActive: boolean = currentWorkspaceId === workspace.id
+                            const isEditing: boolean = editingId === workspace.id
 
                             return (
                                 <View
@@ -263,7 +249,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                                         isActive && styles.workspaceRowActive,
                                     ]}
                                 >
-                                    {/* Avatar */}
                                     <View
                                         style={[
                                             styles.workspaceAvatar,
@@ -279,7 +264,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                                         />
                                     </View>
 
-                                    {/* Text / Edit */}
                                     <View style={styles.workspaceTextContainer}>
                                         {isEditing ? (
                                             <View style={styles.inlineEditRow}>
@@ -340,7 +324,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                                         )}
                                     </View>
 
-                                    {/* Actions */}
                                     {!isEditing && (
                                         <View style={styles.workspaceActions}>
                                             {!isActive && (

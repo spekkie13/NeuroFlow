@@ -1,15 +1,16 @@
 import React from 'react'
-import { ActivityIndicator, StyleSheet, View } from 'react-native'
+import { ActivityIndicator, View } from 'react-native'
 import {AuthScreen} from "./components/auth/AuthScreen";
 import Planner from "./components/planner/Planner";
 import {useAuth} from "./hooks/useAuth";
+import {appStyles} from "./styles/app.styles";
 
-const App: React.FC = () => {
+export const App: React.FC = () => {
     const { user, isLoading, error, signInWithGoogle, signIn, signUp, signOut, clearError } = useAuth()
 
     if (isLoading) {
         return (
-            <View style={styles.loading}>
+            <View style={appStyles.loading}>
                 <ActivityIndicator size="large" color="#2563eb" />
             </View>
         )
@@ -35,14 +36,3 @@ const App: React.FC = () => {
 
     return <Planner user={user} onSignOut={signOut} />
 }
-
-const styles = StyleSheet.create({
-    loading: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f9fafb',
-    },
-})
-
-export { App }

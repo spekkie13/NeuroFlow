@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Plus, ChevronDown, Pencil } from 'lucide-react-native'
-import { Project, Task } from '../../models'
-import { Routine } from '../../models/Routine'
-import { styles } from '../../styles/planner'
+import { Project, Task, Routine } from '../../models'
+import { taskScreenStyles } from '../../styles/planner/taskScreen.styles'
 import { AppButton } from '../ui/AppButton'
 import { TaskView } from '../tasks/TaskView'
 import { CreateProjectModal } from './CreateProjectModal'
@@ -121,9 +120,9 @@ export const TasksScreen: React.FC<TasksScreenProps> = ({
 
     if (!currentWorkspaceId) {
         return (
-            <View style={styles.center}>
-                <Text style={styles.emptyTitle}>No active workspace</Text>
-                <Text style={styles.emptySubtitle}>
+            <View style={taskScreenStyles.center}>
+                <Text style={taskScreenStyles.emptyTitle}>No active workspace</Text>
+                <Text style={taskScreenStyles.emptySubtitle}>
                     Go to the Account tab to create or select a workspace.
                 </Text>
             </View>
@@ -132,7 +131,7 @@ export const TasksScreen: React.FC<TasksScreenProps> = ({
 
     if (projectsLoading) {
         return (
-            <View style={styles.center}>
+            <View style={taskScreenStyles.center}>
                 <Text>Loading projects...</Text>
             </View>
         )
@@ -178,9 +177,9 @@ export const TasksScreen: React.FC<TasksScreenProps> = ({
 
     if (!projects.length || !activeProject) {
         return (
-            <View style={styles.center}>
-                <Text style={styles.emptyTitle}>No projects yet</Text>
-                <Text style={styles.emptySubtitle}>
+            <View style={taskScreenStyles.center}>
+                <Text style={taskScreenStyles.emptyTitle}>No projects yet</Text>
+                <Text style={taskScreenStyles.emptySubtitle}>
                     Create your first project to start organizing your tasks.
                 </Text>
                 <AppButton
@@ -197,10 +196,10 @@ export const TasksScreen: React.FC<TasksScreenProps> = ({
 
     return (
         <View style={{ flex: 1 }}>
-            <View style={styles.tasksHeader}>
+            <View style={taskScreenStyles.tasksHeader}>
                 <View style={{ flex: 1 }}>
-                    <Text style={styles.tasksHeaderTitle}>Tasks</Text>
-                    <Text style={styles.tasksHeaderSubtitle}>
+                    <Text style={taskScreenStyles.tasksHeaderTitle}>Tasks</Text>
+                    <Text style={taskScreenStyles.tasksHeaderSubtitle}>
                         Plan tasks inside the selected project.
                     </Text>
                 </View>
@@ -213,24 +212,24 @@ export const TasksScreen: React.FC<TasksScreenProps> = ({
                 />
             </View>
 
-            <View style={styles.projectDropdownWrapper}>
-                <Text style={styles.dropdownLabel}>Current project</Text>
-                <View style={styles.projectDropdownRow}>
+            <View style={taskScreenStyles.projectDropdownWrapper}>
+                <Text style={taskScreenStyles.dropdownLabel}>Current project</Text>
+                <View style={taskScreenStyles.projectDropdownRow}>
                     <TouchableOpacity
-                        style={[styles.dropdownButton, { flex: 1 }]}
+                        style={[taskScreenStyles.dropdownButton, { flex: 1 }]}
                         activeOpacity={0.8}
                         onPress={() => setIsProjectPickerVisible(true)}
                     >
-                        <View style={styles.dropdownLeft}>
-                            <View style={[styles.projectDot, { backgroundColor: activeProject.color }]} />
-                            <Text style={styles.dropdownText} numberOfLines={1}>
+                        <View style={taskScreenStyles.dropdownLeft}>
+                            <View style={[taskScreenStyles.projectDot, { backgroundColor: activeProject.color }]} />
+                            <Text style={taskScreenStyles.dropdownText} numberOfLines={1}>
                                 {activeProject.name}
                             </Text>
                         </View>
                         <ChevronDown size={16} color="#6b7280" />
                     </TouchableOpacity>
                     <TouchableOpacity
-                        style={styles.projectEditButton}
+                        style={taskScreenStyles.projectEditButton}
                         onPress={openEditProjectModal}
                         activeOpacity={0.7}
                     >
@@ -240,8 +239,8 @@ export const TasksScreen: React.FC<TasksScreenProps> = ({
             </View>
 
             <ScrollView
-                style={styles.tasksScroll}
-                contentContainerStyle={styles.tasksContent}
+                style={taskScreenStyles.tasksScroll}
+                contentContainerStyle={taskScreenStyles.tasksContent}
             >
                 <TaskView
                     project={activeProject}

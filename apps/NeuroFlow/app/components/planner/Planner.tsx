@@ -4,12 +4,8 @@ import {PlannerProps, PlannerView} from "../../props/planner/PlannerProps";
 import {useWorkspaces} from "../../hooks/useWorkspaces";
 import {useProjects} from "../../hooks/useProjects";
 import {useGlobalSettings} from "../../hooks/useGlobalSettings";
-import {
-    initNotificationHandler,
-    requestPermissions,
-    scheduleAllReminders
-} from "../../services/notifications/NotificationService";
-import {styles} from "../../styles/planner";
+import {initNotificationHandler, requestPermissions, scheduleAllReminders} from "../../services/notifications/NotificationService";
+import {plannerStyles} from "../../styles/planner/planner.styles";
 import {TodayView} from "../today/TodayView";
 import {SettingsView} from "../account/SettingsView";
 import {WorkspaceSwitcherBar} from "../workspace/WorkspaceSwitcherBar";
@@ -70,7 +66,7 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }: PlannerProp
 
     const handleSetGlobalReminder = async (time: string | null) => {
         if (time !== null) {
-            const granted = await requestPermissions()
+            const granted: boolean = await requestPermissions()
             if (!granted) { alertPermissionDenied(); return }
         }
         await setGlobalReminder(time)
@@ -79,7 +75,7 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }: PlannerProp
     const renderContent = () => {
         if (accountsLoading) {
             return (
-                <View style={styles.center}>
+                <View style={plannerStyles.center}>
                     <Text>Loading workspaces...</Text>
                 </View>
             )
@@ -143,7 +139,7 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }: PlannerProp
     }
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView style={plannerStyles.safeArea}>
             {currentWorkspace && (
                 <WorkspaceSwitcherBar
                     workspaceName={currentWorkspace.name}
@@ -154,7 +150,7 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }: PlannerProp
                 workspaceError={syncWorkspaceError}
                 projectError={syncProjectsError}
             />
-            <View style={styles.container}>{renderContent()}</View>
+            <View style={plannerStyles.container}>{renderContent()}</View>
             <BottomNav currentView={currentView} onViewChange={setCurrentView} />
             <WorkspaceSwitcherModal
                 visible={isWorkspaceSwitcherVisible}

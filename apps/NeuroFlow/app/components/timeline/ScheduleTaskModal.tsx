@@ -5,10 +5,8 @@ import { ScheduleTaskModalProps } from "../../props/ui/ScheduleTaskModalProps"
 import {Priority} from "../../models";
 import {formatLocalDate, getDateInputPlaceholder, parseLocalDate, toIsoDateString} from "../../utils/dateUtils";
 import {createTask} from "../../services/domain/TaskService";
-import { styles } from '../../styles/timeline'
-import {AppButton} from "../ui/AppButton";
-import {TextField} from "../ui/TextField";
-import {DateField} from "../ui/DateField";
+import { scheduleTaskModalStyles } from '../../styles/timeline/scheduleTaskModal.styles'
+import {AppButton, DateField, TextField} from "../ui";
 import {getPriorityStyle} from "../../utils/priorityUtils";
 
 type ModalTab = 'new' | 'existing'
@@ -69,38 +67,38 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
             animationType="fade"
             onRequestClose={onClose}
         >
-            <View style={styles.modalOverlay}>
-                <View style={styles.modalCard}>
-                    <View style={styles.modalHeaderRow}>
+            <View style={scheduleTaskModalStyles.modalOverlay}>
+                <View style={scheduleTaskModalStyles.modalCard}>
+                    <View style={scheduleTaskModalStyles.modalHeaderRow}>
                         <View>
-                            <Text style={styles.modalTitle}>Schedule Task</Text>
+                            <Text style={scheduleTaskModalStyles.modalTitle}>Schedule Task</Text>
                             {selectedDate && (
-                                <Text style={styles.modalSubtitle}>
+                                <Text style={scheduleTaskModalStyles.modalSubtitle}>
                                     {formatLocalDate(selectedDate)}
                                 </Text>
                             )}
                         </View>
-                        <TouchableOpacity onPress={onClose} style={styles.modalCloseButton}>
+                        <TouchableOpacity onPress={onClose} style={scheduleTaskModalStyles.modalCloseButton}>
                             <X size={18} color="#6b7280" />
                         </TouchableOpacity>
                     </View>
 
                     {/* Tabs */}
-                    <View style={styles.modalTabsRow}>
+                    <View style={scheduleTaskModalStyles.modalTabsRow}>
                         <TouchableOpacity
                             style={[
-                                styles.modalTab,
-                                modalTab === 'existing' && styles.modalTabActive,
+                                scheduleTaskModalStyles.modalTab,
+                                modalTab === 'existing' && scheduleTaskModalStyles.modalTabActive,
                             ]}
                             onPress={() => setModalTab('existing')}
                             activeOpacity={0.8}
                         >
-                            <View style={styles.modalTabInner}>
+                            <View style={scheduleTaskModalStyles.modalTabInner}>
                                 <List size={16} color="#2563eb" />
                                 <Text
                                     style={[
-                                        styles.modalTabText,
-                                        modalTab === 'existing' && styles.modalTabTextActive,
+                                        scheduleTaskModalStyles.modalTabText,
+                                        modalTab === 'existing' && scheduleTaskModalStyles.modalTabTextActive,
                                     ]}
                                 >
                                     Add Existing ({selectableExistingTasks.length})
@@ -109,18 +107,18 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[
-                                styles.modalTab,
-                                modalTab === 'new' && styles.modalTabActive,
+                                scheduleTaskModalStyles.modalTab,
+                                modalTab === 'new' && scheduleTaskModalStyles.modalTabActive,
                             ]}
                             onPress={() => setModalTab('new')}
                             activeOpacity={0.8}
                         >
-                            <View style={styles.modalTabInner}>
+                            <View style={scheduleTaskModalStyles.modalTabInner}>
                                 <Plus size={16} color="#2563eb" />
                                 <Text
                                     style={[
-                                        styles.modalTabText,
-                                        modalTab === 'new' && styles.modalTabTextActive,
+                                        scheduleTaskModalStyles.modalTabText,
+                                        modalTab === 'new' && scheduleTaskModalStyles.modalTabTextActive,
                                     ]}
                                 >
                                     Create New
@@ -129,11 +127,11 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
                         </TouchableOpacity>
                     </View>
 
-                    <ScrollView style={styles.modalBody}>
+                    <ScrollView style={scheduleTaskModalStyles.modalBody}>
                         {modalTab === 'new' ? (
                             <>
-                                <View style={styles.fieldGroup}>
-                                    <Text style={styles.fieldLabel}>Task Name</Text>
+                                <View style={scheduleTaskModalStyles.fieldGroup}>
+                                    <Text style={scheduleTaskModalStyles.fieldLabel}>Task Name</Text>
                                     <TextField
                                         value={newTaskName}
                                         onChangeText={setNewTaskName}
@@ -143,24 +141,24 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
                                     />
                                 </View>
 
-                                <View style={styles.fieldGroup}>
-                                    <Text style={styles.fieldLabel}>Priority</Text>
-                                    <View style={styles.priorityRow}>
+                                <View style={scheduleTaskModalStyles.fieldGroup}>
+                                    <Text style={scheduleTaskModalStyles.fieldLabel}>Priority</Text>
+                                    <View style={scheduleTaskModalStyles.priorityRow}>
                                         {(['low', 'medium', 'high'] as Priority[]).map((prio) => {
                                             const active = newTaskPriority === prio
                                             return (
                                                 <TouchableOpacity
                                                     key={prio}
                                                     style={[
-                                                        styles.priorityOption,
-                                                        active && styles.priorityOptionActive,
+                                                        scheduleTaskModalStyles.priorityOption,
+                                                        active && scheduleTaskModalStyles.priorityOptionActive,
                                                     ]}
                                                     onPress={() => setNewTaskPriority(prio)}
                                                 >
                                                     <Text
                                                         style={[
-                                                            styles.priorityOptionText,
-                                                            active && styles.priorityOptionTextActive,
+                                                            scheduleTaskModalStyles.priorityOptionText,
+                                                            active && scheduleTaskModalStyles.priorityOptionTextActive,
                                                         ]}
                                                     >
                                                         {prio}
@@ -171,8 +169,8 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
                                     </View>
                                 </View>
 
-                                <View style={styles.fieldGroup}>
-                                    <Text style={styles.fieldLabel}>Date ({placeholder})</Text>
+                                <View style={scheduleTaskModalStyles.fieldGroup}>
+                                    <Text style={scheduleTaskModalStyles.fieldLabel}>Date ({placeholder})</Text>
                                     <DateField
                                         value={taskDate}
                                         onChangeText={setTaskDate}
@@ -183,28 +181,28 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
                         ) : (
                             <>
                                 {selectableExistingTasks.length === 0 ? (
-                                    <View style={styles.emptyExistingBox}>
+                                    <View style={scheduleTaskModalStyles.emptyExistingBox}>
                                         <List size={40} color="#9ca3af" />
-                                        <Text style={styles.emptyExistingTitle}>
+                                        <Text style={scheduleTaskModalStyles.emptyExistingTitle}>
                                             No tasks need scheduling
                                         </Text>
-                                        <Text style={styles.emptyExistingSubtitle}>
+                                        <Text style={scheduleTaskModalStyles.emptyExistingSubtitle}>
                                             All tasks are scheduled and up to date
                                         </Text>
                                     </View>
                                 ) : (
                                     <>
-                                        <View style={styles.fieldGroup}>
-                                            <Text style={styles.fieldLabel}>Select Task</Text>
-                                            <View style={styles.existingList}>
+                                        <View style={scheduleTaskModalStyles.fieldGroup}>
+                                            <Text style={scheduleTaskModalStyles.fieldLabel}>Select Task</Text>
+                                            <View style={scheduleTaskModalStyles.existingList}>
                                                 {selectableExistingTasks.map((task) => {
                                                     const active = selectedExistingTaskId === task.id
                                                     return (
                                                         <TouchableOpacity
                                                             key={task.id}
                                                             style={[
-                                                                styles.existingItem,
-                                                                active && styles.existingItemActive,
+                                                                scheduleTaskModalStyles.existingItem,
+                                                                active && scheduleTaskModalStyles.existingItemActive,
                                                             ]}
                                                             onPress={() =>
                                                                 setSelectedExistingTaskId(task.id)
@@ -212,18 +210,18 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
                                                             activeOpacity={0.8}
                                                         >
                                                             <Text
-                                                                style={styles.existingItemName}
+                                                                style={scheduleTaskModalStyles.existingItemName}
                                                                 numberOfLines={1}
                                                             >
                                                                 {task.name}
                                                             </Text>
                                                             <View
                                                                 style={[
-                                                                    styles.priorityBadgeSmall,
-                                                                    getPriorityStyle(task.priority, styles.priorityBadgeHigh, styles.priorityBadgeMedium, styles.priorityBadgeLow),
+                                                                    scheduleTaskModalStyles.priorityBadgeSmall,
+                                                                    getPriorityStyle(task.priority, scheduleTaskModalStyles.priorityBadgeHigh, scheduleTaskModalStyles.priorityBadgeMedium, scheduleTaskModalStyles.priorityBadgeLow),
                                                                 ]}
                                                             >
-                                                                <Text style={styles.priorityBadgeText}>
+                                                                <Text style={scheduleTaskModalStyles.priorityBadgeText}>
                                                                     {task.priority}
                                                                 </Text>
                                                             </View>
@@ -233,8 +231,8 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
                                             </View>
                                         </View>
 
-                                        <View style={styles.fieldGroup}>
-                                            <Text style={styles.fieldLabel}>Date ({placeholder})</Text>
+                                        <View style={scheduleTaskModalStyles.fieldGroup}>
+                                            <Text style={scheduleTaskModalStyles.fieldLabel}>Date ({placeholder})</Text>
                                             <DateField
                                                 value={taskDate}
                                                 onChangeText={setTaskDate}
@@ -247,7 +245,7 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
                         )}
                     </ScrollView>
 
-                    <View style={styles.modalFooter}>
+                    <View style={scheduleTaskModalStyles.modalFooter}>
                         <AppButton title="Cancel" variant="outline" onPress={onClose} fullWidth />
                         {modalTab === 'new' ? (
                             <AppButton
