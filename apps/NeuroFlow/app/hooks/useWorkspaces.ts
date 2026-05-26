@@ -56,7 +56,15 @@ export function useWorkspaces(userId: string | null): UseAccountsResult {
             if (userId) {
                 const merged: Workspace[] | null = await syncWorkspaces()
                 if (!mounted) return
-                if (merged) workspacesToShow = merged
+                if (merged !== null) {
+                    workspacesToShow = merged
+                } else {
+                    // Sync failed — don't create a phantom default workspace for existing users.
+                    // Surface the error and bail; the user can retry by restarting the app.
+                    setSyncError('Could not reach the server. Check your connection and reopen the app.')
+                    setIsLoading(false)
+                    return
+                }
             }
 
             if (workspacesToShow.length === 0) {

@@ -215,7 +215,8 @@ export async function syncProjects(workspaceId: string): Promise<Project[] | nul
 
         await saveProjectsForWorkspace(workspaceId, merged)
         return merged
-    } catch {
+    } catch (e) {
+        console.error('[SyncService] syncProjects failed:', e)
         return null
     }
 }
