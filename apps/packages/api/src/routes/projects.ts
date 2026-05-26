@@ -15,6 +15,10 @@ export async function projectRoutes(app: FastifyInstance) {
 
         const result = await Promise.all(
             projectList.map(async (project) => {
+                if (project.deletedAt) {
+                    return { ...project, tasks: [] }
+                }
+
                 const taskList: Task[] = await taskService.getTasksByProject(userId, project.id);
 
                 const tasksWithSteps: Task[] = await Promise.all(
