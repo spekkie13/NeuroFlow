@@ -1,7 +1,7 @@
 import {Project, ProjectInsert, ProjectUpdate} from "../types/db.types";
 import {db} from "../db/index.js";
 import {projects} from "../db/schema.js";
-import {and, eq, isNull} from "drizzle-orm";
+import {and, eq} from "drizzle-orm";
 
 export class ProjectRepository {
     async getProjectsForWorkspace(userId: string, workspaceId: string): Promise<Project[]> {
@@ -12,7 +12,6 @@ export class ProjectRepository {
                 and(
                     eq(projects.userId, userId),
                     eq(projects.workspaceId, workspaceId),
-                    isNull(projects.deletedAt)
                 )
             )
     }
@@ -46,9 +45,10 @@ export class ProjectRepository {
     }
 
     async softDeleteProject(userId: string, id: string): Promise<void> {
+        const now = new Date()
         await db
             .update(projects)
-            .set({ deletedAt: new Date() })
+            .set({ deletedAt: now, updatedAt: now })
             .where(and(
                 eq(projects.userId, userId),
                 eq(projects.id, id),

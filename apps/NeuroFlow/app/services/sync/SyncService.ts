@@ -207,7 +207,7 @@ export async function syncProjects(workspaceId: string): Promise<Project[] | nul
                 await pushProject(workspaceId, p)
             } else {
                 const remoteRow: ApiProject = remoteProjects.find((r: ApiProject) => r.id === p.id)
-                if (remoteRow && (p.updatedAt ?? '') > (remoteRow.updatedAt ?? '')) {
+                if (remoteRow && !remoteRow.deletedAt && (p.updatedAt ?? '') > (remoteRow.updatedAt ?? '')) {
                     await pushProject(workspaceId, p)
                 }
             }
