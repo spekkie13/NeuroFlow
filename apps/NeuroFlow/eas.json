@@ -17,14 +17,20 @@
         "image": "latest"
       },
       "channel": "preview",
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://neuro-flow-api.vercel.app"
+      }
     },
     "production": {
       "autoIncrement": true,
       "android": {
         "image": "latest"
       },
-      "channel": "production"
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://neuro-flow-api.vercel.app"
+      }
     },
     "apk": {
       "distribution": "internal",
