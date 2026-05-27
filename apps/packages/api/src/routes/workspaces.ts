@@ -35,6 +35,6 @@ export async function workspaceRoutes(app: FastifyInstance) {
         const userId: string = request.user!.id
 
         await workspaceService.softDeleteWorkspace(userId, id)
-        return reply.status(201).send()
+        return reply.status(204).send()
     })
 }
