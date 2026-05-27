@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, Modal, Platform, Text, TouchableOpacity, View } from 'react-native'
+import { Modal, Platform, Text, TouchableOpacity, View } from 'react-native'
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker'
 import { AppButton } from '../ui/AppButton'
 import { TextField } from '../ui/TextField'
@@ -23,6 +23,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     onSetReminderTime,
 }: CreateProjectModalProps) => {
     const [showTimePicker, setShowTimePicker] = useState(false)
+    const [confirmingDelete, setConfirmingDelete] = useState(false)
 
     const pickerSeedTime: string = typeof reminderTime === 'string'
         ? reminderTime
@@ -36,15 +37,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     const customTime: string = typeof reminderTime === 'string' ? reminderTime : null
 
     const handleDelete = () => {
-        console.log('[CreateProjectModal] handleDelete triggered projectName=', projectName, 'onDelete=', typeof onDelete)
-        Alert.alert(
-            'Delete project',
-            `Delete "${projectName}"? This will permanently remove all tasks inside it.`,
-            [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Delete', style: 'destructive', onPress: () => { console.log('[CreateProjectModal] Alert confirmed, calling onDelete'); onDelete?.() } },
-            ],
-        )
+        setConfirmingDelete(true)
     }
 
     return (
@@ -53,6 +46,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
             transparent
             animationType="fade"
             onRequestClose={onCancel}
+            onDismiss={() => setConfirmingDelete(false)}
         >
             <View style={createProjectModalStyles.modalOverlay}>
                 <View style={createProjectModalStyles.modalCard}>
@@ -161,13 +155,37 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     </View>
 
                     {editMode && onDelete && (
-                        <TouchableOpacity
-                            style={createProjectModalStyles.deleteProjectButton}
-                            onPress={handleDelete}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={createProjectModalStyles.deleteProjectButtonText}>Delete project</Text>
-                        </TouchableOpacity>
+                        confirmingDelete ? (
+                            <View style={createProjectModalStyles.deleteConfirmRow}>
+                                <Text style={createProjectModalStyles.deleteConfirmText}>
+                                    Delete "{projectName}"? This removes all tasks inside it.
+                                </Text>
+                                <View style={createProjectModalStyles.deleteConfirmButtons}>
+                                    <AppButton
+                                        title="Cancel"
+                                        variant="outline"
+                                        size="sm"
+                                        onPress={() => setConfirmingDelete(false)}
+                                        fullWidth
+                                    />
+                                    <AppButton
+                                        title="Delete"
+                                        variant="danger"
+                                        size="sm"
+                                        onPress={onDelete}
+                                        fullWidth
+                                    />
+                                </View>
+                            </View>
+                        ) : (
+                            <TouchableOpacity
+                                style={createProjectModalStyles.deleteProjectButton}
+                                onPress={handleDelete}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={createProjectModalStyles.deleteProjectButtonText}>Delete project</Text>
+                            </TouchableOpacity>
+                        )
                     )}
                 </View>
             </View>

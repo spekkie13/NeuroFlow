@@ -121,4 +121,17 @@ export const createProjectModalStyles = StyleSheet.create({
         color: '#ef4444',
         fontWeight: '500',
     },
+    deleteConfirmRow: {
+        marginTop: 12,
+        gap: 8,
+    },
+    deleteConfirmText: {
+        fontSize: 13,
+        color: '#374151',
+        textAlign: 'center',
+    },
+    deleteConfirmButtons: {
+        flexDirection: 'row',
+        gap: 8,
+    },
 })
