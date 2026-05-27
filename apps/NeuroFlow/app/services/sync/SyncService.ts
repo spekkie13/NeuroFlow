@@ -107,11 +107,13 @@ export async function deleteRemoteTask(taskId: string): Promise<boolean> {
 }
 
 export async function deleteRemoteProject(projectId: string): Promise<boolean> {
+    console.log('[SyncService] deleteRemoteProject projectId=', projectId)
     try {
         await apiClient.delete(`/projects/${projectId}`);
+        console.log('[SyncService] deleteRemoteProject succeeded')
         return true;
     } catch (err) {
-        console.error('[SyncService] deleteRemoteProject failed:', err);
+        console.error('[SyncService] deleteRemoteProject failed:', err instanceof Error ? err.message : err);
         return false;
     }
 }

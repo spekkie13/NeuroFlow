@@ -85,7 +85,9 @@ export async function projectRoutes(app: FastifyInstance) {
         const { id } = request.params as { id: string }
         const userId: string = request.user!.id;
 
-        await projectService.softDeleteProject(userId, id);
+        console.log('[projects] DELETE /projects/:id id=', id, 'userId=', userId)
+        const affected = await projectService.softDeleteProject(userId, id);
+        console.log('[projects] softDeleteProject rowsAffected=', affected)
 
         return reply.status(204).send()
     })

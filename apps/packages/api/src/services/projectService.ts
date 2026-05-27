@@ -35,8 +35,8 @@ export class ProjectService {
         return await projectRepository.updateProject(userId, id, project);
     }
 
-    async softDeleteProject(userId: string, workspaceId: string): Promise<void> {
-        return await projectRepository.softDeleteProject(userId, workspaceId);
+    async softDeleteProject(userId: string, id: string): Promise<number> {
+        return await projectRepository.softDeleteProject(userId, id);
     }
 }
 
