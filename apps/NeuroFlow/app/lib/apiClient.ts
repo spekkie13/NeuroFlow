@@ -9,9 +9,6 @@ async function getToken(): Promise<string | null> {
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     const token: string = await getToken()
-    const method: string = options.method ?? 'GET'
-
-    console.log(`[apiClient] ${method} ${path} token=${token ? token.slice(0, 8) + '…' : 'none'}`)
 
     const isDelete: boolean = options.method === 'DELETE'
 
@@ -23,8 +20,6 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
             ...options.headers,
         },
     })
-
-    console.log(`[apiClient] ${method} ${path} → ${response.status} ok=${response.ok}`)
 
     // 204 No Content — don't try to parse the body
     if (response.status === 204) {

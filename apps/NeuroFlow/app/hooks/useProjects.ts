@@ -114,13 +114,10 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
 
     const deleteProject = async (projectId: string) => {
         const target: Project = projects.find((p: Project) => p.id === projectId)
-        console.log('[useProjects] deleteProject id=', projectId, 'name=', target?.name, 'userId=', userId, 'workspaceId=', workspaceId)
         const next: Project[] = projects.filter((p: Project) => p.id !== projectId)
         await persist(next)
-        console.log('[useProjects] persisted locally, remaining projects=', next.map(p => p.id))
         if (userId) {
             const deleted: boolean = await deleteRemoteProject(projectId)
-            console.log('[useProjects] deleteRemoteProject result=', deleted)
             if (!deleted)
                 setSyncError(`Project "${target?.name}" couldn't be deleted from the server. It's removed on this device.`)
             else

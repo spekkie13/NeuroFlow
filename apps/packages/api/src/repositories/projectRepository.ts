@@ -79,24 +79,18 @@ export class ProjectRepository {
             )
             .returning()
 
-        console.log('updated project', project)
-
         return project;
     }
 
-    async softDeleteProject(userId: string, id: string): Promise<number> {
-        console.log('[projectRepository] softDeleteProject userId=%s id=%s', userId, id)
+    async softDeleteProject(userId: string, id: string): Promise<void> {
         const now = new Date()
-        const rows = await db
+        await db
             .update(projects)
             .set({ deletedAt: now, updatedAt: now })
             .where(and(
                 eq(projects.userId, userId),
                 eq(projects.id, id),
             ))
-            .returning({ id: projects.id })
-        console.log('[projectRepository] softDeleteProject rowsAffected=%d', rows.length)
-        return rows.length
     }
 }
 
