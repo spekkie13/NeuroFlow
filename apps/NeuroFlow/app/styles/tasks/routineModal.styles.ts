@@ -109,4 +109,31 @@ export const routineModalStyles = StyleSheet.create({
         fontWeight: '500',
         color: '#374151',
     },
+    stepRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 6,
+    },
+    stepInput: {
+        flex: 1,
+        fontSize: 13,
+        color: '#111827',
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 7,
+        backgroundColor: '#f9fafb',
+    },
+    addStepButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        paddingVertical: 6,
+    },
+    addStepText: {
+        fontSize: 13,
+        color: '#6b7280',
+    },
 })

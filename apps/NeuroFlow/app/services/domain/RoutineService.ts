@@ -1,5 +1,5 @@
 import {Priority, Project, Task} from "../../models";
-import {Routine, RecurrenceRule} from "../../models/Routine";
+import {Routine, RecurrenceRule, RoutineStep} from "../../models/Routine";
 import {generateId} from "../../utils/idUtils";
 import {toIsoDateString} from "../../utils/dateUtils";
 
@@ -11,6 +11,7 @@ export function createRoutine(params: {
     priority?: Priority
     estimatedMinutes?: number
     notes?: string
+    steps?: RoutineStep[]
 }): Routine {
     return {
         id: generateId(),
@@ -19,6 +20,7 @@ export function createRoutine(params: {
         priority: params.priority ?? 'medium',
         estimatedMinutes: params.estimatedMinutes,
         notes: params.notes,
+        steps: params.steps,
         active: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -79,6 +81,7 @@ function createTaskFromRoutine(routine: Routine, dateStr: string): Task {
         date: dateStr,
         notes: routine.notes ?? '',
         estimatedMinutes: routine.estimatedMinutes,
+        steps: routine.steps?.map(s => ({ id: generateId(), text: s.text, done: false })),
         routineId: routine.id,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

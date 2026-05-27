@@ -1,12 +1,14 @@
-import React, {useEffect, useState} from 'react'
-import {Modal, ScrollView, Text, TouchableOpacity, View} from 'react-native'
-import {X} from 'lucide-react-native'
+import React, {useEffect, useRef, useState} from 'react'
+import {Modal, ScrollView, Text, TextInput, TouchableOpacity, View} from 'react-native'
+import {Plus, Trash2, X} from 'lucide-react-native'
 import { Priority, RecurrenceFrequency, RecurrenceRule } from "../../models"
+import {RoutineStep} from "../../models/Routine"
 import {createRoutine} from "../../services/domain/RoutineService"
 import { AppButton, TextField } from "../ui"
 import {RoutineModalProps} from "../../props/tasks/RoutineModalProps";
 import {DAY_LABELS, ESTIMATE_PRESETS, MONTH_DAYS} from "../../constants/budgetConstants";
 import { routineModalStyles } from "../../styles/tasks/routineModal.styles"
+import {generateId} from "../../utils/idUtils";
 
 export const RoutineModal: React.FC<RoutineModalProps> = ({visible, routine, onSave, onClose}: RoutineModalProps) => {
     const [name, setName] = useState('')
@@ -15,6 +17,8 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({visible, routine, onS
     const [dayOfMonth, setDayOfMonth] = useState(1)
     const [priority, setPriority] = useState<Priority>('medium')
     const [estimatedMinutes, setEstimatedMinutes] = useState<number | undefined>(undefined)
+    const [steps, setSteps] = useState<RoutineStep[]>([])
+    const newStepRef = useRef<TextInput>(null)
 
     useEffect(() => {
         if (visible) {
@@ -24,6 +28,7 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({visible, routine, onS
             setDayOfMonth(routine?.recurrence.dayOfMonth ?? 1)
             setPriority(routine?.priority ?? 'medium')
             setEstimatedMinutes(routine?.estimatedMinutes)
+            setSteps(routine?.steps ?? [])
         }
     }, [visible, routine])
 
@@ -41,6 +46,8 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({visible, routine, onS
         const trimmed = name.trim()
         if (!trimmed) return
 
+        const cleanSteps = steps.filter(s => s.text.trim().length > 0).map(s => ({ ...s, text: s.text.trim() }))
+
         if (routine) {
             onSave({
                 ...routine,
@@ -48,11 +55,25 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({visible, routine, onS
                 recurrence: buildRule(),
                 priority,
                 estimatedMinutes,
+                steps: cleanSteps.length > 0 ? cleanSteps : undefined,
                 updatedAt: new Date().toISOString(),
             })
         } else {
-            onSave(createRoutine({name: trimmed, recurrence: buildRule(), priority, estimatedMinutes}))
+            onSave(createRoutine({name: trimmed, recurrence: buildRule(), priority, estimatedMinutes, steps: cleanSteps.length > 0 ? cleanSteps : undefined}))
         }
+    }
+
+    const addStep = () => {
+        setSteps(prev => [...prev, { id: generateId(), text: '' }])
+        setTimeout(() => newStepRef.current?.focus(), 50)
+    }
+
+    const updateStep = (id: string, text: string) => {
+        setSteps(prev => prev.map(s => s.id === id ? { ...s, text } : s))
+    }
+
+    const removeStep = (id: string) => {
+        setSteps(prev => prev.filter(s => s.id !== id))
     }
 
     const toggleDay = (day: number) => {
@@ -165,6 +186,29 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({visible, routine, onS
                                 </TouchableOpacity>
                             ))}
                         </View>
+
+                        <Text style={routineModalStyles.label}>Steps (optional)</Text>
+                        {steps.map((step, index) => (
+                            <View key={step.id} style={routineModalStyles.stepRow}>
+                                <TextInput
+                                    ref={index === steps.length - 1 ? newStepRef : undefined}
+                                    style={routineModalStyles.stepInput}
+                                    value={step.text}
+                                    onChangeText={text => updateStep(step.id, text)}
+                                    placeholder={`Step ${index + 1}`}
+                                    placeholderTextColor="#9ca3af"
+                                    returnKeyType="next"
+                                    onSubmitEditing={addStep}
+                                />
+                                <TouchableOpacity onPress={() => removeStep(step.id)} hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
+                                    <Trash2 size={14} color="#9ca3af"/>
+                                </TouchableOpacity>
+                            </View>
+                        ))}
+                        <TouchableOpacity style={routineModalStyles.addStepButton} onPress={addStep}>
+                            <Plus size={13} color="#6b7280"/>
+                            <Text style={routineModalStyles.addStepText}>Add step</Text>
+                        </TouchableOpacity>
 
                         <AppButton
                             title={routine ? 'Save changes' : 'Create routine'}

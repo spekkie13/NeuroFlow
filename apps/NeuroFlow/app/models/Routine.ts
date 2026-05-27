@@ -8,6 +8,11 @@ export interface RecurrenceRule {
     dayOfMonth?: number    // 1–28; used when frequency='monthly'
 }
 
+export interface RoutineStep {
+    id: string
+    text: string
+}
+
 export interface Routine {
     id: string
     name: string
@@ -15,6 +20,7 @@ export interface Routine {
     priority: Priority
     estimatedMinutes?: number
     notes?: string
+    steps?: RoutineStep[]
     active: boolean
     createdAt: string
     updatedAt: string

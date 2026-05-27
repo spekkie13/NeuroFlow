@@ -16,7 +16,10 @@ export const RoutineItem: React.FC<RoutineItemProps> = ({routine, onToggleActive
                     <Text style={[routineItemStyles.name, !routine.active && routineItemStyles.nameInactive]} numberOfLines={1}>
                         {routine.name}
                     </Text>
-                    <Text style={routineItemStyles.label}>{getRecurrenceLabel(routine.recurrence)}</Text>
+                    <Text style={routineItemStyles.label}>
+                        {getRecurrenceLabel(routine.recurrence)}
+                        {(routine.steps?.length ?? 0) > 0 ? `  ·  ${routine.steps!.length} step${routine.steps!.length === 1 ? '' : 's'}` : ''}
+                    </Text>
                 </View>
                 <Switch
                     value={routine.active}
