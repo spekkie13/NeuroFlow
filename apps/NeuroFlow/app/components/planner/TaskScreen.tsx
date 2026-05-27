@@ -113,6 +113,7 @@ export const TasksScreen: React.FC<TasksScreenProps> = ({
     }
 
     const handleDeleteProject = async () => {
+        console.log('[TaskScreen] handleDeleteProject activeProject=', activeProject?.id ?? 'null')
         if (!activeProject) return
         await onDeleteProject(activeProject.id)
         setIsEditProjectModalVisible(false)

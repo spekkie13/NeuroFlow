@@ -36,12 +36,13 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     const customTime: string = typeof reminderTime === 'string' ? reminderTime : null
 
     const handleDelete = () => {
+        console.log('[CreateProjectModal] handleDelete triggered projectName=', projectName, 'onDelete=', typeof onDelete)
         Alert.alert(
             'Delete project',
             `Delete "${projectName}"? This will permanently remove all tasks inside it.`,
             [
                 { text: 'Cancel', style: 'cancel' },
-                { text: 'Delete', style: 'destructive', onPress: onDelete },
+                { text: 'Delete', style: 'destructive', onPress: () => { console.log('[CreateProjectModal] Alert confirmed, calling onDelete'); onDelete?.() } },
             ],
         )
     }
