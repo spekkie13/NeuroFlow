@@ -42,29 +42,23 @@ export const routineItemStyles = StyleSheet.create({
         marginLeft: 8,
         padding: 2,
     },
-    menu: {
-        borderTopWidth: 1,
-        borderTopColor: '#e5e7eb',
+    inlineMenu: {
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
         backgroundColor: '#ffffff',
+        padding: 6,
+        minWidth: 160,
+        shadowColor: '#000',
+        shadowOpacity: 0.08,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 6 },
     },
-    menuItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 14,
-        paddingVertical: 10,
-        gap: 8,
-    },
-    menuItemText: {
-        fontSize: 13,
-        fontWeight: '500',
-        color: '#374151',
-    },
-    menuItemDanger: {
-        color: '#ef4444',
-    },
-    menuDivider: {
+    inlineMenuDivider: {
         height: 1,
-        backgroundColor: '#f3f4f6',
-        marginHorizontal: 14,
+        backgroundColor: '#e5e7eb',
+        marginVertical: 6,
+        marginHorizontal: 6,
+        opacity: 0.7,
     },
 })

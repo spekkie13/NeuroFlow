@@ -26,12 +26,13 @@ import {TaskMoveDirection} from "../models/task/TaskMoveDirection";
 
 export function useProjects(workspaceId: string | null, userId: string | null): UseProjectsResult {
     const [projects, setProjects] = useState<Project[]>([])
-    const [isLoading, setIsLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
     const [syncError, setSyncError] = useState<string | null>(null)
 
     useEffect(() => {
         if (!workspaceId) {
             setProjects([])
+            setIsLoading(false)
             return
         }
 
@@ -47,12 +48,14 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
             const didGenerate = withInstances.some((p, i) => p !== loaded[i])
             if (didGenerate) await saveProjectsForWorkspace(workspaceId, withInstances)
             setProjects(withInstances)
-            setIsLoading(false)
+            const waitForSync = !!userId && withInstances.length === 0
+            if (!waitForSync) setIsLoading(false)
 
             if (userId) {
                 await syncWorkspaces()
 
                 syncProjects(workspaceId).then((merged: Project[]) => {
+                    if (waitForSync && mounted) setIsLoading(false)
                     if (!mounted || !merged) return
                     const withSyncedInstances = generateRoutineInstances(
                         cleanupOldInstances(merged),
