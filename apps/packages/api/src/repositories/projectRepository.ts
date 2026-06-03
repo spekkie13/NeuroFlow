@@ -1,7 +1,8 @@
 import {Project, ProjectInsert, ProjectUpdate} from "../types/db.types";
 import {db} from "../db/index.js";
 import {projects, steps, tasks} from "../db/schema.js";
-import {and, eq, inArray} from "drizzle-orm";
+import {and, eq, gte, inArray, isNull} from "drizzle-orm";
+import {tombstoneCutoff} from "../config/retention.js";
 
 export class ProjectRepository {
     async getProjectsForWorkspace(userId: string, workspaceId: string) {
@@ -27,7 +28,8 @@ export class ProjectRepository {
                 .where(
                     and(
                         eq(tasks.userId, userId),
-                        inArray(tasks.projectId, activeProjectIds)
+                        inArray(tasks.projectId, activeProjectIds),
+                        isNull(tasks.deletedAt)
                     )
                 )
             : []
@@ -48,9 +50,34 @@ export class ProjectRepository {
             return acc
         }, {} as Record<string, any>)
 
+        // Tombstones: ids of soft-deleted tasks, so a client holding a stale-but-newer
+        // copy of the project can still drop the task locally (delete wins over staleness).
+        // Only tombstones within the retention window are advertised — older ones have had
+        // ample time to propagate and are purged, keeping this payload bounded. (gte also
+        // excludes NULL deletedAt, so only genuinely-deleted rows match.)
+        const deletedTaskRows = activeProjectIds.length > 0
+            ? await db
+                .select({ id: tasks.id, projectId: tasks.projectId })
+                .from(tasks)
+                .where(
+                    and(
+                        eq(tasks.userId, userId),
+                        inArray(tasks.projectId, activeProjectIds),
+                        gte(tasks.deletedAt, tombstoneCutoff())
+                    )
+                )
+            : []
+
+        const deletedTaskIdsByProject = deletedTaskRows.reduce((acc, row) => {
+            if (!acc[row.projectId]) acc[row.projectId] = []
+            acc[row.projectId].push(row.id)
+            return acc
+        }, {} as Record<string, string[]>)
+
         return projectList.map(project => ({
             ...project,
-            tasks: tasksByProject[project.id] ?? []
+            tasks: tasksByProject[project.id] ?? [],
+            deletedTaskIds: deletedTaskIdsByProject[project.id] ?? []
         }))
     }
 

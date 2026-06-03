@@ -1,10 +1,18 @@
 import {projectRepository} from "../repositories/projectRepository.js";
+import {taskRepository} from "../repositories/taskRepository.js";
 import {Project} from "../types/db.types";
 import {randomUUID} from "crypto";
 
 export class ProjectService {
     async getProjectsForWorkspace(userId: string, workspaceId: string): Promise<Project[]> {
-        return await projectRepository.getProjectsForWorkspace(userId, workspaceId);
+        // Opportunistically purge expired task tombstones for this user. Runs in parallel
+        // with the read so it adds no latency, and the read never returns expired tombstones
+        // regardless (see projectRepository). Failures are swallowed — purging is best-effort.
+        const [projects] = await Promise.all([
+            projectRepository.getProjectsForWorkspace(userId, workspaceId),
+            taskRepository.purgeExpiredDeletedTasks(userId).catch(() => 0),
+        ]);
+        return projects;
     }
 
     async createProject(userId: string, id: string, workspaceId: string, name: string, color: string, reminderTime?: string, routines?: any[], updatedAt?: string) {

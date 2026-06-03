@@ -47,7 +47,7 @@ function mapApiProject(p: ApiProject): Project {
         name: p.name,
         color: p.color,
         reminderTime: p.reminderTime ?? undefined,
-        tasks: p.tasks.map(mapApiTask),
+        tasks: p.tasks.filter((t: ApiTask) => !t.deletedAt).map(mapApiTask),
         routines: (p.routines ?? []).map(mapApiRoutine),
         createdAt: p.createdAt,
         updatedAt: p.updatedAt ?? undefined,
@@ -211,6 +211,23 @@ export async function syncProjects(workspaceId: string): Promise<Project[] | nul
                     await pushProject(workspaceId, p)
                 }
             }
+        }
+
+        // Apply task tombstones: drop any locally-held task the server reports as deleted,
+        // regardless of project updatedAt. This makes a task delete win even when this device
+        // is holding a stale-but-newer copy of the project (delete wins over staleness).
+        const deletedTaskIdsByProject = new Map<string, Set<string>>()
+        for (const row of remoteProjects) {
+            if (row.deletedTaskIds?.length) {
+                deletedTaskIdsByProject.set(row.id, new Set(row.deletedTaskIds))
+            }
+        }
+        if (deletedTaskIdsByProject.size > 0) {
+            merged = merged.map((p: Project) => {
+                const deleted: Set<string> | undefined = deletedTaskIdsByProject.get(p.id)
+                if (!deleted) return p
+                return { ...p, tasks: p.tasks.filter((t: Task) => !deleted.has(t.id)) }
+            })
         }
 
         await saveProjectsForWorkspace(workspaceId, merged)

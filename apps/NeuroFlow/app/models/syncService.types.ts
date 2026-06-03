@@ -55,6 +55,7 @@ export interface ApiProject {
     reminderTime: string | null
     tasks: ApiTask[]
     routines: ApiRoutine[]
+    deletedTaskIds?: string[]
     createdAt: string
     updatedAt: string | null
     deletedAt: string | null
