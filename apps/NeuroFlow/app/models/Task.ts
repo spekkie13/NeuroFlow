@@ -18,4 +18,5 @@ export interface Task {
     routineId?: string
     createdAt?: string
     updatedAt?: string
+    sortOrder?: number
 }

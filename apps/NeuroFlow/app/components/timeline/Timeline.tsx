@@ -1,15 +1,17 @@
-import React, {RefObject, useEffect, useImperativeHandle, useMemo, useRef, useState} from 'react'
+import React, {RefObject, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState} from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Plus, CheckCircle2, Circle } from 'lucide-react-native'
 import { LinearGradient } from 'expo-linear-gradient'
+import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist'
 import { formatLocalDateRange, formatLocalDate, formatMinutes, parseLocalDate, toIsoDateString, isSameDay } from '../../utils/dateUtils'
-import {Priority, Task} from "../../models";
+import {Task} from "../../models";
 import { TimelineProps } from "../../props/timeline/TimelineProps"
 import { isOverdue } from "../../services/domain/TaskService"
 import { timelineStyles } from "../../styles/timeline/timeline.styles";
 import {getPriorityStyle} from "../../utils/priorityUtils";
 import {ScheduleTaskModal} from "./ScheduleTaskModal";
 import {RescheduleModal} from "../tasks/RescheduleModal";
+import {sortTasksForColumn} from "../../utils/taskSortUtils";
 
 // Cast View to accept web-only mouse event props (onMouseDown etc.) that
 // React Native's type definitions don't include but are valid on web builds.
@@ -17,13 +19,12 @@ const WebView = View as React.ComponentType<any>
 
 export type TimelineHandle = { scrollToToday: () => void }
 
-const PRIORITY_ORDER: Record<Priority, number> = { high: 0, medium: 1, low: 2 }
-
 export const Timeline = ({
     project,
     dailyMinutes,
     onAddTask,
     onUpdateTask,
+    onReorderTasks,
     ref,
 }: TimelineProps & { ref?: React.Ref<TimelineHandle | null> }) => {
     const [isGrabbing, setIsGrabbing] = useState<boolean>(false)
@@ -54,7 +55,7 @@ export const Timeline = ({
 
     // Mouse event handlers for click-and-drag scrolling on web.
     // Parameters typed as `any` because React Native's types don't include
-    // web MouseEvent; the underlying DOM event is accessed at runtime.
+    // web MouseEvent; the underlying DOM element is accessed at runtime.
     const handleMouseDown = (e: any): void => {
         isDragging.current = true
         setIsGrabbing(true)
@@ -102,25 +103,15 @@ export const Timeline = ({
     )
 
     const overdueTasks: Task[] = useMemo(() => {
-        return project.tasks
-            .filter(isOverdue)
-            .sort(((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]))
+        return sortTasksForColumn(project.tasks.filter(isOverdue))
     }, [project.tasks])
 
     const tasksByDate = useMemo(() => {
         return dates.map((date: Date) => {
             const dateStr: string = toIsoDateString(date)
-            const tasksForDay: Task[] = project.tasks.filter((task) => {
-                if (!task.date)
-                    return false
-
-                return task.date === dateStr
-            })
-
-            tasksForDay.sort(
-                (a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority],
+            const tasksForDay: Task[] = sortTasksForColumn(
+                project.tasks.filter(task => task.date === dateStr)
             )
-
             const estimatedTotal: number = tasksForDay.reduce((sum, t) => sum + (t.estimatedMinutes ?? 0), 0)
             return { date, tasks: tasksForDay, completedCount: tasksForDay.filter(t => t.completed).length, estimatedTotal }
         })
@@ -131,9 +122,122 @@ export const Timeline = ({
         setShowModal(true)
     }
 
-    const handleToggleComplete = (task: Task) => {
+    const handleToggleComplete = useCallback((task: Task) => {
         onUpdateTask(task.id, { completed: !task.completed })
-    }
+    }, [onUpdateTask])
+
+    const renderOverdueTaskItem = useCallback(({ item: task, drag, isActive }: RenderItemParams<Task>) => {
+        const dateRange = formatLocalDateRange(task.date, task.date)
+        return (
+            <View
+                style={[
+                    timelineStyles.taskCard,
+                    { borderLeftColor: '#ef4444' },
+                    isActive && { opacity: 0.88 },
+                ]}
+            >
+                <View style={timelineStyles.taskRow}>
+                    <TouchableOpacity
+                        onPress={() => handleToggleComplete(task)}
+                        style={timelineStyles.checkButton}
+                        activeOpacity={0.7}
+                        delayPressIn={50}
+                    >
+                        <Circle size={16} color="#9ca3af" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={timelineStyles.taskContent}
+                        onPress={() => openReschedule(task)}
+                        onLongPress={drag}
+                        delayLongPress={200}
+                        activeOpacity={0.7}
+                        delayPressIn={50}
+                    >
+                        <Text style={timelineStyles.taskName} numberOfLines={2}>
+                            {task.name}
+                        </Text>
+                        {dateRange && (
+                            <Text style={[timelineStyles.taskDates, timelineStyles.taskDatesOverdue]}>
+                                {dateRange}
+                            </Text>
+                        )}
+                        <View style={[timelineStyles.priorityBadge, getPriorityStyle(task.priority, timelineStyles.priorityBadgeHigh, timelineStyles.priorityBadgeMedium, timelineStyles.priorityBadgeLow)]}>
+                            <Text style={timelineStyles.priorityBadgeText}>{task.priority}</Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        )
+    }, [handleToggleComplete, openReschedule])
+
+    const renderDateTaskItem = useCallback(({ item: task, drag, isActive }: RenderItemParams<Task>) => {
+        const dateRange = formatLocalDateRange(task.date, task.date)
+        const overdue = isOverdue(task)
+        return (
+            <View
+                style={[
+                    timelineStyles.taskCard,
+                    { borderLeftColor: task.completed ? '#9ca3af' : project.color },
+                    task.completed && timelineStyles.taskCardCompleted,
+                    isActive && { opacity: 0.88 },
+                ]}
+            >
+                <View style={timelineStyles.taskRow}>
+                    <TouchableOpacity
+                        onPress={() => handleToggleComplete(task)}
+                        style={timelineStyles.checkButton}
+                        activeOpacity={0.7}
+                        delayPressIn={50}
+                    >
+                        {task.completed ? (
+                            <CheckCircle2 size={16} color="#22c55e" />
+                        ) : (
+                            <Circle size={16} color="#9ca3af" />
+                        )}
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={timelineStyles.taskContent}
+                        onPress={() => openReschedule(task)}
+                        onLongPress={drag}
+                        delayLongPress={200}
+                        activeOpacity={0.7}
+                        delayPressIn={50}
+                    >
+                        <Text
+                            style={[
+                                timelineStyles.taskName,
+                                task.completed && timelineStyles.taskNameCompleted,
+                            ]}
+                            numberOfLines={2}
+                        >
+                            {task.name}
+                        </Text>
+                        {dateRange && (
+                            <Text
+                                style={[
+                                    timelineStyles.taskDates,
+                                    overdue && timelineStyles.taskDatesOverdue,
+                                ]}
+                            >
+                                {overdue ? 'Needs attention · ' : ''}
+                                {dateRange}
+                            </Text>
+                        )}
+                        <View
+                            style={[
+                                timelineStyles.priorityBadge,
+                                getPriorityStyle(task.priority, timelineStyles.priorityBadgeHigh, timelineStyles.priorityBadgeMedium, timelineStyles.priorityBadgeLow),
+                            ]}
+                        >
+                            <Text style={timelineStyles.priorityBadgeText}>
+                                {task.priority}
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        )
+    }, [project.color, handleToggleComplete, openReschedule])
 
     return (
         <View style={timelineStyles.container}>
@@ -163,44 +267,13 @@ export const Timeline = ({
                             </Text>
                         </View>
                         <View style={timelineStyles.columnBody}>
-                            {overdueTasks.map((task) => {
-                                const dateRange = formatLocalDateRange(task.date, task.date)
-                                return (
-                                    <View
-                                        key={task.id}
-                                        style={[timelineStyles.taskCard, { borderLeftColor: '#ef4444' }]}
-                                    >
-                                        <View style={timelineStyles.taskRow}>
-                                            <TouchableOpacity
-                                                onPress={() => handleToggleComplete(task)}
-                                                style={timelineStyles.checkButton}
-                                                activeOpacity={0.7}
-                                                delayPressIn={50}
-                                            >
-                                                <Circle size={16} color="#9ca3af" />
-                                            </TouchableOpacity>
-                                            <TouchableOpacity
-                                                style={timelineStyles.taskContent}
-                                                onPress={() => openReschedule(task)}
-                                                activeOpacity={0.7}
-                                                delayPressIn={50}
-                                            >
-                                                <Text style={timelineStyles.taskName} numberOfLines={2}>
-                                                    {task.name}
-                                                </Text>
-                                                {dateRange && (
-                                                    <Text style={[timelineStyles.taskDates, timelineStyles.taskDatesOverdue]}>
-                                                        {dateRange}
-                                                    </Text>
-                                                )}
-                                                <View style={[timelineStyles.priorityBadge, getPriorityStyle(task.priority, timelineStyles.priorityBadgeHigh, timelineStyles.priorityBadgeMedium, timelineStyles.priorityBadgeLow)]}>
-                                                    <Text style={timelineStyles.priorityBadgeText}>{task.priority}</Text>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                )
-                            })}
+                            <DraggableFlatList
+                                data={overdueTasks}
+                                keyExtractor={(task) => task.id}
+                                renderItem={renderOverdueTaskItem}
+                                onDragEnd={({ data }) => onReorderTasks(data)}
+                                scrollEnabled={false}
+                            />
                         </View>
                     </View>
                 )}
@@ -280,86 +353,13 @@ export const Timeline = ({
                                     </View>
                                 )}
 
-                                {tasks.map((task) => {
-                                    const dateRange = formatLocalDateRange(
-                                        task.date,
-                                        task.date,
-                                    )
-                                    const overdue = isOverdue(task)
-
-                                    return (
-                                        <View
-                                            key={task.id}
-                                            style={[
-                                                timelineStyles.taskCard,
-                                                {
-                                                    borderLeftColor: task.completed
-                                                        ? '#9ca3af'
-                                                        : project.color,
-                                                },
-                                                task.completed && timelineStyles.taskCardCompleted,
-                                            ]}
-                                        >
-                                            <View style={timelineStyles.taskRow}>
-                                                <TouchableOpacity
-                                                    onPress={() => handleToggleComplete(task)}
-                                                    style={timelineStyles.checkButton}
-                                                    activeOpacity={0.7}
-                                                    delayPressIn={50}
-                                                >
-                                                    {task.completed ? (
-                                                        <CheckCircle2
-                                                            size={16}
-                                                            color="#22c55e"
-                                                        />
-                                                    ) : (
-                                                        <Circle size={16} color="#9ca3af" />
-                                                    )}
-                                                </TouchableOpacity>
-
-                                                <TouchableOpacity
-                                                    style={timelineStyles.taskContent}
-                                                    onPress={() => openReschedule(task)}
-                                                    activeOpacity={0.7}
-                                                    delayPressIn={50}
-                                                >
-                                                    <Text
-                                                        style={[
-                                                            timelineStyles.taskName,
-                                                            task.completed && timelineStyles.taskNameCompleted,
-                                                        ]}
-                                                        numberOfLines={2}
-                                                    >
-                                                        {task.name}
-                                                    </Text>
-
-                                                    {dateRange && (
-                                                        <Text
-                                                            style={[
-                                                                timelineStyles.taskDates,
-                                                                overdue && timelineStyles.taskDatesOverdue,
-                                                            ]}
-                                                        >
-                                                            {overdue ? 'Needs attention · ' : ''}
-                                                            {dateRange}
-                                                        </Text>
-                                                    )}
-
-                                                    <View
-                                                        style={[
-                                                            timelineStyles.priorityBadge,
-                                                            getPriorityStyle(task.priority, timelineStyles.priorityBadgeHigh, timelineStyles.priorityBadgeMedium, timelineStyles.priorityBadgeLow),
-                                                        ]}
-                                                    >
-                                                        <Text style={timelineStyles.priorityBadgeText}>
-                                                            {task.priority}
-                                                        </Text>
-                                                    </View>
-                                                </TouchableOpacity>
-                                            </View>
-                                        </View>
-                                    )
-                                })}
+                                <DraggableFlatList
+                                    data={tasks}
+                                    keyExtractor={(task) => task.id}
+                                    renderItem={renderDateTaskItem}
+                                    onDragEnd={({ data }) => onReorderTasks(data)}
+                                    scrollEnabled={false}
+                                />
 
                                 <TouchableOpacity
                                     style={timelineStyles.addTaskButton}

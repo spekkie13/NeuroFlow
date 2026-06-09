@@ -42,6 +42,7 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }: PlannerProp
         addTask,
         updateTask,
         deleteTask,
+        reorderTasks,
         moveTask,
         addRoutine,
         updateRoutine,
@@ -115,6 +116,7 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }: PlannerProp
                         dailyMinutes={dailyMinutes}
                         onAddTask={addTask}
                         onUpdateTask={updateTask}
+                        onReorderTasks={reorderTasks}
                     />
                 )
             case 'settings':

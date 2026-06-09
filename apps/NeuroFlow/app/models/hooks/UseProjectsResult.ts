@@ -17,6 +17,7 @@ export interface UseProjectsResult {
         updates: Partial<Task>,
     ) => Promise<void>
     deleteTask: (projectId: string, taskId: string) => Promise<void>
+    reorderTasks: (projectId: string, reorderedTasks: Task[]) => Promise<void>
     moveTask: (
         projectId: string,
         taskId: string,

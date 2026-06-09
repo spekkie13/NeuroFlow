@@ -11,6 +11,7 @@ interface TimelineScreenProps {
     dailyMinutes: number | null
     onAddTask: (projectId: string, task: Task) => Promise<void>
     onUpdateTask: (projectId: string, taskId: string, updates: Partial<Task>) => Promise<void>
+    onReorderTasks: (projectId: string, reorderedTasks: Task[]) => Promise<void>
 }
 
 export const TimelineScreen: React.FC<TimelineScreenProps> = ({
@@ -18,6 +19,7 @@ export const TimelineScreen: React.FC<TimelineScreenProps> = ({
                                                                   dailyMinutes,
                                                                   onAddTask,
                                                                   onUpdateTask,
+                                                                  onReorderTasks,
                                                               }) => {
     const timelineRefs = useRef<Record<string, React.RefObject<TimelineHandle | null>>>({})
 
@@ -86,6 +88,7 @@ export const TimelineScreen: React.FC<TimelineScreenProps> = ({
                                 dailyMinutes={dailyMinutes}
                                 onAddTask={(task) => onAddTask(project.id, task)}
                                 onUpdateTask={(taskId, updates) => onUpdateTask(project.id, taskId, updates)}
+                                onReorderTasks={(reorderedTasks) => onReorderTasks(project.id, reorderedTasks)}
                             />
                         </View>
                     )
