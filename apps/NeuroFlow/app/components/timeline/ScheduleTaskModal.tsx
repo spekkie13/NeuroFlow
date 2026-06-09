@@ -194,7 +194,11 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
                                     <>
                                         <View style={scheduleTaskModalStyles.fieldGroup}>
                                             <Text style={scheduleTaskModalStyles.fieldLabel}>Select Task</Text>
-                                            <View style={scheduleTaskModalStyles.existingList}>
+                                            <ScrollView
+                                                style={scheduleTaskModalStyles.existingList}
+                                                nestedScrollEnabled
+                                                showsVerticalScrollIndicator={false}
+                                            >
                                                 {selectableExistingTasks.map((task) => {
                                                     const active = selectedExistingTaskId === task.id
                                                     return (
@@ -228,7 +232,7 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
                                                         </TouchableOpacity>
                                                     )
                                                 })}
-                                            </View>
+                                            </ScrollView>
                                         </View>
 
                                         <View style={scheduleTaskModalStyles.fieldGroup}>
