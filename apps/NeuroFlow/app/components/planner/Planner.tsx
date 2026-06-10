@@ -110,6 +110,8 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }: PlannerProp
                 return (
                     <TodayView
                         projects={projects}
+                        workspaces={workspaces}
+                        userId={user.id}
                         onUpdateTask={(projectId, taskId, updates) => updateTask(projectId, taskId, updates)}
                     />
                 )

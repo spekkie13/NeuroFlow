@@ -2,20 +2,26 @@ import React, { useMemo, useState } from 'react'
 import {ScrollView, Text, TouchableOpacity, View} from 'react-native'
 import { CheckCircle2, ChevronDown, ChevronRight, Circle } from 'lucide-react-native'
 import {Priority, Project, Task} from "../../models";
+import { Workspace } from '../../models/Workspace'
 import {formatLocalDate, parseLocalDate, toIsoDateString} from "../../utils/dateUtils";
 import { isOverdue } from "../../services/domain/TaskService";
 import { styles } from '../../styles/today'
 import {getPriorityStyle} from "../../utils/priorityUtils";
 import {RescheduleModal} from "../tasks/RescheduleModal";
+import { TimelineExpandedView } from '../timeline/TimelineExpandedView'
 
 const PRIORITY_ORDER: Record<Priority, number> = { high: 0, medium: 1, low: 2 }
+type TodayMode = 'compact' | 'expanded'
 
 interface TodayViewProps {
     projects: Project[]
+    workspaces: Workspace[]
+    userId: string | null
     onUpdateTask: (projectId: string, taskId: string, updates: Partial<Task>) => void
 }
 
-export const TodayView: React.FC<TodayViewProps> = ({ projects, onUpdateTask }) => {
+export const TodayView: React.FC<TodayViewProps> = ({ projects, workspaces, userId, onUpdateTask }) => {
+    const [mode, setMode] = useState<TodayMode>('compact')
     const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set())
     const [rescheduleTarget, setRescheduleTarget] = useState<{ projectId: string; task: Task } | null>(null)
     const [rescheduleDate, setRescheduleDate] = useState('')
@@ -123,84 +129,114 @@ export const TodayView: React.FC<TodayViewProps> = ({ projects, onUpdateTask }) 
                 <View>
                     <Text style={styles.headerTitle}>Today</Text>
                     <Text style={styles.headerSubtitle}>
-                        {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+                        {mode === 'compact'
+                            ? new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
+                            : 'All workspaces'}
                     </Text>
                 </View>
-                {hasAnything && (
-                    <View style={styles.summaryBadge}>
-                        {todayTotal > 0 && (
-                            <Text style={styles.summaryText}>{todayDone}/{todayTotal} done today</Text>
-                        )}
-                        {overdueTotal > 0 && (
-                            <Text style={[styles.summaryText, styles.summaryOverdue]}>
-                                {overdueTotal} overdue
+                <View style={{ alignItems: 'flex-end', gap: 6 }}>
+                    <View style={styles.modeToggle}>
+                        <TouchableOpacity
+                            style={[styles.modeToggleButton, mode === 'compact' && styles.modeToggleButtonActive]}
+                            onPress={() => setMode('compact')}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={[styles.modeToggleText, mode === 'compact' && styles.modeToggleTextActive]}>
+                                Compact
                             </Text>
-                        )}
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.modeToggleButton, mode === 'expanded' && styles.modeToggleButtonActive]}
+                            onPress={() => setMode('expanded')}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={[styles.modeToggleText, mode === 'expanded' && styles.modeToggleTextActive]}>
+                                Expanded
+                            </Text>
+                        </TouchableOpacity>
                     </View>
-                )}
+                    {mode === 'compact' && hasAnything && (
+                        <View style={styles.summaryBadge}>
+                            {todayTotal > 0 && (
+                                <Text style={styles.summaryText}>{todayDone}/{todayTotal} done today</Text>
+                            )}
+                            {overdueTotal > 0 && (
+                                <Text style={[styles.summaryText, styles.summaryOverdue]}>
+                                    {overdueTotal} overdue
+                                </Text>
+                            )}
+                        </View>
+                    )}
+                </View>
             </View>
 
-            <ScrollView
-                style={styles.scroll}
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-            >
-                {!hasAnything && (
-                    <View style={styles.emptyState}>
-                        <Text style={styles.emptyTitle}>You're all caught up!</Text>
-                        <Text style={styles.emptySubtitle}>No tasks due today or overdue.</Text>
-                    </View>
-                )}
-
-                {overdueTotal > 0 && (
-                    <View style={styles.section}>
-                        {renderSectionHeader(
-                            'overdue',
-                            'Overdue',
-                            `${overdueTotal} task${overdueTotal !== 1 ? 's' : ''}`,
-                            undefined,
-                            true
+            {mode === 'expanded' ? (
+                <TimelineExpandedView workspaces={workspaces} userId={userId} />
+            ) : (
+                <>
+                    <ScrollView
+                        style={styles.scroll}
+                        contentContainerStyle={styles.scrollContent}
+                        showsVerticalScrollIndicator={false}
+                    >
+                        {!hasAnything && (
+                            <View style={styles.emptyState}>
+                                <Text style={styles.emptyTitle}>You're all caught up!</Text>
+                                <Text style={styles.emptySubtitle}>No tasks due today or overdue.</Text>
+                            </View>
                         )}
-                        {!collapsedSections.has('overdue') && (
-                            <View style={styles.sectionBody}>
-                                {overdueItems.map(({ task, project }) =>
-                                    renderTaskRow(task, project.id, project.color)
+
+                        {overdueTotal > 0 && (
+                            <View style={styles.section}>
+                                {renderSectionHeader(
+                                    'overdue',
+                                    'Overdue',
+                                    `${overdueTotal} task${overdueTotal !== 1 ? 's' : ''}`,
+                                    undefined,
+                                    true
+                                )}
+                                {!collapsedSections.has('overdue') && (
+                                    <View style={styles.sectionBody}>
+                                        {overdueItems.map(({ task, project }) =>
+                                            renderTaskRow(task, project.id, project.color)
+                                        )}
+                                    </View>
                                 )}
                             </View>
                         )}
-                    </View>
-                )}
 
-                {todayByProject.map(({ project, tasks }) => {
-                    const done = tasks.filter(t => t.completed).length
-                    return (
-                        <View key={project.id} style={styles.section}>
-                            {renderSectionHeader(project.id, project.name, `${done}/${tasks.length}`, project.color)}
-                            {!collapsedSections.has(project.id) && (
-                                <View style={styles.sectionBody}>
-                                    {tasks.map(task => renderTaskRow(task, project.id))}
+                        {todayByProject.map(({ project, tasks }) => {
+                            const done = tasks.filter(t => t.completed).length
+                            return (
+                                <View key={project.id} style={styles.section}>
+                                    {renderSectionHeader(project.id, project.name, `${done}/${tasks.length}`, project.color)}
+                                    {!collapsedSections.has(project.id) && (
+                                        <View style={styles.sectionBody}>
+                                            {tasks.map(task => renderTaskRow(task, project.id))}
+                                        </View>
+                                    )}
                                 </View>
-                            )}
-                        </View>
-                    )
-                })}
-            </ScrollView>
+                            )
+                        })}
+                    </ScrollView>
 
-            <RescheduleModal
-                visible={!!rescheduleTarget}
-                taskName={rescheduleTarget?.task.name}
-                date={rescheduleDate}
-                hasDate={!!rescheduleTarget?.task.date}
-                onChangeDate={setRescheduleDate}
-                onSave={handleSaveReschedule}
-                onClear={() => {
-                    if (!rescheduleTarget) return
-                    onUpdateTask(rescheduleTarget.projectId, rescheduleTarget.task.id, { date: null })
-                    setRescheduleTarget(null)
-                    setRescheduleDate('')
-                }}
-                onCancel={() => { setRescheduleTarget(null); setRescheduleDate('') }}
-            />
+                    <RescheduleModal
+                        visible={!!rescheduleTarget}
+                        taskName={rescheduleTarget?.task.name}
+                        date={rescheduleDate}
+                        hasDate={!!rescheduleTarget?.task.date}
+                        onChangeDate={setRescheduleDate}
+                        onSave={handleSaveReschedule}
+                        onClear={() => {
+                            if (!rescheduleTarget) return
+                            onUpdateTask(rescheduleTarget.projectId, rescheduleTarget.task.id, { date: null })
+                            setRescheduleTarget(null)
+                            setRescheduleDate('')
+                        }}
+                        onCancel={() => { setRescheduleTarget(null); setRescheduleDate('') }}
+                    />
+                </>
+            )}
         </View>
     )
 }
