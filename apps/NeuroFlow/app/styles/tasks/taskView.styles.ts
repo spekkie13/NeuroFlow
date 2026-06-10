@@ -37,6 +37,11 @@ export const taskViewStyles = StyleSheet.create({
     filterBar: {
         flexDirection: 'row',
         gap: 6,
+        marginBottom: 8,
+    },
+    sortBar: {
+        flexDirection: 'row',
+        gap: 6,
         marginBottom: 12,
     },
     filterChip: {

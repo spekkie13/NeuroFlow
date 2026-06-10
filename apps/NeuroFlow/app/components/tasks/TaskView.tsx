@@ -8,7 +8,8 @@ import {formatLocalDate, parseLocalDate, toIsoDateString} from "../../utils/date
 import {TaskItem} from "./TaskItem";
 import {RoutineItem} from "./RoutineItem";
 import {RoutineModal} from "./RoutineModal";
-import {taskViewStyles} from "../../styles/tasks/taskView.styles";
+import {taskViewStyles} from "../../styles/tasks/taskView.styles"
+import {SortMode, sortTasks} from "../../utils/taskSortUtils";
 import { AppButton, TextField } from "../ui";
 import {PriorityModal} from "./PriorityModal";
 import {RescheduleModal} from "./RescheduleModal";
@@ -38,6 +39,7 @@ export const TaskView: React.FC<TaskViewProps> = ({
     const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
     const [editTaskName, setEditTaskName] = useState('')
     const [filterMode, setFilterMode] = useState<FilterMode>('all')
+    const [sortMode, setSortMode] = useState<SortMode>('created')
     const [showCompleted, setShowCompleted] = useState(true)
 
     const [priorityModalTask, setPriorityModalTask] = useState<Task | null>(null)
@@ -54,8 +56,8 @@ export const TaskView: React.FC<TaskViewProps> = ({
 
     const routines: Routine[] = project.routines ?? []
 
-    const activeTasks: Task[] = useMemo(() => project.tasks.filter((t: Task) => !t.completed && !t.routineId), [project.tasks])
-    const completedTasks: Task[] = useMemo(() => project.tasks.filter((t: Task) => t.completed), [project.tasks])
+    const activeTasks: Task[] = useMemo(() => sortTasks(project.tasks.filter((t: Task) => !t.completed && !t.routineId), sortMode), [project.tasks, sortMode])
+    const completedTasks: Task[] = useMemo(() => sortTasks(project.tasks.filter((t: Task) => t.completed), sortMode), [project.tasks, sortMode])
 
     const toggleMenu = (taskId: string) => {
         setOpenMenuTaskId((prev) => (prev === taskId ? null : taskId))
@@ -228,20 +230,36 @@ export const TaskView: React.FC<TaskViewProps> = ({
             </View>
 
             {project.tasks.length > 0 && (
-                <View style={taskViewStyles.filterBar}>
-                    {(['all', 'active', 'completed'] as FilterMode[]).map((mode) => (
-                        <TouchableOpacity
-                            key={mode}
-                            style={[taskViewStyles.filterChip, filterMode === mode && taskViewStyles.filterChipActive]}
-                            onPress={() => setFilterMode(mode)}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={[taskViewStyles.filterChipText, filterMode === mode && taskViewStyles.filterChipTextActive]}>
-                                {mode === 'all' ? `All (${project.tasks.length})` : mode === 'active' ? `Active (${activeTasks.length})` : `Done (${completedTasks.length})`}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
+                <>
+                    <View style={taskViewStyles.filterBar}>
+                        {(['all', 'active', 'completed'] as FilterMode[]).map((mode) => (
+                            <TouchableOpacity
+                                key={mode}
+                                style={[taskViewStyles.filterChip, filterMode === mode && taskViewStyles.filterChipActive]}
+                                onPress={() => setFilterMode(mode)}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={[taskViewStyles.filterChipText, filterMode === mode && taskViewStyles.filterChipTextActive]}>
+                                    {mode === 'all' ? `All (${project.tasks.length})` : mode === 'active' ? `Active (${activeTasks.length})` : `Done (${completedTasks.length})`}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                    <View style={taskViewStyles.sortBar}>
+                        {(['created', 'due'] as SortMode[]).map((mode) => (
+                            <TouchableOpacity
+                                key={mode}
+                                style={[taskViewStyles.filterChip, sortMode === mode && taskViewStyles.filterChipActive]}
+                                onPress={() => setSortMode(mode)}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={[taskViewStyles.filterChipText, sortMode === mode && taskViewStyles.filterChipTextActive]}>
+                                    {mode === 'created' ? 'Created' : 'Due date'}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </>
             )}
 
             {project.tasks.length === 0 ? (
