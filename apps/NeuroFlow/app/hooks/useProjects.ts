@@ -5,7 +5,6 @@ import {
     withTaskAdded,
     withTaskDeleted,
     withTaskUpdated,
-    withTasksReordered,
     withUpdatedProjectName,
     withTaskMoved,
 } from '../services/domain/ProjectService'
@@ -193,24 +192,6 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
         }
     }
 
-    const reorderTasks = async (projectId: string, reorderedTasks: Task[]) => {
-        const updatedAt: string = new Date().toISOString()
-        const next: Project[] = projects.map((p: Project) =>
-            p.id === projectId
-                ? { ...withTasksReordered(p, reorderedTasks), updatedAt }
-                : p,
-        )
-        await persist(next)
-        const updated: Project = next.find((p: Project) => p.id === projectId)
-        if (userId && workspaceId && updated) {
-            const synced: Project | null = await pushProject(workspaceId, updated)
-            if (!synced)
-                setSyncError(`Task order in project "${updated.name}" couldn't be synced. It's saved on this device.`)
-            else
-                setSyncError(null)
-        }
-    }
-
     const moveTask = async (projectId: string, taskId: string, direction: TaskMoveDirection) => {
         const updatedAt: string = new Date().toISOString()
         const next: Project[] = projects.map((p: Project) =>
@@ -328,7 +309,6 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
         addTask,
         updateTask,
         deleteTask,
-        reorderTasks,
         moveTask,
         addRoutine,
         updateRoutine,

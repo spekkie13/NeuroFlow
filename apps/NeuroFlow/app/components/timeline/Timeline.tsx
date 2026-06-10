@@ -2,7 +2,6 @@ import React, {RefObject, useCallback, useEffect, useImperativeHandle, useMemo, 
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Plus, CheckCircle2, Circle } from 'lucide-react-native'
 import { LinearGradient } from 'expo-linear-gradient'
-import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist'
 import { formatLocalDateRange, formatLocalDate, formatMinutes, parseLocalDate, toIsoDateString, isSameDay } from '../../utils/dateUtils'
 import {Task} from "../../models";
 import { TimelineProps } from "../../props/timeline/TimelineProps"
@@ -11,7 +10,7 @@ import { timelineStyles } from "../../styles/timeline/timeline.styles";
 import {getPriorityStyle} from "../../utils/priorityUtils";
 import {ScheduleTaskModal} from "./ScheduleTaskModal";
 import {RescheduleModal} from "../tasks/RescheduleModal";
-import {sortTasksForColumn} from "../../utils/taskSortUtils";
+import { sortTasksForColumn } from "../../utils/taskSortUtils";
 
 // Cast View to accept web-only mouse event props (onMouseDown etc.) that
 // React Native's type definitions don't include but are valid on web builds.
@@ -24,7 +23,6 @@ export const Timeline = ({
     dailyMinutes,
     onAddTask,
     onUpdateTask,
-    onReorderTasks,
     ref,
 }: TimelineProps & { ref?: React.Ref<TimelineHandle | null> }) => {
     const [isGrabbing, setIsGrabbing] = useState<boolean>(false)
@@ -68,6 +66,9 @@ export const Timeline = ({
 
     const handleMouseMove = (e: any): void => {
         if (!isDragging.current) return
+        // Only commit to scroll after 5px of horizontal movement so a casual
+        // click on a task card doesn't cause a tiny unintentional scroll.
+        if (Math.abs(e.clientX - dragStartX.current) < 5) return
         e.preventDefault()
         const node = (scrollViewRef.current as any)?.getScrollableNode?.()
         if (node) node.scrollLeft = dragStartScrollLeft.current - (e.clientX - dragStartX.current)
@@ -126,16 +127,10 @@ export const Timeline = ({
         onUpdateTask(task.id, { completed: !task.completed })
     }, [onUpdateTask])
 
-    const renderOverdueTaskItem = useCallback(({ item: task, drag, isActive }: RenderItemParams<Task>) => {
+    const renderOverdueTaskItem = useCallback((task: Task) => {
         const dateRange = formatLocalDateRange(task.date, task.date)
         return (
-            <View
-                style={[
-                    timelineStyles.taskCard,
-                    { borderLeftColor: '#ef4444' },
-                    isActive && { opacity: 0.88 },
-                ]}
-            >
+            <View key={task.id} style={[timelineStyles.taskCard, { borderLeftColor: '#ef4444' }]}>
                 <View style={timelineStyles.taskRow}>
                     <TouchableOpacity
                         onPress={() => handleToggleComplete(task)}
@@ -148,8 +143,6 @@ export const Timeline = ({
                     <TouchableOpacity
                         style={timelineStyles.taskContent}
                         onPress={() => openReschedule(task)}
-                        onLongPress={drag}
-                        delayLongPress={200}
                         activeOpacity={0.7}
                         delayPressIn={50}
                     >
@@ -170,16 +163,16 @@ export const Timeline = ({
         )
     }, [handleToggleComplete, openReschedule])
 
-    const renderDateTaskItem = useCallback(({ item: task, drag, isActive }: RenderItemParams<Task>) => {
+    const renderDateTaskItem = useCallback((task: Task) => {
         const dateRange = formatLocalDateRange(task.date, task.date)
         const overdue = isOverdue(task)
         return (
             <View
+                key={task.id}
                 style={[
                     timelineStyles.taskCard,
                     { borderLeftColor: task.completed ? '#9ca3af' : project.color },
                     task.completed && timelineStyles.taskCardCompleted,
-                    isActive && { opacity: 0.88 },
                 ]}
             >
                 <View style={timelineStyles.taskRow}>
@@ -198,8 +191,6 @@ export const Timeline = ({
                     <TouchableOpacity
                         style={timelineStyles.taskContent}
                         onPress={() => openReschedule(task)}
-                        onLongPress={drag}
-                        delayLongPress={200}
                         activeOpacity={0.7}
                         delayPressIn={50}
                     >
@@ -267,13 +258,7 @@ export const Timeline = ({
                             </Text>
                         </View>
                         <View style={timelineStyles.columnBody}>
-                            <DraggableFlatList
-                                data={overdueTasks}
-                                keyExtractor={(task) => task.id}
-                                renderItem={renderOverdueTaskItem}
-                                onDragEnd={({ data }) => onReorderTasks(data)}
-                                scrollEnabled={false}
-                            />
+                            {overdueTasks.map(renderOverdueTaskItem)}
                         </View>
                     </View>
                 )}
@@ -353,13 +338,7 @@ export const Timeline = ({
                                     </View>
                                 )}
 
-                                <DraggableFlatList
-                                    data={tasks}
-                                    keyExtractor={(task) => task.id}
-                                    renderItem={renderDateTaskItem}
-                                    onDragEnd={({ data }) => onReorderTasks(data)}
-                                    scrollEnabled={false}
-                                />
+                                {tasks.map(renderDateTaskItem)}
 
                                 <TouchableOpacity
                                     style={timelineStyles.addTaskButton}

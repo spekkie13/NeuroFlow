@@ -24,52 +24,10 @@ export function withUpdatedProjectName(project: Project, name: string): Project 
     }
 }
 
-export function nextSortOrderForDate(project: Project, date: string): number {
-    const orders = project.tasks
-        .filter(t => t.date === date && t.sortOrder != null)
-        .map(t => t.sortOrder!)
-    return orders.length === 0 ? 0 : Math.max(...orders) + 1
-}
-
-export function compactSortOrderForDate(project: Project, date: string): Project {
-    const sorted = project.tasks
-        .filter(t => t.date === date)
-        .sort((a, b) => {
-            if (a.sortOrder != null && b.sortOrder != null) return a.sortOrder - b.sortOrder
-            if (a.sortOrder != null) return -1
-            if (b.sortOrder != null) return 1
-            return (a.createdAt ?? '') < (b.createdAt ?? '') ? -1 : 1
-        })
-
-    const orderById = new Map<string, number>()
-    sorted.forEach((t, i) => orderById.set(t.id, i))
-
-    return {
-        ...project,
-        tasks: project.tasks.map(t =>
-            t.date === date ? { ...t, sortOrder: orderById.get(t.id) } : t
-        ),
-    }
-}
-
-export function withTasksReordered(project: Project, reorderedTasks: Task[]): Project {
-    const orderById = new Map<string, number>()
-    reorderedTasks.forEach((t, i) => orderById.set(t.id, i))
-    return {
-        ...project,
-        tasks: project.tasks.map(t =>
-            orderById.has(t.id) ? { ...t, sortOrder: orderById.get(t.id) } : t
-        ),
-    }
-}
-
 export function withTaskAdded(project: Project, task: Task): Project {
-    const taskWithOrder = task.date
-        ? { ...task, sortOrder: nextSortOrderForDate(project, task.date) }
-        : task
     return {
         ...project,
-        tasks: [...project.tasks, taskWithOrder],
+        tasks: [...project.tasks, task],
     }
 }
 
@@ -78,50 +36,19 @@ export function withTaskUpdated(
     taskId: string,
     updates: Partial<Task>,
 ): Project {
-    const existing = project.tasks.find(t => t.id === taskId)
-
-    let updated: Project = {
+    return {
         ...project,
         tasks: project.tasks.map((t: Task) =>
             t.id === taskId ? { ...t, ...updates } : t,
         ),
     }
-
-    const dateChanging = updates.date !== undefined && updates.date !== existing?.date
-
-    if (dateChanging && existing) {
-        if (updates.date) {
-            const newSortOrder = nextSortOrderForDate(project, updates.date)
-            updated = {
-                ...updated,
-                tasks: updated.tasks.map(t =>
-                    t.id === taskId ? { ...t, sortOrder: newSortOrder } : t
-                ),
-            }
-        } else {
-            updated = {
-                ...updated,
-                tasks: updated.tasks.map(t =>
-                    t.id === taskId ? { ...t, sortOrder: undefined } : t
-                ),
-            }
-        }
-
-        if (existing.date) {
-            updated = compactSortOrderForDate(updated, existing.date)
-        }
-    }
-
-    return updated
 }
 
 export function withTaskDeleted(project: Project, taskId: string): Project {
-    const task = project.tasks.find(t => t.id === taskId)
-    const withoutTask: Project = {
+    return {
         ...project,
         tasks: project.tasks.filter((t: Task) => t.id !== taskId),
     }
-    return task?.date ? compactSortOrderForDate(withoutTask, task.date) : withoutTask
 }
 
 export function withTaskMoved(
