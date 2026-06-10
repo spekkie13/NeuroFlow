@@ -113,6 +113,8 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }: PlannerProp
                     <TimelineScreen
                         projects={projects}
                         dailyMinutes={dailyMinutes}
+                        workspaces={workspaces}
+                        userId={user.id}
                         onAddTask={addTask}
                         onUpdateTask={updateTask}
                     />

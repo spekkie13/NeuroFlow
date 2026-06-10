@@ -1,24 +1,33 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { List } from 'lucide-react-native'
 import { Project, Task } from '../../models'
+import { Workspace } from '../../models/Workspace'
 import { timelineScreenStyles } from '../../styles/planner/timelineScreen.styles'
 import { Timeline, TimelineHandle } from '../timeline/Timeline'
+import { TimelineExpandedView } from '../timeline/TimelineExpandedView'
 import { isOverdue } from '../../services/domain/TaskService'
+
+type TimelineMode = 'compact' | 'expanded'
 
 interface TimelineScreenProps {
     projects: Project[]
     dailyMinutes: number | null
+    workspaces: Workspace[]
+    userId: string | null
     onAddTask: (projectId: string, task: Task) => Promise<void>
     onUpdateTask: (projectId: string, taskId: string, updates: Partial<Task>) => Promise<void>
 }
 
 export const TimelineScreen: React.FC<TimelineScreenProps> = ({
-                                                                  projects,
-                                                                  dailyMinutes,
-                                                                  onAddTask,
-                                                                  onUpdateTask,
-                                                              }) => {
+    projects,
+    dailyMinutes,
+    workspaces,
+    userId,
+    onAddTask,
+    onUpdateTask,
+}) => {
+    const [mode, setMode] = useState<TimelineMode>('compact')
     const timelineRefs = useRef<Record<string, React.RefObject<TimelineHandle | null>>>({})
 
     const getTimelineRef = (projectId: string): React.RefObject<TimelineHandle | null> => {
@@ -31,7 +40,7 @@ export const TimelineScreen: React.FC<TimelineScreenProps> = ({
     const getUnscheduledCount = (tasks: Task[]) =>
         tasks.filter(t => !t.completed && (!t.date || isOverdue(t))).length
 
-    if (projects.length === 0) {
+    if (projects.length === 0 && mode === 'compact') {
         return (
             <View style={timelineScreenStyles.center}>
                 <Text style={timelineScreenStyles.emptyTitle}>No projects yet</Text>
@@ -46,51 +55,93 @@ export const TimelineScreen: React.FC<TimelineScreenProps> = ({
         <View style={{ flex: 1 }}>
             <View style={timelineScreenStyles.timelineHeader}>
                 <View>
-                    <Text style={timelineScreenStyles.timelineHeaderTitle}>Timeline View</Text>
-                    <Text style={timelineScreenStyles.timelineHeaderSubtitle}>Next 14 days</Text>
+                    <Text style={timelineScreenStyles.timelineHeaderTitle}>Timeline</Text>
+                    <Text style={timelineScreenStyles.timelineHeaderSubtitle}>
+                        {mode === 'compact' ? 'Next 14 days' : 'Today · all workspaces'}
+                    </Text>
                 </View>
-                <TouchableOpacity
-                    style={timelineScreenStyles.projectTodayButton}
-                    onPress={() => Object.values(timelineRefs.current).forEach(r => r.current?.scrollToToday())}
-                    activeOpacity={0.7}
-                >
-                    <Text style={timelineScreenStyles.projectTodayButtonText}>Today</Text>
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    {mode === 'compact' && (
+                        <TouchableOpacity
+                            style={timelineScreenStyles.projectTodayButton}
+                            onPress={() => Object.values(timelineRefs.current).forEach(r => r.current?.scrollToToday())}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={timelineScreenStyles.projectTodayButtonText}>Today</Text>
+                        </TouchableOpacity>
+                    )}
+                    <View style={timelineScreenStyles.modeToggle}>
+                        <TouchableOpacity
+                            style={[
+                                timelineScreenStyles.modeToggleButton,
+                                mode === 'compact' && timelineScreenStyles.modeToggleButtonActive,
+                            ]}
+                            onPress={() => setMode('compact')}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={[
+                                timelineScreenStyles.modeToggleText,
+                                mode === 'compact' && timelineScreenStyles.modeToggleTextActive,
+                            ]}>
+                                Compact
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[
+                                timelineScreenStyles.modeToggleButton,
+                                mode === 'expanded' && timelineScreenStyles.modeToggleButtonActive,
+                            ]}
+                            onPress={() => setMode('expanded')}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={[
+                                timelineScreenStyles.modeToggleText,
+                                mode === 'expanded' && timelineScreenStyles.modeToggleTextActive,
+                            ]}>
+                                Expanded
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
             </View>
 
-            <ScrollView
-                style={timelineScreenStyles.timelineScroll}
-                contentContainerStyle={timelineScreenStyles.timelineContent}
-            >
-                {projects.map((project) => {
-                    const unscheduledCount = getUnscheduledCount(project.tasks)
-                    return (
-                        <View key={project.id} style={timelineScreenStyles.projectSection}>
-                            <View style={timelineScreenStyles.projectHeader}>
-                                <View style={timelineScreenStyles.projectHeaderLeft}>
-                                    <View style={[timelineScreenStyles.projectColorDot, { backgroundColor: project.color }]} />
-                                    <Text style={timelineScreenStyles.projectTitle}>{project.name}</Text>
-                                </View>
-                                {unscheduledCount > 0 && (
-                                    <View style={timelineScreenStyles.projectUnscheduledBadge}>
-                                        <List size={13} color="#92400e" />
-                                        <Text style={timelineScreenStyles.projectUnscheduledText}>
-                                            {unscheduledCount} need scheduling
-                                        </Text>
+            {mode === 'expanded' ? (
+                <TimelineExpandedView workspaces={workspaces} userId={userId} />
+            ) : (
+                <ScrollView
+                    style={timelineScreenStyles.timelineScroll}
+                    contentContainerStyle={timelineScreenStyles.timelineContent}
+                >
+                    {projects.map((project) => {
+                        const unscheduledCount = getUnscheduledCount(project.tasks)
+                        return (
+                            <View key={project.id} style={timelineScreenStyles.projectSection}>
+                                <View style={timelineScreenStyles.projectHeader}>
+                                    <View style={timelineScreenStyles.projectHeaderLeft}>
+                                        <View style={[timelineScreenStyles.projectColorDot, { backgroundColor: project.color }]} />
+                                        <Text style={timelineScreenStyles.projectTitle}>{project.name}</Text>
                                     </View>
-                                )}
+                                    {unscheduledCount > 0 && (
+                                        <View style={timelineScreenStyles.projectUnscheduledBadge}>
+                                            <List size={13} color="#92400e" />
+                                            <Text style={timelineScreenStyles.projectUnscheduledText}>
+                                                {unscheduledCount} need scheduling
+                                            </Text>
+                                        </View>
+                                    )}
+                                </View>
+                                <Timeline
+                                    ref={getTimelineRef(project.id)}
+                                    project={project}
+                                    dailyMinutes={dailyMinutes}
+                                    onAddTask={(task) => onAddTask(project.id, task)}
+                                    onUpdateTask={(taskId, updates) => onUpdateTask(project.id, taskId, updates)}
+                                />
                             </View>
-                            <Timeline
-                                ref={getTimelineRef(project.id)}
-                                project={project}
-                                dailyMinutes={dailyMinutes}
-                                onAddTask={(task) => onAddTask(project.id, task)}
-                                onUpdateTask={(taskId, updates) => onUpdateTask(project.id, taskId, updates)}
-                            />
-                        </View>
-                    )
-                })}
-            </ScrollView>
+                        )
+                    })}
+                </ScrollView>
+            )}
         </View>
     )
 }

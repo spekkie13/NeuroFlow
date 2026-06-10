@@ -97,4 +97,27 @@ export const timelineScreenStyles = StyleSheet.create({
         fontWeight: '500',
         color: '#92400e',
     },
+    modeToggle: {
+        flexDirection: 'row',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+        overflow: 'hidden',
+    },
+    modeToggleButton: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        backgroundColor: '#f9fafb',
+    },
+    modeToggleButtonActive: {
+        backgroundColor: '#2563eb',
+    },
+    modeToggleText: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: '#6b7280',
+    },
+    modeToggleTextActive: {
+        color: '#ffffff',
+    },
 })
