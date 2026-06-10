@@ -8,6 +8,7 @@ import { AppButton } from '../ui/AppButton'
 import { TaskView } from '../tasks/TaskView'
 import { CreateProjectModal } from './CreateProjectModal'
 import { ProjectPickerModal } from './ProjectPickerModal'
+import { MoveProjectToWorkspaceModal } from './MoveProjectToWorkspaceModal'
 import { getNextProjectColor } from '../../services/domain/ProjectColorService'
 import { requestPermissions } from '../../services/notifications/NotificationService'
 import { Alert } from 'react-native'
@@ -30,6 +31,7 @@ interface TasksScreenProps {
     onMoveTaskToProject: (sourceProjectId: string, taskId: string, targetProjectId: string) => Promise<void>
     workspaces: Workspace[]
     onMoveTaskToWorkspace: (sourceProjectId: string, taskId: string, targetWorkspaceId: string, targetProjectId: string) => Promise<void>
+    onMoveProjectToWorkspace: (projectId: string, targetWorkspaceId: string) => Promise<void>
 }
 
 export const TasksScreen: React.FC<TasksScreenProps> = ({
@@ -50,6 +52,7 @@ export const TasksScreen: React.FC<TasksScreenProps> = ({
                                                             onMoveTaskToProject,
                                                             workspaces,
                                                             onMoveTaskToWorkspace,
+                                                            onMoveProjectToWorkspace,
                                                         }) => {
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
         projects[0]?.id ?? null
@@ -57,6 +60,7 @@ export const TasksScreen: React.FC<TasksScreenProps> = ({
     const [isProjectModalVisible, setIsProjectModalVisible] = useState(false)
     const [isProjectPickerVisible, setIsProjectPickerVisible] = useState(false)
     const [isEditProjectModalVisible, setIsEditProjectModalVisible] = useState(false)
+    const [isMoveProjectModalVisible, setIsMoveProjectModalVisible] = useState(false)
     const [newProjectName, setNewProjectName] = useState('')
     const [newProjectColor, setNewProjectColor] = useState('#2563eb')
     const [newProjectReminderTime, setNewProjectReminderTime] = useState<string | null | undefined>(undefined)
@@ -125,6 +129,13 @@ export const TasksScreen: React.FC<TasksScreenProps> = ({
         setIsEditProjectModalVisible(false)
     }
 
+    const handleMoveProjectToWorkspace = async (targetWorkspaceId: string) => {
+        if (!activeProject) return
+        await onMoveProjectToWorkspace(activeProject.id, targetWorkspaceId)
+        setIsMoveProjectModalVisible(false)
+        setIsEditProjectModalVisible(false)
+    }
+
     if (!currentWorkspaceId) {
         return (
             <View style={taskScreenStyles.center}>
@@ -171,6 +182,7 @@ export const TasksScreen: React.FC<TasksScreenProps> = ({
                 reminderTime={editProjectReminderTime}
                 globalReminderTime={globalReminderTime}
                 onSetReminderTime={setEditProjectReminderTime}
+                onMoveToWorkspace={workspaces.length > 1 ? () => { setIsEditProjectModalVisible(false); setIsMoveProjectModalVisible(true) } : undefined}
             />
             <ProjectPickerModal
                 visible={isProjectPickerVisible}
@@ -178,6 +190,13 @@ export const TasksScreen: React.FC<TasksScreenProps> = ({
                 activeProjectId={activeProject?.id ?? null}
                 onSelectProject={(id) => { setSelectedProjectId(id); setIsProjectPickerVisible(false) }}
                 onClose={() => setIsProjectPickerVisible(false)}
+            />
+            <MoveProjectToWorkspaceModal
+                visible={isMoveProjectModalVisible}
+                workspaces={workspaces}
+                currentWorkspaceId={currentWorkspaceId}
+                onConfirm={handleMoveProjectToWorkspace}
+                onClose={() => setIsMoveProjectModalVisible(false)}
             />
         </>
     )

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { loadProjectsForWorkspace, saveProjectsForWorkspace, transferTaskBetweenWorkspaces } from '../services/storage/projectStorage'
+import { loadProjectsForWorkspace, saveProjectsForWorkspace, transferTaskBetweenWorkspaces, transferProjectBetweenWorkspaces } from '../services/storage/projectStorage'
 import {
     createProject,
     withTaskAdded,
@@ -274,6 +274,24 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
         }
     }
 
+    const moveProjectToWorkspace = async (projectId: string, targetWorkspaceId: string) => {
+        if (targetWorkspaceId === workspaceId || !workspaceId) return
+
+        const project = await transferProjectBetweenWorkspaces(workspaceId, projectId, targetWorkspaceId)
+        if (!project) return
+
+        setProjects(projects.filter((p: Project) => p.id !== projectId))
+
+        if (userId) {
+            const deleted = await deleteRemoteProject(project.id)
+            const synced = await pushProject(targetWorkspaceId, project)
+            if (!deleted || !synced)
+                setSyncError(`Project "${project.name}" move couldn't be fully synced. Changes are saved on this device.`)
+            else
+                setSyncError(null)
+        }
+    }
+
     const addRoutine = async (projectId: string, routine: Routine) => {
         const today = new Date()
         const next: Project[] = projects.map((p: Project) => {
@@ -376,6 +394,7 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
         moveTask,
         moveTaskToProject,
         moveTaskToWorkspace,
+        moveProjectToWorkspace,
         addRoutine,
         updateRoutine,
         deleteRoutine,

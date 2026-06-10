@@ -20,6 +20,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     reminderTime,
     globalReminderTime,
     onSetReminderTime,
+    onMoveToWorkspace,
 }: CreateProjectModalProps) => {
     const [showTimePicker, setShowTimePicker] = useState(false)
     const [confirmingDelete, setConfirmingDelete] = useState(false)
@@ -152,6 +153,16 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                             disabled={!projectName.trim()}
                         />
                     </View>
+
+                    {editMode && onMoveToWorkspace && (
+                        <TouchableOpacity
+                            style={createProjectModalStyles.deleteProjectButton}
+                            onPress={onMoveToWorkspace}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={createProjectModalStyles.moveToWorkspaceText}>Move to workspace</Text>
+                        </TouchableOpacity>
+                    )}
 
                     {editMode && onDelete && (
                         confirmingDelete ? (

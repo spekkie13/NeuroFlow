@@ -33,6 +33,7 @@ export interface UseProjectsResult {
         targetWorkspaceId: string,
         targetProjectId: string,
     ) => Promise<void>
+    moveProjectToWorkspace: (projectId: string, targetWorkspaceId: string) => Promise<void>
     addRoutine: (projectId: string, routine: Routine) => Promise<void>
     updateRoutine: (projectId: string, routineId: string, updates: Partial<Routine>) => Promise<void>
     deleteRoutine: (projectId: string, routineId: string) => Promise<void>

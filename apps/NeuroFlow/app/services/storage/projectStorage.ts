@@ -17,6 +17,21 @@ export async function saveProjectsForWorkspace(workspaceId: string, projects: Pr
     await setJsonItem(keyForWorkspace(workspaceId), projects)
 }
 
+export async function transferProjectBetweenWorkspaces(
+    sourceWorkspaceId: string,
+    projectId: string,
+    targetWorkspaceId: string,
+): Promise<Project | null> {
+    const sourceProjects = await loadProjectsForWorkspace(sourceWorkspaceId)
+    const project = sourceProjects.find(p => p.id === projectId)
+    if (!project) return null
+
+    const targetProjects = await loadProjectsForWorkspace(targetWorkspaceId)
+    await saveProjectsForWorkspace(sourceWorkspaceId, sourceProjects.filter(p => p.id !== projectId))
+    await saveProjectsForWorkspace(targetWorkspaceId, [...targetProjects, project])
+    return project
+}
+
 export async function transferTaskBetweenWorkspaces(
     sourceWorkspaceId: string,
     sourceProjectId: string,

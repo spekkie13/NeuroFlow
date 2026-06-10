@@ -12,4 +12,5 @@ export interface CreateProjectModalProps {
     reminderTime?: string | null
     globalReminderTime?: string | null
     onSetReminderTime?: (time: string | null | undefined) => void
+    onMoveToWorkspace?: () => void
 }

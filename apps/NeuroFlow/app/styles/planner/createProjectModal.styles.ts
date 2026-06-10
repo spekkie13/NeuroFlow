@@ -121,6 +121,11 @@ export const createProjectModalStyles = StyleSheet.create({
         color: '#ef4444',
         fontWeight: '500',
     },
+    moveToWorkspaceText: {
+        fontSize: 13,
+        color: '#2563eb',
+        fontWeight: '500',
+    },
     deleteConfirmRow: {
         marginTop: 12,
         gap: 8,
