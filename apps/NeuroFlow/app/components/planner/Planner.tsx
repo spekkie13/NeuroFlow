@@ -43,6 +43,8 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }: PlannerProp
         updateTask,
         deleteTask,
         moveTask,
+        moveTaskToProject,
+        moveTaskToWorkspace,
         addRoutine,
         updateRoutine,
         deleteRoutine,
@@ -96,6 +98,9 @@ export const Planner: React.FC<PlannerProps> = ({ user, onSignOut }: PlannerProp
                         onUpdateTask={updateTask}
                         onDeleteTask={deleteTask}
                         onMoveTask={moveTask}
+                        onMoveTaskToProject={moveTaskToProject}
+                        workspaces={workspaces}
+                        onMoveTaskToWorkspace={moveTaskToWorkspace}
                         onAddRoutine={addRoutine}
                         onUpdateRoutine={updateRoutine}
                         onDeleteRoutine={deleteRoutine}

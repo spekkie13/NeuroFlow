@@ -22,6 +22,17 @@ export interface UseProjectsResult {
         taskId: string,
         direction: TaskMoveDirection,
     ) => Promise<void>
+    moveTaskToProject: (
+        sourceProjectId: string,
+        taskId: string,
+        targetProjectId: string,
+    ) => Promise<void>
+    moveTaskToWorkspace: (
+        sourceProjectId: string,
+        taskId: string,
+        targetWorkspaceId: string,
+        targetProjectId: string,
+    ) => Promise<void>
     addRoutine: (projectId: string, routine: Routine) => Promise<void>
     updateRoutine: (projectId: string, routineId: string, updates: Partial<Routine>) => Promise<void>
     deleteRoutine: (projectId: string, routineId: string) => Promise<void>

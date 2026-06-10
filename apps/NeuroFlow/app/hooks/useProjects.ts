@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { loadProjectsForWorkspace, saveProjectsForWorkspace } from '../services/storage/projectStorage'
+import { loadProjectsForWorkspace, saveProjectsForWorkspace, transferTaskBetweenWorkspaces } from '../services/storage/projectStorage'
 import {
     createProject,
     withTaskAdded,
@@ -7,6 +7,7 @@ import {
     withTaskUpdated,
     withUpdatedProjectName,
     withTaskMoved,
+    transferTask,
 } from '../services/domain/ProjectService'
 import { getNextProjectColor } from '../services/domain/ProjectColorService'
 import {
@@ -210,6 +211,69 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
         }
     }
 
+    const moveTaskToProject = async (sourceProjectId: string, taskId: string, targetProjectId: string) => {
+        if (sourceProjectId === targetProjectId) return
+        const source = projects.find((p: Project) => p.id === sourceProjectId)
+        const target = projects.find((p: Project) => p.id === targetProjectId)
+        if (!source || !target) return
+
+        const [updatedSource, updatedTarget] = transferTask(source, target, taskId)
+        const next: Project[] = projects.map((p: Project) => {
+            if (p.id === sourceProjectId) return updatedSource
+            if (p.id === targetProjectId) return updatedTarget
+            return p
+        })
+        await persist(next)
+
+        if (userId && workspaceId) {
+            const [syncedSource, syncedTarget] = await Promise.all([
+                pushProject(workspaceId, updatedSource),
+                pushProject(workspaceId, updatedTarget),
+            ])
+            if (!syncedSource || !syncedTarget)
+                setSyncError(`Task move couldn't be fully synced. Changes are saved on this device.`)
+            else
+                setSyncError(null)
+        }
+    }
+
+    const moveTaskToWorkspace = async (
+        sourceProjectId: string,
+        taskId: string,
+        targetWorkspaceId: string,
+        targetProjectId: string,
+    ) => {
+        if (targetWorkspaceId === workspaceId) {
+            return moveTaskToProject(sourceProjectId, taskId, targetProjectId)
+        }
+        if (!workspaceId) return
+
+        const result = await transferTaskBetweenWorkspaces(
+            workspaceId,
+            sourceProjectId,
+            taskId,
+            targetWorkspaceId,
+            targetProjectId,
+        )
+        if (!result) return
+
+        // Storage was already written by transferTaskBetweenWorkspaces — only patch in-memory state
+        setProjects(projects.map((p: Project) =>
+            p.id === sourceProjectId ? result.updatedSource : p,
+        ))
+
+        if (userId) {
+            const [syncedSource, syncedTarget] = await Promise.all([
+                pushProject(workspaceId, result.updatedSource),
+                pushProject(targetWorkspaceId, result.updatedTarget),
+            ])
+            if (!syncedSource || !syncedTarget)
+                setSyncError(`Cross-workspace task move couldn't be fully synced. Changes are saved on this device.`)
+            else
+                setSyncError(null)
+        }
+    }
+
     const addRoutine = async (projectId: string, routine: Routine) => {
         const today = new Date()
         const next: Project[] = projects.map((p: Project) => {
@@ -310,6 +374,8 @@ export function useProjects(workspaceId: string | null, userId: string | null): 
         updateTask,
         deleteTask,
         moveTask,
+        moveTaskToProject,
+        moveTaskToWorkspace,
         addRoutine,
         updateRoutine,
         deleteRoutine,

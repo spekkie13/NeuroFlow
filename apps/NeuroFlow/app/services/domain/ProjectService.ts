@@ -51,6 +51,20 @@ export function withTaskDeleted(project: Project, taskId: string): Project {
     }
 }
 
+export function transferTask(
+    source: Project,
+    target: Project,
+    taskId: string,
+): [Project, Project] {
+    const task = source.tasks.find((t: Task) => t.id === taskId)
+    if (!task) return [source, target]
+    const now = new Date().toISOString()
+    return [
+        { ...withTaskDeleted(source, taskId), updatedAt: now },
+        { ...withTaskAdded(target, task), updatedAt: now },
+    ]
+}
+
 export function withTaskMoved(
     project: Project,
     taskId: string,

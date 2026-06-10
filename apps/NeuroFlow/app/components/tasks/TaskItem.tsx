@@ -1,6 +1,6 @@
 import React, {RefObject, useEffect, useRef, useState} from 'react'
 import { Animated, Modal, PanResponder, PanResponderInstance, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native'
-import { ArrowDown, ArrowUp, CheckCircle2, ChevronsDown, ChevronsUp, Circle, Clock, Edit3, FileText, Flag, ListChecks, MoreHorizontal, Plus, Repeat2, Timer, Trash2, X } from 'lucide-react-native'
+import { ArrowDown, ArrowRightFromLine, ArrowUp, CheckCircle2, ChevronsDown, ChevronsUp, Circle, Clock, Edit3, FileText, Flag, FolderInput, ListChecks, MoreHorizontal, Plus, Repeat2, Timer, Trash2, X} from 'lucide-react-native'
 import { TaskItemProps } from "../../props/tasks/TaskItemProps"
 import {formatLocalDate, formatMinutes} from "../../utils/dateUtils";
 import { isOverdue } from "../../services/domain/TaskService";
@@ -37,6 +37,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     onSaveNotes,
     onSaveSteps,
     onOpenEstimateModal,
+    onOpenMoveToProjectModal,
+    onOpenMoveToWorkspaceModal,
 }: TaskItemProps) => {
     const [notesExpanded, setNotesExpanded] = useState<boolean>(false)
     const [localNotes, setLocalNotes] = useState<string>(task.notes || '')
@@ -395,6 +397,20 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                                         label={task.estimatedMinutes ? `~${formatMinutes(task.estimatedMinutes)} · Change` : 'Set estimate'}
                                         onPress={onOpenEstimateModal}
                                     />
+                                    {onOpenMoveToProjectModal && !task.routineId && (
+                                        <MenuItem
+                                            icon={<FolderInput size={16} color="#374151" />}
+                                            label="Move to project"
+                                            onPress={onOpenMoveToProjectModal}
+                                        />
+                                    )}
+                                    {onOpenMoveToWorkspaceModal && !task.routineId && (
+                                        <MenuItem
+                                            icon={<ArrowRightFromLine size={16} color="#374151" />}
+                                            label="Move to workspace"
+                                            onPress={onOpenMoveToWorkspaceModal}
+                                        />
+                                    )}
 
                                     {showMoveActions && (
                                         <>

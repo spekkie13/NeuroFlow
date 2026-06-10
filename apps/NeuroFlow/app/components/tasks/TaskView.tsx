@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import {Text, TouchableOpacity, View} from 'react-native'
+import {Alert, Text, TouchableOpacity, View} from 'react-native'
 import { Plus, ChevronDown, ChevronUp } from 'lucide-react-native'
 import {TaskViewProps} from "../../props/tasks/TaskViewProps";
 import {createTask} from "../../services/domain/TaskService";
@@ -13,15 +13,23 @@ import { AppButton, TextField } from "../ui";
 import {PriorityModal} from "./PriorityModal";
 import {RescheduleModal} from "./RescheduleModal";
 import {EstimateModal} from "./EstimateModal";
+import {ProjectPickerModal} from "../planner/ProjectPickerModal";
+import {MoveToWorkspaceModal} from "./MoveToWorkspaceModal";
+import {loadProjectsForWorkspace} from "../../services/storage/projectStorage";
 
 type FilterMode = 'all' | 'active' | 'completed'
 
 export const TaskView: React.FC<TaskViewProps> = ({
                                                       project,
+                                                      otherProjects,
+                                                      workspaces,
+                                                      currentWorkspaceId,
                                                       onAddTask,
                                                       onUpdateTask,
                                                       onDeleteTask,
                                                       onMoveTask,
+                                                      onMoveTaskToProject,
+                                                      onMoveTaskToWorkspace,
                                                       onAddRoutine,
                                                       onUpdateRoutine,
                                                       onDeleteRoutine,
@@ -37,6 +45,8 @@ export const TaskView: React.FC<TaskViewProps> = ({
     const [rescheduleStart, setRescheduleStart] = useState('')
     const [openMenuTaskId, setOpenMenuTaskId] = useState<string | null>(null)
     const [estimateModalTask, setEstimateModalTask] = useState<Task | null>(null)
+    const [moveToProjectTask, setMoveToProjectTask] = useState<Task | null>(null)
+    const [moveToWorkspaceTask, setMoveToWorkspaceTask] = useState<Task | null>(null)
 
     const [showRoutines, setShowRoutines] = useState(true)
     const [routineModalOpen, setRoutineModalOpen] = useState(false)
@@ -117,6 +127,32 @@ export const TaskView: React.FC<TaskViewProps> = ({
         setRescheduleStart('')
     }
 
+    const openMoveToProjectModal = (task: Task) => {
+        if (!otherProjects?.length) {
+            Alert.alert('No other projects', 'Create another project first to move tasks between projects.')
+            return
+        }
+        setOpenMenuTaskId(null)
+        setMoveToProjectTask(task)
+    }
+
+    const handleMoveToProject = (targetProjectId: string) => {
+        if (!moveToProjectTask) return
+        onMoveTaskToProject?.(moveToProjectTask.id, targetProjectId)
+        setMoveToProjectTask(null)
+    }
+
+    const openMoveToWorkspaceModal = (task: Task) => {
+        setOpenMenuTaskId(null)
+        setMoveToWorkspaceTask(task)
+    }
+
+    const handleMoveToWorkspace = (targetWorkspaceId: string, targetProjectId: string) => {
+        if (!moveToWorkspaceTask) return
+        onMoveTaskToWorkspace?.(moveToWorkspaceTask.id, targetWorkspaceId, targetProjectId)
+        setMoveToWorkspaceTask(null)
+    }
+
     const renderTaskItem = (task: Task, index: number, list: Task[]) => (
         <TaskItem
             key={task.id}
@@ -145,6 +181,8 @@ export const TaskView: React.FC<TaskViewProps> = ({
             onSaveNotes={(notes: string) => onUpdateTask(task.id, { notes })}
             onSaveSteps={(steps: Step[]) => onUpdateTask(task.id, { steps })}
             onOpenEstimateModal={() => openEstimateModal(task)}
+            onOpenMoveToProjectModal={onMoveTaskToProject ? () => openMoveToProjectModal(task) : undefined}
+            onOpenMoveToWorkspaceModal={onMoveTaskToWorkspace ? () => openMoveToWorkspaceModal(task) : undefined}
         />
     )
 
@@ -311,6 +349,23 @@ export const TaskView: React.FC<TaskViewProps> = ({
                 currentMinutes={estimateModalTask?.estimatedMinutes}
                 onSetEstimate={handleSetEstimate}
                 onClose={() => setEstimateModalTask(null)}
+            />
+
+            <ProjectPickerModal
+                visible={!!moveToProjectTask}
+                projects={otherProjects ?? []}
+                activeProjectId={null}
+                onSelectProject={handleMoveToProject}
+                onClose={() => setMoveToProjectTask(null)}
+            />
+
+            <MoveToWorkspaceModal
+                visible={!!moveToWorkspaceTask}
+                workspaces={workspaces ?? []}
+                currentWorkspaceId={currentWorkspaceId ?? null}
+                onLoadProjects={loadProjectsForWorkspace}
+                onConfirm={handleMoveToWorkspace}
+                onClose={() => setMoveToWorkspaceTask(null)}
             />
 
             <RoutineModal

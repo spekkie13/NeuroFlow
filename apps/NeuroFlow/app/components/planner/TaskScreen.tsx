@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Plus, ChevronDown, Pencil } from 'lucide-react-native'
 import { Project, Task, Routine } from '../../models'
+import { Workspace } from '../../models/Workspace'
 import { taskScreenStyles } from '../../styles/planner/taskScreen.styles'
 import { AppButton } from '../ui/AppButton'
 import { TaskView } from '../tasks/TaskView'
@@ -26,6 +27,9 @@ interface TasksScreenProps {
     onAddRoutine: (projectId: string, routine: Routine) => Promise<void>
     onUpdateRoutine: (projectId: string, routineId: string, updates: Partial<Routine>) => Promise<void>
     onDeleteRoutine: (projectId: string, routineId: string) => Promise<void>
+    onMoveTaskToProject: (sourceProjectId: string, taskId: string, targetProjectId: string) => Promise<void>
+    workspaces: Workspace[]
+    onMoveTaskToWorkspace: (sourceProjectId: string, taskId: string, targetWorkspaceId: string, targetProjectId: string) => Promise<void>
 }
 
 export const TasksScreen: React.FC<TasksScreenProps> = ({
@@ -43,6 +47,9 @@ export const TasksScreen: React.FC<TasksScreenProps> = ({
                                                             onAddRoutine,
                                                             onUpdateRoutine,
                                                             onDeleteRoutine,
+                                                            onMoveTaskToProject,
+                                                            workspaces,
+                                                            onMoveTaskToWorkspace,
                                                         }) => {
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
         projects[0]?.id ?? null
@@ -244,10 +251,15 @@ export const TasksScreen: React.FC<TasksScreenProps> = ({
             >
                 <TaskView
                     project={activeProject}
+                    otherProjects={projects.filter(p => p.id !== activeProject.id)}
                     onAddTask={(task) => onAddTask(activeProject.id, task)}
                     onUpdateTask={(taskId, updates) => onUpdateTask(activeProject.id, taskId, updates)}
                     onDeleteTask={(taskId) => onDeleteTask(activeProject.id, taskId)}
                     onMoveTask={(taskId, direction) => onMoveTask(activeProject.id, taskId, direction)}
+                    onMoveTaskToProject={(taskId, targetProjectId) => onMoveTaskToProject(activeProject.id, taskId, targetProjectId)}
+                    workspaces={workspaces}
+                    currentWorkspaceId={currentWorkspaceId}
+                    onMoveTaskToWorkspace={(taskId, targetWorkspaceId, targetProjectId) => onMoveTaskToWorkspace(activeProject.id, taskId, targetWorkspaceId, targetProjectId)}
                     onAddRoutine={(routine) => onAddRoutine(activeProject.id, routine)}
                     onUpdateRoutine={(routineId, updates) => onUpdateRoutine(activeProject.id, routineId, updates)}
                     onDeleteRoutine={(routineId) => onDeleteRoutine(activeProject.id, routineId)}

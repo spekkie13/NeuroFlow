@@ -26,4 +26,6 @@ export interface TaskItemProps {
     onSaveNotes: (notes: string) => void
     onSaveSteps: (steps: Step[]) => void
     onOpenEstimateModal: () => void
+    onOpenMoveToProjectModal?: () => void
+    onOpenMoveToWorkspaceModal?: () => void
 }
